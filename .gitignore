@@ -36,3 +36,14 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Log Files ###
+logs/
+*.log
+*.log.*
+*.gz
+*.zip
+
+### Temporary Files ###
+temp/
+tmp/

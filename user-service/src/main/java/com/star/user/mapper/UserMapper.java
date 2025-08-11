@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  * 用户Mapper接口
+ * 
  * @author star
  */
 @Mapper
@@ -17,46 +18,42 @@ public interface UserMapper extends BaseMapper<User> {
 
     /**
      * 根据用户名查询用户
-     * @param username 用户名
-     * @return 用户信息
      */
-    @Select("SELECT * FROM user WHERE username = #{username}")
-    User selectByUsername(@Param("username") String username);
+    @Select("SELECT * FROM user WHERE username = #{username} AND status = 1")
+    User findByUsername(@Param("username") String username);
 
     /**
      * 根据邮箱查询用户
-     * @param email 邮箱
-     * @return 用户信息
      */
-    @Select("SELECT * FROM user WHERE email = #{email}")
-    User selectByEmail(@Param("email") String email);
+    @Select("SELECT * FROM user WHERE email = #{email} AND status = 1")
+    User findByEmail(@Param("email") String email);
 
     /**
      * 根据手机号查询用户
-     * @param phone 手机号
-     * @return 用户信息
      */
-    @Select("SELECT * FROM user WHERE phone = #{phone}")
-    User selectByPhone(@Param("phone") String phone);
+    @Select("SELECT * FROM user WHERE phone = #{phone} AND status = 1")
+    User findByPhone(@Param("phone") String phone);
 
     /**
-     * 根据用户ID查询用户角色
-     * @param userId 用户ID
-     * @return 角色列表
+     * 根据用户名、邮箱或手机号查询用户（登录用）
      */
-    @Select("SELECT r.* FROM role r " +
-            "INNER JOIN user_role ur ON r.id = ur.role_id " +
-            "WHERE ur.user_id = #{userId}")
-    List<String> selectRolesByUserId(@Param("userId") Long userId);
+    @Select("SELECT * FROM user WHERE (username = #{identifier} OR email = #{identifier} OR phone = #{identifier}) AND status = 1")
+    User findByIdentifier(@Param("identifier") String identifier);
 
     /**
-     * 根据用户ID查询用户权限
-     * @param userId 用户ID
-     * @return 权限列表
+     * 查询用户的角色列表
      */
-    @Select("SELECT DISTINCT p.permission_key FROM permission p " +
-            "INNER JOIN role_permission rp ON p.id = rp.permission_id " +
-            "INNER JOIN user_role ur ON rp.role_id = ur.role_id " +
+    @Select("SELECT r.role_name FROM user_role ur " +
+            "LEFT JOIN role r ON ur.role_id = r.id " +
             "WHERE ur.user_id = #{userId}")
-    List<String> selectPermissionsByUserId(@Param("userId") Long userId);
+    List<String> findUserRoles(@Param("userId") Long userId);
+
+    /**
+     * 查询用户的权限列表
+     */
+    @Select("SELECT DISTINCT p.permission_key FROM user_role ur " +
+            "LEFT JOIN role_permission rp ON ur.role_id = rp.role_id " +
+            "LEFT JOIN permission p ON rp.permission_id = p.id " +
+            "WHERE ur.user_id = #{userId}")
+    List<String> findUserPermissions(@Param("userId") Long userId);
 }

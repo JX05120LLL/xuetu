@@ -1,30 +1,25 @@
 package com.star.user.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.mysql.cj.x.protobuf.MysqlxDatatypes;
 import com.star.common.entity.BaseEntity;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
  * 角色实体类
+ * 
  * @author star
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("role")
+@Schema(description = "角色信息")
 public class Role extends BaseEntity {
 
-    /**
-     * 角色名称
-     */
-    @TableField("role_name")
+    @Schema(description = "角色名称", example = "ADMIN")
     private String roleName;
 
-    /**
-     * 角色描述
-     */
-    @TableField("description")
+    @Schema(description = "角色描述", example = "系统管理员")
     private String description;
 }

@@ -1,0 +1,145 @@
+# 网关服务配置
+server:
+  port: 8080  # 网关端口
+
+spring:
+  application:
+    name: gateway  # 服务名称
+  
+  # 配置数据导入（Spring Boot 2.4+ 必需）
+  config:
+    import:
+      - optional:nacos:gateway.yml  # 从Nacos导入主配置
+      - optional:nacos:common-config.yml  # 从Nacos导入公共配置
+    
+  # Spring Cloud Gateway 配置
+  cloud:
+    # Nacos配置
+    nacos:
+      # 服务发现配置
+      discovery:
+        server-addr: localhost:8848  # Nacos服务器地址
+        namespace: public  # 命名空间
+        group: DEFAULT_GROUP  # 分组
+        
+      # 配置中心（可选）
+      config:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        file-extension: yml
+        enabled: false  # 暂时禁用，避免连接问题
+    
+    # 网关路由配置
+    gateway:
+      # 路由规则配置
+      routes:
+        # 用户服务路由
+        - id: user-service
+          uri: lb://user-service  # lb表示负载均衡，user-service是服务名
+          predicates:
+            - Path=/api/user/**  # 匹配路径
+          filters:
+            - StripPrefix=2  # 去掉前缀 /api/user -> /
+            
+        # 课程服务路由  
+        - id: course-service
+          uri: lb://course-service
+          predicates:
+            - Path=/api/course/**
+          filters:
+            - StripPrefix=2
+            
+        # 订单服务路由
+        - id: order-service  
+          uri: lb://order-service
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - StripPrefix=2
+            
+        # 管理服务路由
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - StripPrefix=2
+            
+        # 学习服务路由
+        - id: learning-service
+          uri: lb://learning-service
+          predicates:
+            - Path=/api/learning/**
+          filters:
+            - StripPrefix=2
+      
+      # 全局跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':  # 匹配所有路径
+            allowed-origin-patterns: "*"  # 允许所有源
+            allowed-methods: "*"  # 允许所有方法
+            allowed-headers: "*"  # 允许所有请求头
+            allow-credentials: true  # 允许携带凭证
+            max-age: 3600  # 预检请求缓存时间
+      
+      # 默认过滤器
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin  # 去重响应头
+
+  # Redis配置（用于存储黑名单等）
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+# JWT配置
+jwt:
+  secret: xuetu-gateway-jwt-secret-key-2024
+  expiration: 86400  # 24小时
+
+# 限流配置
+rate-limit:
+  redis-rate-limiter:
+    replenish-rate: 10  # 每秒允许处理的请求数量
+    burst-capacity: 20  # 令牌桶的容量
+
+# 日志配置
+logging:
+  level:
+    com.xuetu.gateway: INFO
+    org.springframework.cloud.gateway: DEBUG  # 网关调试日志
+    root: INFO
+  # 日志文件配置
+  file:
+    path: logs/gateway  # 日志文件存放路径
+    name: logs/gateway/gateway.log  # 日志文件名
+  pattern:
+    # 控制台日志格式
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
+    # 文件日志格式
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
+  # 日志文件轮转配置
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB  # 单个文件最大大小
+      max-history: 30  # 保留30天的日志
+      total-size-cap: 3GB  # 总日志大小限制
+    
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # 暴露所有端点
+  endpoint:
+    health:
+      show-details: always

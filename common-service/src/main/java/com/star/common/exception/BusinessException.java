@@ -1,28 +1,16 @@
 package com.star.common.exception;
 
 import com.star.common.result.ResultCode;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
- * 业务异常
+ * 通用业务异常 - 公共模块使用的业务异常
+ * 继承自BaseBusinessException，各微服务可以直接使用或继承
+ * 
  * @author star
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class BusinessException extends RuntimeException {
+public class BusinessException extends BaseBusinessException {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 错误码
-     */
-    private Integer code;
-
-    /**
-     * 错误信息
-     */
-    private String message;
 
     public BusinessException() {
         super();
@@ -30,37 +18,25 @@ public class BusinessException extends RuntimeException {
 
     public BusinessException(String message) {
         super(message);
-        this.code = ResultCode.FAIL.getCode();
-        this.message = message;
     }
 
     public BusinessException(Integer code, String message) {
-        super(message);
-        this.code = code;
-        this.message = message;
+        super(code, message);
     }
 
     public BusinessException(ResultCode resultCode) {
-        super(resultCode.getMessage());
-        this.code = resultCode.getCode();
-        this.message = resultCode.getMessage();
+        super(resultCode);
     }
 
     public BusinessException(ResultCode resultCode, String message) {
-        super(message);
-        this.code = resultCode.getCode();
-        this.message = message;
+        super(resultCode, message);
     }
 
     public BusinessException(String message, Throwable cause) {
         super(message, cause);
-        this.code = ResultCode.FAIL.getCode();
-        this.message = message;
     }
 
     public BusinessException(Integer code, String message, Throwable cause) {
-        super(message, cause);
-        this.code = code;
-        this.message = message;
+        super(code, message, cause);
     }
 }

@@ -9,27 +9,42 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.Set;
 
 /**
- * 全局异常处理器
+ * 基础异常处理器 - 各微服务可继承此类
+ * 
+ * 职责:
+ * 1. 处理通用异常类型
+ * 2. 提供异常处理模板
+ * 3. 不直接使用@RestControllerAdvice注解
+ * 4. 各微服务继承后添加@RestControllerAdvice注解
+ * 
  * @author star
  */
 @Slf4j
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+public abstract class BaseExceptionHandler {
 
     /**
-     * 处理业务异常
+     * 处理基础业务异常
+     */
+    @ExceptionHandler(BaseBusinessException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public R<Void> handleBaseBusinessException(BaseBusinessException e) {
+        log.error("业务异常: {}", e.getMessage(), e);
+        return R.error(e.getCode(), e.getMessage());
+    }
+
+    /**
+     * 处理通用业务异常
      */
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.OK)
     public R<Void> handleBusinessException(BusinessException e) {
-        log.error("业务异常: {}", e.getMessage(), e);
+        log.error("通用业务异常: {}", e.getMessage(), e);
         return R.error(e.getCode(), e.getMessage());
     }
 
@@ -39,7 +54,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error("参数验证异常: {}", e.getMessage(), e);
+        log.error("参数验证异常: {}", e.getMessage());
         
         StringBuilder errorMsg = new StringBuilder();
         for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
@@ -58,7 +73,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleBindException(BindException e) {
-        log.error("参数绑定异常: {}", e.getMessage(), e);
+        log.error("参数绑定异常: {}", e.getMessage());
         
         StringBuilder errorMsg = new StringBuilder();
         for (FieldError fieldError : e.getFieldErrors()) {
@@ -77,7 +92,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleConstraintViolationException(ConstraintViolationException e) {
-        log.error("约束验证异常: {}", e.getMessage(), e);
+        log.error("约束验证异常: {}", e.getMessage());
         
         StringBuilder errorMsg = new StringBuilder();
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
