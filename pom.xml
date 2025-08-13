@@ -94,6 +94,13 @@
                 <version>${knife4j.version}</version>
             </dependency>
             
+            <!-- Knife4j 网关聚合 -->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
+                <version>${knife4j.version}</version>
+            </dependency>
+            
             <!-- Auth0 JWT -->
             <dependency>
                 <groupId>com.auth0</groupId>

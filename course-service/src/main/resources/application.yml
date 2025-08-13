@@ -1,0 +1,119 @@
+# 课程服务配置
+server:
+  port: 8077  # 课程服务端口
+
+spring:
+  application:
+    name: course-service  # 服务名称
+  
+  # 配置数据导入（Spring Boot 2.4+ 必需）
+  config:
+    import:
+      - optional:nacos:course-service.yml  # 从Nacos导入课程服务配置
+      - optional:nacos:common-config.yml  # 从Nacos导入公共配置
+    
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/xuetu_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456  # 请根据实际情况修改
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 1  # 使用数据库1，避免与用户服务冲突
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        
+  # Spring Cloud 配置
+  cloud:
+    nacos:
+      # 服务发现配置
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        
+      # 配置中心（可选）
+      config:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        file-extension: yml
+        enabled: false  # 暂时禁用，避免连接问题
+
+# MyBatis Plus配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.star.course.entity
+  configuration:
+    map-underscore-to-camel-case: true  # 下划线转驼峰
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 打印SQL日志
+  global-config:
+    db-config:
+      id-type: auto  # 主键自增
+      logic-delete-field: deleted  # 逻辑删除字段名
+      logic-delete-value: 1  # 逻辑删除值
+      logic-not-delete-value: 0  # 未删除值
+
+# 日志配置
+logging:
+  level:
+    com.star.course: DEBUG
+    org.springframework.cloud: INFO
+    root: INFO
+  # 日志文件配置
+  file:
+    path: logs/course-service  # 日志文件存放路径
+    name: logs/course-service/course-service.log  # 日志文件名
+  pattern:
+    # 控制台日志格式
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
+    # 文件日志格式
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
+  # 日志文件轮转配置
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB  # 单个文件最大大小
+      max-history: 30  # 保留30天的日志
+      total-size-cap: 3GB  # 总日志大小限制
+    
+# Knife4j API文档配置
+knife4j:
+  enable: true
+  openapi:
+    title: 课程服务API文档
+    description: 学途在线教育平台-课程服务
+    version: 1.0.0
+    contact: star@xuetu.com
+    
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# 课程服务特有配置
+course:
+  # 文件上传配置
+  upload:
+    path: /uploads/course/  # 课程文件上传路径
+    max-size: 100MB  # 最大文件大小
+    allowed-types: jpg,jpeg,png,gif,mp4,pdf  # 允许的文件类型
+  
+  # 缓存配置
+  cache:
+    hot-courses-ttl: 3600  # 热门课程缓存时间(秒)
+    category-tree-ttl: 1800  # 分类树缓存时间(秒)
+    course-detail-ttl: 600  # 课程详情缓存时间(秒)
