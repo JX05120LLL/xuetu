@@ -78,4 +78,13 @@ public class CourseExceptionHandler extends BaseExceptionHandler {
         log.warn("回复异常: {}", e.getMessage());
         return R.error(e.getCode(), e.getMessage());
     }
+
+    /**
+     * 处理标签异常
+     */
+    @ExceptionHandler(TagException.class)
+    public R<Void> handleTagException(TagException e) {
+        log.warn("标签异常: {}", e.getMessage());
+        return R.error(e.getCode(), e.getMessage());
+    }
 }

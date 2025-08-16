@@ -42,10 +42,19 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/api/user/login",      // 用户登录
             "/api/user/register",   // 用户注册
             "/api/user/captcha",    // 验证码
-            "/api/course/list",     // 课程列表（游客可访问）
-            "/api/course/detail",   // 课程详情（游客可访问）
+            "/api/course/courses",  // 课程列表（游客可访问）
+            "/api/course/categories", // 课程分类（游客可访问）
+            "/doc.html",            // API文档首页
+            "/swagger-ui",          // Swagger UI静态资源
+            "/v3/api-docs",         // OpenAPI文档
+            "/api/user/v3/api-docs", // 用户服务API文档
+            "/api/course/v3/api-docs", // 课程服务API文档
+            "/api/order/v3/api-docs", // 订单服务API文档
+            "/webjars",             // 静态资源
+            "/swagger-resources",   // Swagger资源
             "/actuator",            // 健康检查
-            "/favicon.ico"          // 网站图标
+            "/favicon.ico",         // 网站图标
+            "/api-docs"             // 自定义聚合API文档页面
     );
 
     @Override

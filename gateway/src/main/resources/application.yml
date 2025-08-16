@@ -32,39 +32,21 @@ spring:
     
     # 网关路由配置
     gateway:
-      # 路由规则配置
+      # 路由规则配置 - 简化版本
       routes:
         # 用户服务路由
         - id: user-service
-          uri: lb://user-service  # lb表示负载均衡，user-service是服务名
-          predicates:
-            - Path=/api/user/**  # 匹配路径
-          filters:
-            - StripPrefix=2  # 去掉前缀 /api/user -> /
-            
-        # 用户服务API文档路由
-        - id: user-service-docs
           uri: lb://user-service
           predicates:
-            - Path=/api/user/v3/api-docs/**
+            - Path=/api/user/**
           filters:
             - StripPrefix=2
-            
-
             
         # 课程服务路由  
         - id: course-service
           uri: lb://course-service
           predicates:
             - Path=/api/course/**
-          filters:
-            - StripPrefix=2
-            
-        # 课程服务API文档路由
-        - id: course-service-docs
-          uri: lb://course-service
-          predicates:
-            - Path=/api/course/v3/api-docs/**
           filters:
             - StripPrefix=2
             
@@ -186,18 +168,15 @@ knife4j:
     version: "1.0.0"
   gateway:
     enabled: true
-    strategy: discover
-    discover:
-      enabled: true
-      version: openapi3
+    strategy: manual
     routes:
       - name: "用户服务"
-        url: "/v3/api-docs"
-        service-name: "user-service" 
+        url: "/api/user/v3/api-docs"
+        location: "/api/user/v3/api-docs"
         order: 1
       - name: "课程服务"
-        url: "/v3/api-docs"
-        service-name: "course-service"
+        url: "/api/course/v3/api-docs"
+        location: "/api/course/v3/api-docs"
         order: 2
 
 # 管理端点配置

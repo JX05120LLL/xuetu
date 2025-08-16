@@ -35,4 +35,28 @@ public class PageParam {
      * 排序方式：asc-升序，desc-降序
      */
     private String order = "desc";
+
+    /**
+     * 无参构造函数
+     */
+    public PageParam() {
+    }
+
+    /**
+     * 带参构造函数
+     */
+    public PageParam(Integer current, Integer size) {
+        this.current = current;
+        this.size = size;
+    }
+
+    /**
+     * 带排序的构造函数
+     */
+    public PageParam(Integer current, Integer size, String orderBy, String order) {
+        this.current = current;
+        this.size = size;
+        this.orderBy = orderBy;
+        this.order = order;
+    }
 }

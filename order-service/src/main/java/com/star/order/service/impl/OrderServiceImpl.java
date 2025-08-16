@@ -1,0 +1,357 @@
+package com.star.order.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.star.common.dto.PageParam;
+import com.star.common.dto.PageResult;
+import com.star.common.result.R;
+import com.star.common.utils.PageUtil;
+import com.star.order.dto.CreateOrderRequest;
+import com.star.order.dto.OrderDTO;
+import com.star.order.dto.OrderItemDTO;
+import com.star.order.dto.PaymentRecordDTO;
+import com.star.order.entity.Order;
+import com.star.order.entity.OrderItem;
+import com.star.order.entity.PaymentRecord;
+import com.star.order.exception.OrderException;
+import com.star.order.feign.CourseServiceClient;
+import com.star.order.feign.UserServiceClient;
+import com.star.order.mapper.OrderMapper;
+import com.star.order.service.OrderItemService;
+import com.star.order.service.OrderService;
+import com.star.order.service.PaymentService;
+import com.star.order.service.UserCourseService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+/**
+ * 订单服务实现类
+ * 
+ * @author star
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
+
+    private final OrderMapper orderMapper;
+    private final OrderItemService orderItemService;
+    private final PaymentService paymentService;
+    private final UserCourseService userCourseService;
+    private final UserServiceClient userServiceClient;
+    private final CourseServiceClient courseServiceClient;
+
+    // 订单号生成器
+    private static final AtomicLong ORDER_SEQUENCE = new AtomicLong(1);
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public OrderDTO createOrder(Long userId, CreateOrderRequest request) {
+        log.info("用户 {} 开始创建订单，课程列表: {}", userId, request.getCourseIds());
+        
+        // 1. 验证用户是否存在
+        R<Boolean> userExistsResult = userServiceClient.checkUserExists(userId);
+        if (userExistsResult == null || !Boolean.TRUE.equals(userExistsResult.getData())) {
+            throw OrderException.createFailed("用户不存在");
+        }
+
+        // 2. 检查是否可以创建订单
+        if (!checkCanCreateOrder(userId, request.getCourseIds())) {
+            throw OrderException.createFailed("存在已购买的课程或课程不可购买");
+        }
+
+        // 3. 获取课程信息
+        R<List<Object>> coursesResult = courseServiceClient.getCoursesByIds(request.getCourseIds());
+        if (coursesResult == null || coursesResult.getData() == null || coursesResult.getData().isEmpty()) {
+            throw OrderException.courseNotAvailable(0L);
+        }
+
+        // 4. 计算订单金额
+        BigDecimal totalAmount = calculateTotalAmount(coursesResult.getData());
+        BigDecimal actualAmount = totalAmount; // 暂时不考虑优惠
+        BigDecimal discountAmount = BigDecimal.ZERO;
+
+        // 5. 创建订单
+        Order order = new Order();
+        order.setOrderNo(generateOrderNo());
+        order.setUserId(userId);
+        order.setTotalAmount(totalAmount);
+        order.setActualAmount(actualAmount);
+        order.setDiscountAmount(discountAmount);
+        order.setStatus(Order.Status.PENDING.getValue());
+        order.setRemark(request.getRemark());
+
+        save(order);
+
+        // 6. 创建订单项
+        List<OrderItem> orderItems = createOrderItems(order.getId(), coursesResult.getData());
+        orderItemService.saveBatch(orderItems);
+
+        log.info("订单创建成功，订单号: {}, 订单ID: {}", order.getOrderNo(), order.getId());
+        
+        return convertToOrderDTO(order);
+    }
+
+    @Override
+    public OrderDTO getOrderDetail(Long orderId) {
+        Order order = getById(orderId);
+        if (order == null) {
+            throw OrderException.notFound(orderId);
+        }
+        return convertToOrderDTO(order);
+    }
+
+    @Override
+    public OrderDTO getOrderDetailByOrderNo(String orderNo) {
+        Order order = orderMapper.selectByOrderNo(orderNo);
+        if (order == null) {
+            throw OrderException.notFoundByOrderNo(orderNo);
+        }
+        return convertToOrderDTO(order);
+    }
+
+    @Override
+    public PageResult<OrderDTO> getUserOrders(Long userId, PageParam pageParam) {
+        Page<Order> page = PageUtil.buildPage(pageParam);
+        LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Order::getUserId, userId)
+               .orderByDesc(Order::getCreatedTime);
+        
+        page(page, wrapper);
+        
+        List<OrderDTO> orderDTOs = page.getRecords().stream()
+                .map(this::convertToOrderDTO)
+                .collect(Collectors.toList());
+        
+        return PageUtil.buildPageResult(orderDTOs, page.getTotal(), page.getCurrent(), page.getSize());
+    }
+
+    @Override
+    public PageResult<OrderDTO> getUserOrdersByStatus(Long userId, Integer status, PageParam pageParam) {
+        Page<Order> page = PageUtil.buildPage(pageParam);
+        LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Order::getUserId, userId)
+               .eq(Order::getStatus, status)
+               .orderByDesc(Order::getCreatedTime);
+        
+        page(page, wrapper);
+        
+        List<OrderDTO> orderDTOs = page.getRecords().stream()
+                .map(this::convertToOrderDTO)
+                .collect(Collectors.toList());
+        
+        return PageUtil.buildPageResult(orderDTOs, page.getTotal(), page.getCurrent(), page.getSize());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean cancelOrder(Long userId, Long orderId) {
+        Order order = getById(orderId);
+        if (order == null) {
+            throw OrderException.notFound(orderId);
+        }
+        
+        if (!order.getUserId().equals(userId)) {
+            throw OrderException.notBelongToUser(orderId, userId);
+        }
+        
+        if (!Order.Status.PENDING.getValue().equals(order.getStatus())) {
+            throw OrderException.invalidStatus("取消", getStatusName(order.getStatus()));
+        }
+        
+        order.setStatus(Order.Status.CANCELLED.getValue());
+        boolean success = updateById(order);
+        
+        if (success) {
+            log.info("订单取消成功，订单ID: {}, 用户ID: {}", orderId, userId);
+        }
+        
+        return success;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean confirmOrder(Long userId, Long orderId) {
+        Order order = getById(orderId);
+        if (order == null) {
+            throw OrderException.notFound(orderId);
+        }
+        
+        if (!order.getUserId().equals(userId)) {
+            throw OrderException.notBelongToUser(orderId, userId);
+        }
+        
+        if (!Order.Status.PAID.getValue().equals(order.getStatus())) {
+            throw OrderException.invalidStatus("确认收货", getStatusName(order.getStatus()));
+        }
+        
+        // 对于课程订单，确认收货可能不需要特殊处理
+        log.info("订单确认收货，订单ID: {}, 用户ID: {}", orderId, userId);
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean handlePaymentSuccess(String orderNo, String paymentNo) {
+        log.info("处理支付成功回调，订单号: {}, 支付单号: {}", orderNo, paymentNo);
+        
+        Order order = orderMapper.selectByOrderNo(orderNo);
+        if (order == null) {
+            throw OrderException.notFoundByOrderNo(orderNo);
+        }
+        
+        // 更新订单状态为已支付
+        order.setStatus(Order.Status.PAID.getValue());
+        boolean orderUpdated = updateById(order);
+        
+        if (!orderUpdated) {
+            log.error("更新订单状态失败，订单号: {}", orderNo);
+            return false;
+        }
+        
+        // 开通用户课程
+        boolean coursesActivated = userCourseService.activateUserCoursesFromOrder(order.getId());
+        if (!coursesActivated) {
+            log.error("开通用户课程失败，订单ID: {}", order.getId());
+            return false;
+        }
+        
+        log.info("支付成功处理完成，订单号: {}", orderNo);
+        return true;
+    }
+
+    @Override
+    public Boolean checkCanCreateOrder(Long userId, List<Long> courseIds) {
+        // 检查用户是否已购买这些课程
+        for (Long courseId : courseIds) {
+            if (userCourseService.checkUserHasCourse(userId, courseId)) {
+                log.warn("用户 {} 已购买课程 {}", userId, courseId);
+                return false;
+            }
+            
+            // 检查课程是否可购买
+            R<Boolean> purchasableResult = courseServiceClient.checkCoursePurchasable(courseId);
+            if (purchasableResult == null || !Boolean.TRUE.equals(purchasableResult.getData())) {
+                log.warn("课程 {} 不可购买", courseId);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public Integer countUserOrders(Long userId) {
+        return orderMapper.countByUserId(userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer handleTimeoutOrders() {
+        // 查询30分钟前还未支付的订单
+        List<Order> timeoutOrders = orderMapper.selectTimeoutOrders(30);
+        
+        int cancelCount = 0;
+        for (Order order : timeoutOrders) {
+            order.setStatus(Order.Status.CANCELLED.getValue());
+            if (updateById(order)) {
+                cancelCount++;
+                log.info("订单支付超时自动取消，订单号: {}", order.getOrderNo());
+            }
+        }
+        
+        log.info("处理超时订单完成，取消订单数量: {}", cancelCount);
+        return cancelCount;
+    }
+
+    /**
+     * 生成订单号
+     */
+    private String generateOrderNo() {
+        String dateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        long sequence = ORDER_SEQUENCE.getAndIncrement() % 10000;
+        return "ORD" + dateTime + String.format("%04d", sequence);
+    }
+
+    /**
+     * 计算订单总金额
+     */
+    private BigDecimal calculateTotalAmount(List<Object> courses) {
+        // 这里需要根据实际的课程数据结构来计算
+        // 暂时返回固定金额，实际应该从课程信息中获取价格
+        return BigDecimal.valueOf(99.00 * courses.size());
+    }
+
+    /**
+     * 创建订单项
+     */
+    private List<OrderItem> createOrderItems(Long orderId, List<Object> courses) {
+        return courses.stream().map(course -> {
+            OrderItem item = new OrderItem();
+            item.setOrderId(orderId);
+            // 这里需要根据实际的课程数据结构来设置
+            // item.setCourseId(...);
+            // item.setCourseTitle(...);
+            // item.setPrice(...);
+            // quantity字段已从数据库移除，不再设置
+            return item;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 转换为OrderDTO
+     */
+    private OrderDTO convertToOrderDTO(Order order) {
+        OrderDTO dto = new OrderDTO();
+        BeanUtils.copyProperties(order, dto);
+        dto.setCreateTime(order.getCreatedTime());
+        dto.setUpdateTime(order.getUpdatedTime());
+        dto.setStatusName(getStatusName(order.getStatus()));
+        
+        // 设置订单项
+        List<OrderItem> orderItems = orderItemService.getOrderItemsByOrderId(order.getId());
+        List<OrderItemDTO> orderItemDTOs = orderItems.stream()
+                .map(this::convertToOrderItemDTO)
+                .collect(Collectors.toList());
+        dto.setOrderItems(orderItemDTOs);
+        
+        // 设置支付记录
+        List<PaymentRecordDTO> paymentRecords = paymentService.getPaymentsByOrderId(order.getId());
+        dto.setPaymentRecords(paymentRecords);
+        
+        return dto;
+    }
+
+    /**
+     * 转换为OrderItemDTO
+     */
+    private OrderItemDTO convertToOrderItemDTO(OrderItem orderItem) {
+        OrderItemDTO dto = new OrderItemDTO();
+        BeanUtils.copyProperties(orderItem, dto);
+        dto.setCreateTime(orderItem.getCreatedTime());
+        return dto;
+    }
+
+    /**
+     * 获取状态名称
+     */
+    private String getStatusName(Integer status) {
+        for (Order.Status s : Order.Status.values()) {
+            if (s.getValue().equals(status)) {
+                return s.getLabel();
+            }
+        }
+        return "未知状态";
+    }
+}
