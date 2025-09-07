@@ -1,0 +1,84 @@
+server:
+  port: 8044
+
+spring:
+  application:
+    name: learning-service
+  profiles:
+    active: dev
+    
+  # 配置导入 - Spring Cloud 2021.x 必需
+  config:
+    import:
+      - optional:nacos:learning-service-dev.yml  # 从Nacos导入配置（可选）
+
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/xuetu_db?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 10000ms
+    lettuce:
+      pool:
+        max-active: 200
+        max-wait: -1ms
+        max-idle: 10
+        min-idle: 0
+
+  # 云服务配置
+  cloud:
+    # Nacos配置
+    nacos:
+      # 服务发现配置
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        enabled: true
+      # 配置中心配置
+      config:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        file-extension: yml
+        enabled: true  # 启用配置中心
+
+# MyBatis Plus配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.star.learning.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# API文档配置
+knife4j:
+  enable: true
+  openapi:
+    title: 学习服务API文档
+    description: 学习服务相关接口文档
+    version: 1.0
+    concat: star@xuetu.com
+
+# 日志配置
+logging:
+  level:
+    com.star.learning: debug
+    root: info

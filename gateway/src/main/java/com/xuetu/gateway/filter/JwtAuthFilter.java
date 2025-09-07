@@ -1,5 +1,6 @@
 package com.xuetu.gateway.filter;
 
+
 import com.xuetu.gateway.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -50,6 +51,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/api/user/v3/api-docs", // 用户服务API文档
             "/api/course/v3/api-docs", // 课程服务API文档
             "/api/order/v3/api-docs", // 订单服务API文档
+            "/api/learning/v3/api-docs", // 学习服务API文档
             "/webjars",             // 静态资源
             "/swagger-resources",   // Swagger资源
             "/actuator",            // 健康检查

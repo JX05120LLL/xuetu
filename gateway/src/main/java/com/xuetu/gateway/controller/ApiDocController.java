@@ -64,11 +64,11 @@ public class ApiDocController {
                     
                     <div class="stats">
                         <div class="stat">
-                            <span class="stat-number">3</span>
+                            <span class="stat-number">4</span>
                             <span class="stat-label">微服务模块</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">80+</span>
+                            <span class="stat-number">100+</span>
                             <span class="stat-label">API接口</span>
                         </div>
                         <div class="stat">
@@ -109,8 +109,20 @@ public class ApiDocController {
                             </div>
                             <div class="service-desc">提供订单管理、<strong>模拟支付</strong>、用户课程关系等功能的API接口。支持完整的课程购买流程。</div>
                             <div class="btn-group">
-                                <a href="http://localhost:8078/doc.html" class="btn" target="_blank">📖 查看文档</a>
+                                <a href="http://localhost:8055/doc.html" class="btn" target="_blank">📖 查看文档</a>
                                 <a href="/api/order/v3/api-docs" class="btn btn-secondary" target="_blank">📄 原始数据</a>
+                            </div>
+                        </div>
+                        
+                        <div class="service-card">
+                            <div class="service-title">
+                                <span class="service-icon">📈</span>
+                                学习服务 API
+                            </div>
+                            <div class="service-desc">提供学习进度跟踪、<strong>智能笔记管理</strong>、学习数据统计等功能的API接口。为AI功能提供数据基础。</div>
+                            <div class="btn-group">
+                                <a href="http://localhost:8044/doc.html" class="btn" target="_blank">📖 查看文档</a>
+                                <a href="/api/learning/v3/api-docs" class="btn btn-secondary" target="_blank">📄 原始数据</a>
                             </div>
                         </div>
                     </div>
@@ -141,11 +153,13 @@ public class ApiDocController {
                             
                             <div class="step">
                                 <span class="step-number">3</span>
-                                <strong>测试课程和订单功能：</strong>
+                                <strong>测试各服务功能：</strong>
                                 <br>• 查询所有标签：<code>GET /api/course/tags</code>
                                 <br>• 创建订单：<code>POST /api/order/orders</code>
                                 <br>• 快捷支付：<code>POST /api/order/payments/quick-pay</code>
                                 <br>• 查询我的课程：<code>GET /api/order/user-courses/my</code>
+                                <br>• 更新学习进度：<code>POST /api/learning/record/progress</code>
+                                <br>• 创建学习笔记：<code>POST /api/learning/note</code>
                             </div>
                             
                             <div class="step">

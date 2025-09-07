@@ -58,30 +58,6 @@ spring:
           filters:
             - StripPrefix=2
             
-        # 订单服务API文档路由（预留）
-        # - id: order-service-docs
-        #   uri: lb://order-service
-        #   predicates:
-        #     - Path=/api/order/v3/api-docs/**
-        #   filters:
-        #     - StripPrefix=2
-            
-        # 管理服务路由
-        - id: admin-service
-          uri: lb://admin-service
-          predicates:
-            - Path=/api/admin/**
-          filters:
-            - StripPrefix=2
-            
-        # 管理服务API文档路由（预留）
-        # - id: admin-service-docs
-        #   uri: lb://admin-service
-        #   predicates:
-        #     - Path=/api/admin/v3/api-docs/**
-        #   filters:
-        #     - StripPrefix=2
-            
         # 学习服务路由
         - id: learning-service
           uri: lb://learning-service
@@ -90,13 +66,42 @@ spring:
           filters:
             - StripPrefix=2
             
-        # 学习服务API文档路由（预留）
-        # - id: learning-service-docs
-        #   uri: lb://learning-service
-        #   predicates:
-        #     - Path=/api/learning/v3/api-docs/**
-        #   filters:
-        #     - StripPrefix=2
+        # API文档路由配置
+        - id: user-service-docs
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/v3/api-docs/**
+          filters:
+            - StripPrefix=2
+            
+        - id: course-service-docs
+          uri: lb://course-service
+          predicates:
+            - Path=/api/course/v3/api-docs/**
+          filters:
+            - StripPrefix=2
+            
+        - id: order-service-docs
+          uri: lb://order-service
+          predicates:
+            - Path=/api/order/v3/api-docs/**
+          filters:
+            - StripPrefix=2
+            
+        - id: learning-service-docs
+          uri: lb://learning-service
+          predicates:
+            - Path=/api/learning/v3/api-docs/**
+          filters:
+            - StripPrefix=2
+            
+        # 管理服务路由
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - StripPrefix=2
       
       # 全局跨域配置
       globalcors:
@@ -163,21 +168,19 @@ knife4j:
   enable: true
   production: false
   openapi:
-    title: "学途在线教育平台 - API文档聚合"
-    description: "微服务架构的在线教育平台API文档"
+    title: "学途智慧教育平台 - API文档聚合"
+    description: "集成AI功能的微服务在线教育平台完整API文档"
     version: "1.0.0"
+    contact: "star@xuetu.com"
+    license: "Apache 2.0"
+    license-url: "https://www.apache.org/licenses/LICENSE-2.0"
   gateway:
     enabled: true
     strategy: manual
-    routes:
-      - name: "用户服务"
-        url: "/api/user/v3/api-docs"
-        location: "/api/user/v3/api-docs"
-        order: 1
-      - name: "课程服务"
-        url: "/api/course/v3/api-docs"
-        location: "/api/course/v3/api-docs"
-        order: 2
+    discover:
+      enabled: false
+      version: openapi3
+  # 通过自定义控制器处理聚合
 
 # 管理端点配置
 management:

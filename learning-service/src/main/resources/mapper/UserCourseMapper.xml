@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.star.learning.mapper.UserCourseMapper">
+
+    <!-- 分页查询用户课程 -->
+    <select id="selectUserCoursesPage" resultType="com.star.learning.entity.UserCourse">
+        SELECT * FROM user_course 
+        WHERE user_id = #{userId} AND deleted = 0
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 检查用户是否拥有课程 -->
+    <select id="selectByUserIdAndCourseId" resultType="com.star.learning.entity.UserCourse">
+        SELECT * FROM user_course 
+        WHERE user_id = #{userId} AND course_id = #{courseId} AND deleted = 0
+    </select>
+
+    <!-- 查询用户所有课程 -->
+    <select id="selectByUserId" resultType="com.star.learning.entity.UserCourse">
+        SELECT * FROM user_course 
+        WHERE user_id = #{userId} AND deleted = 0 
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 查询用户正在学习的课程 -->
+    <select id="selectLearningCoursesByUserId" resultType="com.star.learning.entity.UserCourse">
+        SELECT * FROM user_course 
+        WHERE user_id = #{userId} AND status = 1 AND deleted = 0 AND progress &lt; 100 
+        ORDER BY last_learn_time DESC
+    </select>
+
+    <!-- 查询用户已完成的课程 -->
+    <select id="selectCompletedCoursesByUserId" resultType="com.star.learning.entity.UserCourse">
+        SELECT * FROM user_course 
+        WHERE user_id = #{userId} AND status = 1 AND deleted = 0 AND progress = 100 
+        ORDER BY update_time DESC
+    </select>
+
+    <!-- 更新课程学习进度 -->
+    <update id="updateCourseProgress">
+        UPDATE user_course 
+        SET progress = #{progress}, last_learn_time = NOW(), update_time = NOW() 
+        WHERE user_id = #{userId} AND course_id = #{courseId} AND deleted = 0
+    </update>
+
+    <!-- 激活用户课程（订单支付后调用） -->
+    <update id="activateCourse">
+        UPDATE user_course 
+        SET status = 1, order_id = #{orderId}, purchase_time = NOW(), 
+            last_learn_time = NOW(), update_time = NOW() 
+        WHERE user_id = #{userId} AND course_id = #{courseId} AND deleted = 0
+    </update>
+
+    <!-- 查询过期课程 -->
+    <select id="selectExpiredCourses" resultType="com.star.learning.entity.UserCourse">
+        SELECT * FROM user_course 
+        WHERE status = 1 AND expire_time &lt; NOW() AND deleted = 0
+    </select>
+
+    <!-- 批量更新课程状态 -->
+    <update id="batchUpdateStatus">
+        UPDATE user_course 
+        SET status = #{status}, update_time = NOW() 
+        WHERE deleted = 0 AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+</mapper>

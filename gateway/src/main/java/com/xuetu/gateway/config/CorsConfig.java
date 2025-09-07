@@ -15,12 +15,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
  * 2. 微服务间通信不经过浏览器，无跨域问题
  * 3. 统一配置便于管理和维护
  * 4. 减少各微服务的配置重复
- * 
- * 跨域场景：
- * - 前端开发服务器：http://localhost:3000
- * - 网关服务：http://localhost:8080
- * - 生产环境：https://yourdomain.com
- * 
+ *
  * @author star
  */
 @Slf4j
