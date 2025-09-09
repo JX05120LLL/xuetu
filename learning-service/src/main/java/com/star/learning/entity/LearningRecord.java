@@ -1,22 +1,25 @@
 package com.star.learning.entity;
 
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.star.common.entity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 学习记录实体类
+ * 使用复合主键 (user_id, lesson_id)
  * 
  * @author star
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TableName("learning_record")
-public class LearningRecord extends BaseEntity {
+public class LearningRecord implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * 用户ID
@@ -47,6 +50,20 @@ public class LearningRecord extends BaseEntity {
      * 最后学习时间
      */
     private LocalDateTime lastLearnTime;
+
+    /**
+     * 创建时间
+     */
+    @TableField(value = "created_time", fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdTime;
+
+    /**
+     * 更新时间
+     */
+    @TableField(value = "updated_time", fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedTime;
 
     /**
      * 学习完成状态枚举

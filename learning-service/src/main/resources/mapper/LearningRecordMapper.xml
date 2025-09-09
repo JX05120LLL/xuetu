@@ -87,4 +87,48 @@
         </foreach>
     </update>
 
+    <!-- 插入学习记录 -->
+    <insert id="insertLearningRecord" parameterType="com.star.learning.entity.LearningRecord">
+        INSERT INTO learning_record (
+            user_id, course_id, lesson_id, progress, is_completed, 
+            last_learn_time, created_time, updated_time
+        ) VALUES (
+            #{userId}, #{courseId}, #{lessonId}, #{progress}, #{isCompleted},
+            #{lastLearnTime}, #{createdTime}, #{updatedTime}
+        )
+        ON DUPLICATE KEY UPDATE
+            progress = CASE 
+                WHEN #{progress} > progress THEN #{progress}
+                ELSE progress
+            END,
+            is_completed = #{isCompleted},
+            last_learn_time = #{lastLearnTime},
+            updated_time = #{updatedTime}
+    </insert>
+
+    <!-- 根据复合主键更新学习记录 -->
+    <update id="updateLearningRecord" parameterType="com.star.learning.entity.LearningRecord">
+        UPDATE learning_record
+        SET progress = #{progress},
+            is_completed = #{isCompleted},
+            last_learn_time = #{lastLearnTime},
+            updated_time = #{updatedTime}
+        WHERE user_id = #{userId} AND lesson_id = #{lessonId}
+    </update>
+
+    <!-- 标记课时完成（保持原有进度） -->
+    <insert id="markLessonCompleted">
+        INSERT INTO learning_record (
+            user_id, course_id, lesson_id, progress, is_completed, 
+            last_learn_time, created_time, updated_time
+        ) VALUES (
+            #{userId}, #{courseId}, #{lessonId}, 0, 1,
+            #{lastLearnTime}, #{updatedTime}, #{updatedTime}
+        )
+        ON DUPLICATE KEY UPDATE
+            is_completed = 1,
+            last_learn_time = #{lastLearnTime},
+            updated_time = #{updatedTime}
+    </insert>
+
 </mapper>

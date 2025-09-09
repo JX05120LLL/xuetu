@@ -5,47 +5,41 @@
     <!-- 分页查询用户笔记 -->
     <select id="selectUserNotesPage" resultType="com.star.learning.entity.Note">
         SELECT * FROM note 
-        WHERE user_id = #{userId} AND deleted = 0
-        <if test="keyword != null and keyword != ''">
+        WHERE user_id = #{userId}        <if test="keyword != null and keyword != ''">
             AND (title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'))
         </if>
-        ORDER BY create_time DESC
+        ORDER BY created_time DESC
     </select>
 
     <!-- 根据课程ID查询用户笔记 -->
     <select id="selectByUserIdAndCourseId" resultType="com.star.learning.entity.Note">
         SELECT * FROM note 
-        WHERE user_id = #{userId} AND course_id = #{courseId} AND deleted = 0 
-        ORDER BY create_time DESC
+        WHERE user_id = #{userId} AND course_id = #{courseId}        ORDER BY created_time DESC
     </select>
 
     <!-- 根据课时ID查询用户笔记 -->
     <select id="selectByUserIdAndLessonId" resultType="com.star.learning.entity.Note">
         SELECT * FROM note 
-        WHERE user_id = #{userId} AND lesson_id = #{lessonId} AND deleted = 0 
-        ORDER BY create_time DESC
+        WHERE user_id = #{userId} AND lesson_id = #{lessonId}        ORDER BY created_time DESC
     </select>
 
     <!-- 查询用户笔记总数 -->
     <select id="countByUserId" resultType="java.lang.Integer">
         SELECT COUNT(*) FROM note 
-        WHERE user_id = #{userId} AND deleted = 0
-    </select>
+        WHERE user_id = #{userId}    </select>
 
     <!-- 查询最近的笔记 -->
     <select id="selectRecentNotes" resultType="com.star.learning.entity.Note">
         SELECT * FROM note 
-        WHERE user_id = #{userId} AND deleted = 0 
-        ORDER BY create_time DESC 
+        WHERE user_id = #{userId}        ORDER BY created_time DESC 
         LIMIT #{limit}
     </select>
 
     <!-- 根据关键词搜索笔记 -->
     <select id="searchNotes" resultType="com.star.learning.entity.Note">
         SELECT * FROM note 
-        WHERE user_id = #{userId} AND deleted = 0 
-        AND (title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'))
-        ORDER BY create_time DESC 
+        WHERE user_id = #{userId}        AND (title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'))
+        ORDER BY created_time DESC 
         LIMIT #{limit}
     </select>
 

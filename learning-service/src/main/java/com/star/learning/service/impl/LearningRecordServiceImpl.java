@@ -42,43 +42,23 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
         log.info("更新学习进度: userId={}, courseId={}, lessonId={}, progress={}", 
                 userId, request.getCourseId(), request.getLessonId(), request.getProgress());
 
-        // 查询或创建学习记录
-        LearningRecord record = learningRecordMapper.selectByUserIdAndCourseIdAndLessonId(
-                userId, request.getCourseId(), request.getLessonId());
-
         LocalDateTime now = LocalDateTime.now();
         
-        if (record == null) {
-            // 创建新的学习记录
-            record = new LearningRecord();
-            record.setUserId(userId);
-            record.setCourseId(request.getCourseId());
-            record.setLessonId(request.getLessonId());
-            record.setProgress(request.getProgress());
-            record.setIsCompleted(request.getIsCompleted() != null ? request.getIsCompleted() : 0);
-            record.setLastLearnTime(now);
-            record.setCreatedTime(now);
-            record.setUpdatedTime(now);
-            
-            boolean saved = save(record);
-            if (!saved) {
-                log.error("创建学习记录失败");
-                return false;
-            }
-        } else {
-            // 更新现有记录
-            record.setProgress(request.getProgress());
-            if (request.getIsCompleted() != null) {
-                record.setIsCompleted(request.getIsCompleted());
-            }
-            record.setLastLearnTime(now);
-            record.setUpdatedTime(now);
-            
-            boolean updated = updateById(record);
-            if (!updated) {
-                log.error("更新学习记录失败");
-                return false;
-            }
+        // 直接插入或更新学习记录（使用 ON DUPLICATE KEY UPDATE）
+        LearningRecord record = new LearningRecord();
+        record.setUserId(userId);
+        record.setCourseId(request.getCourseId());
+        record.setLessonId(request.getLessonId());
+        record.setProgress(request.getProgress());
+        record.setIsCompleted(request.getIsCompleted() != null ? request.getIsCompleted() : 0);
+        record.setLastLearnTime(now);
+        record.setCreatedTime(now);
+        record.setUpdatedTime(now);
+        
+        int result = learningRecordMapper.insertLearningRecord(record);
+        if (result <= 0) {
+            log.error("更新学习记录失败");
+            return false;
         }
 
         // 更新用户课程总体进度
@@ -174,26 +154,19 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
     public Boolean markLessonCompleted(Long userId, Long courseId, Long lessonId) {
         log.info("标记课时完成: userId={}, courseId={}, lessonId={}", userId, courseId, lessonId);
 
-        LearningRecord record = learningRecordMapper.selectByUserIdAndCourseIdAndLessonId(
-                userId, courseId, lessonId);
-
-        if (record == null) {
-            // 创建新记录并标记完成
-            record = new LearningRecord();
-            record.setUserId(userId);
-            record.setCourseId(courseId);
-            record.setLessonId(lessonId);
-            record.setProgress(0);
-            record.setIsCompleted(LearningRecord.CompletionStatus.COMPLETED.getValue());
-            record.setLastLearnTime(LocalDateTime.now());
-            return save(record);
-        } else {
-            // 更新为已完成
-            record.setIsCompleted(LearningRecord.CompletionStatus.COMPLETED.getValue());
-            record.setLastLearnTime(LocalDateTime.now());
-            record.setUpdatedTime(LocalDateTime.now());
-            return updateById(record);
+        LocalDateTime now = LocalDateTime.now();
+        
+        // 使用专门的标记完成方法，会自动保持原有进度
+        int result = learningRecordMapper.markLessonCompleted(userId, courseId, lessonId, now, now);
+        if (result > 0) {
+            // 更新用户课程总体进度
+            updateCourseOverallProgress(userId, courseId);
+            log.info("标记课时完成成功: userId={}, courseId={}, lessonId={}", userId, courseId, lessonId);
+            return true;
         }
+        
+        log.error("标记课时完成失败: userId={}, courseId={}, lessonId={}", userId, courseId, lessonId);
+        return false;
     }
 
     @Override

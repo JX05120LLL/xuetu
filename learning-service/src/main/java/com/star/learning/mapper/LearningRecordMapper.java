@@ -64,4 +64,23 @@ public interface LearningRecordMapper extends BaseMapper<LearningRecord> {
      * 批量更新学习进度
      */
     int batchUpdateProgress(@Param("records") List<LearningRecord> records);
+
+    /**
+     * 插入学习记录
+     */
+    int insertLearningRecord(LearningRecord record);
+
+    /**
+     * 根据复合主键更新学习记录
+     */
+    int updateLearningRecord(LearningRecord record);
+
+    /**
+     * 标记课时完成（保持原有进度）
+     */
+    int markLessonCompleted(@Param("userId") Long userId, 
+                           @Param("courseId") Long courseId, 
+                           @Param("lessonId") Long lessonId,
+                           @Param("lastLearnTime") LocalDateTime lastLearnTime,
+                           @Param("updatedTime") LocalDateTime updatedTime);
 }
