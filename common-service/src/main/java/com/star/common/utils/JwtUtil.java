@@ -86,6 +86,85 @@ public class JwtUtil {
     }
 
     /**
+     * 生成JWT Token - 支持自定义Claims（用于角色权限管理）
+     * 
+     * 功能：支持在Token中存储自定义信息（如角色、权限等）
+     * 
+     * @param claims 自定义声明Map，可包含：
+     *               - userId (Long): 用户ID
+     *               - username (String): 用户名
+     *               - roles (List<String>): 角色列表
+     *               - permissions (List<String>): 权限列表
+     * @param expireTime 过期时间（毫秒）
+     * @return JWT Token字符串，失败返回null
+     * 
+     * 使用示例：
+     * Map<String, Object> claims = new HashMap<>();
+     * claims.put("userId", 1001L);
+     * claims.put("username", "张三");
+     * claims.put("roles", Arrays.asList("STUDENT", "TEACHER"));
+     * claims.put("permissions", Arrays.asList("course:view", "course:create"));
+     * String token = JwtUtil.generateToken(claims, 7 * 24 * 60 * 60 * 1000);
+     */
+    public static String generateToken(Map<String, Object> claims, long expireTime) {
+        try {
+            // 1. 创建HMAC256加密算法
+            Algorithm algorithm = Algorithm.HMAC256(CommonConstant.JWT.SECRET);
+            
+            // 2. 设置Token过期时间
+            Date expireDate = new Date(System.currentTimeMillis() + expireTime);
+            
+            // 3. 设置JWT头部信息
+            Map<String, Object> header = new HashMap<>();
+            header.put("typ", "JWT");
+            header.put("alg", "HS256");
+            
+            // 4. 构建JWT Builder
+            var jwtBuilder = JWT.create()
+                    .withHeader(header)
+                    .withIssuer("xuetu")
+                    .withSubject("user")
+                    .withAudience("web")
+                    .withIssuedAt(new Date())
+                    .withExpiresAt(expireDate);
+            
+            // 5. 添加所有自定义claims
+            if (claims != null && !claims.isEmpty()) {
+                for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+                    
+                    // 根据值的类型添加到JWT中
+                    if (value == null) {
+                        continue; // 跳过null值
+                    } else if (value instanceof String) {
+                        jwtBuilder.withClaim(key, (String) value);
+                    } else if (value instanceof Long) {
+                        jwtBuilder.withClaim(key, (Long) value);
+                    } else if (value instanceof Integer) {
+                        jwtBuilder.withClaim(key, (Integer) value);
+                    } else if (value instanceof Boolean) {
+                        jwtBuilder.withClaim(key, (Boolean) value);
+                    } else if (value instanceof java.util.List) {
+                        jwtBuilder.withClaim(key, (java.util.List<?>) value);
+                    } else if (value instanceof java.util.Map) {
+                        jwtBuilder.withClaim(key, (java.util.Map<String, ?>) value);
+                    } else {
+                        // 其他类型转为字符串
+                        jwtBuilder.withClaim(key, value.toString());
+                    }
+                }
+            }
+            
+            // 6. 签名并生成Token
+            return jwtBuilder.sign(algorithm);
+        } catch (JWTCreationException e) {
+            log.error("JWT生成失败", e);
+            return null;
+        }
+    }
+
+    /**
      * 验证JWT Token的有效性 - 每次API请求时调用
      * 
      * 验证内容：
