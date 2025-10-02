@@ -164,6 +164,6 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
      */
     @Override
     public int getOrder() {
-        return -100;  // 高优先级
+        return 1;  // JWT验证优先级：1（在权限验证之前）
     }
 }

@@ -1,10 +1,13 @@
 package com.star.user.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.star.common.result.R;
 import com.star.user.dto.UserLoginRequest;
 import com.star.user.dto.UserLoginResponse;
 import com.star.user.dto.UserRegisterRequest;
 import com.star.user.entity.User;
+import com.star.user.feign.AdminServiceClient;
+import com.star.user.feign.RoleDTO;
 import com.star.user.mapper.UserMapper;
 import com.star.user.service.UserService;
 import com.star.common.utils.JwtUtil;
@@ -19,7 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 用户服务实现类
@@ -32,6 +39,7 @@ import java.util.List;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     private final UserMapper userMapper;
+    private final AdminServiceClient adminServiceClient;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -90,14 +98,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw UserAuthException.accountDisabled();
         }
 
-        // 4. 生成JWT Token
-        String token = JwtUtil.generateToken(user.getId(), user.getUsername());
+        // 4. 调用admin-service获取用户角色和权限
+        List<String> roles = Collections.emptyList();
+        List<String> permissions = Collections.emptyList();
+        
+        try {
+            // 获取用户角色
+            R<List<RoleDTO>> rolesResult = adminServiceClient.getUserRoles(user.getId());
+            if (rolesResult != null && rolesResult.isSuccess() && rolesResult.getData() != null) {
+                roles = rolesResult.getData().stream()
+                    .map(RoleDTO::getRoleName)
+                    .collect(Collectors.toList());
+                log.info("用户角色: {}", roles);
+            }
+            
+            // 获取用户权限
+            R<List<String>> permsResult = adminServiceClient.getUserPermissionKeys(user.getId());
+            if (permsResult != null && permsResult.isSuccess() && permsResult.getData() != null) {
+                permissions = permsResult.getData();
+                log.info("用户权限数量: {}", permissions.size());
+            }
+        } catch (Exception e) {
+            log.warn("获取用户角色权限失败: {}", e.getMessage());
+            // 继续执行，使用空列表
+        }
+
+        // 5. 生成包含角色和权限的JWT Token
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getId());
+        claims.put("username", user.getUsername());
+        claims.put("roles", roles);
+        claims.put("permissions", permissions);
+        
+        String token = JwtUtil.generateToken(claims, CommonConstant.JWT.EXPIRE_TIME);
         if (token == null) {
             throw new UserAuthException("Token生成失败，请稍后重试");
         }
-
-        // 5. 查询用户角色
-        List<String> roles = getUserRoles(user.getId());
 
         // 6. 构建响应
         UserLoginResponse response = new UserLoginResponse();
@@ -114,8 +150,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userInfo.setRoles(roles);
 
         response.setUserInfo(userInfo);
+        response.setPermissions(permissions);  // 🆕 添加权限列表
 
-        log.info("用户登录成功: userId={}", user.getId());
+        log.info("用户登录成功: userId={}, roles={}", user.getId(), roles);
         return response;
     }
 

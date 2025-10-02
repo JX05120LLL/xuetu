@@ -26,6 +26,9 @@ public class UserLoginResponse {
     @Schema(description = "用户信息")
     private UserInfo userInfo;
 
+    @Schema(description = "用户权限列表")
+    private List<String> permissions;
+
     @Data
     @Schema(description = "用户基本信息")
     public static class UserInfo {
