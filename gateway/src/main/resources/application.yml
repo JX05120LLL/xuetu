@@ -66,6 +66,14 @@ spring:
           filters:
             - StripPrefix=2
             
+        # AI服务路由
+        - id: ai-service
+          uri: lb://ai-service
+          predicates:
+            - Path=/api/ai/**
+          filters:
+            - StripPrefix=2
+            
         # API文档路由配置
         - id: user-service-docs
           uri: lb://user-service
@@ -92,6 +100,13 @@ spring:
           uri: lb://learning-service
           predicates:
             - Path=/api/learning/v3/api-docs/**
+          filters:
+            - StripPrefix=2
+            
+        - id: ai-service-docs
+          uri: lb://ai-service
+          predicates:
+            - Path=/api/ai/v3/api-docs/**
           filters:
             - StripPrefix=2
             

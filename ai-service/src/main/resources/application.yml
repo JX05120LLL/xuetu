@@ -1,0 +1,122 @@
+# AI服务配置
+server:
+  port: 8066  # AI服务端口
+
+spring:
+  application:
+    name: ai-service  # 服务名称
+  
+  # 配置数据导入
+  config:
+    import:
+      - optional:nacos:ai-service.yml
+      - optional:nacos:common-config.yml
+    
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/xuetu_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456  # 请根据实际情况修改
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 3  # 使用数据库3，避免冲突
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        
+  # Spring Cloud 配置
+  cloud:
+    nacos:
+      # 服务发现配置
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        
+      # 配置中心（可选）
+      config:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        file-extension: yml
+        enabled: false  # 暂时禁用
+
+# MyBatis Plus配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.star.ai.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+# 阿里通义千问配置
+aliyun:
+  ai:
+    # 需要在阿里云申请：https://dashscope.console.aliyun.com/
+    api-key: ${ALIYUN_AI_KEY:sk-a409f5a051484d0fbc984a6ab2b78691}  # 从环境变量或配置获取
+    # API地址
+    api-url: https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation
+    # 模型名称
+    model: qwen-turbo  # 可选: qwen-turbo(快速), qwen-plus(均衡), qwen-max(最强)
+    # 超时时间(秒)
+    timeout: 60
+    # 最大tokens
+    max-tokens: 2000
+    # 温度(创造性): 0-2, 越高越随机
+    temperature: 0.8
+
+# 日志配置
+logging:
+  level:
+    com.star.ai: DEBUG
+    org.springframework.cloud: INFO
+    root: INFO
+  file:
+    path: logs/ai-service
+    name: logs/ai-service/ai-service.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
+      total-size-cap: 3GB
+    
+# Knife4j API文档配置
+knife4j:
+  enable: true
+  openapi:
+    title: AI服务API文档
+    description: 学途在线教育平台-AI智能服务(通义千问)
+    version: 1.0.0
+    contact: star@xuetu.com
+    
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# Feign配置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000

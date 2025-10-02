@@ -11,11 +11,89 @@
  Target Server Version : 80039 (8.0.39)
  File Encoding         : 65001
 
- Date: 09/09/2025 17:56:12
+ Date: 02/10/2025 17:34:26
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for ai_analysis_report
+-- ----------------------------
+DROP TABLE IF EXISTS `ai_analysis_report`;
+CREATE TABLE `ai_analysis_report`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '报告ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `report_type` tinyint NOT NULL COMMENT '报告类型: 1-学习分析,2-课程推荐,3-学习计划',
+  `report_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '报告内容(JSON格式)',
+  `summary` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '报告摘要',
+  `learning_time` int NULL DEFAULT 0 COMMENT '统计的学习时长(分钟)',
+  `completed_courses` int NULL DEFAULT 0 COMMENT '完成的课程数',
+  `continuous_days` int NULL DEFAULT 0 COMMENT '连续学习天数',
+  `advice_count` int NULL DEFAULT 0 COMMENT '建议条数',
+  `created_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_report_type`(`report_type` ASC) USING BTREE,
+  INDEX `idx_created_time`(`created_time` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI分析报告表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for ai_faq
+-- ----------------------------
+DROP TABLE IF EXISTS `ai_faq`;
+CREATE TABLE `ai_faq`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'FAQ ID',
+  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '分类: 学习方法,编程问题,课程相关',
+  `question` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '问题',
+  `answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'AI生成的答案',
+  `use_count` int NULL DEFAULT 0 COMMENT '使用次数',
+  `status` tinyint NULL DEFAULT 1 COMMENT '状态: 0-禁用,1-启用',
+  `created_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_category`(`category` ASC) USING BTREE,
+  INDEX `idx_use_count`(`use_count` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI常见问题表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for ai_recommendation
+-- ----------------------------
+DROP TABLE IF EXISTS `ai_recommendation`;
+CREATE TABLE `ai_recommendation`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '推荐ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `course_id` bigint NOT NULL COMMENT '推荐的课程ID',
+  `reason` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'AI推荐理由',
+  `score` decimal(3, 2) NULL DEFAULT 0.00 COMMENT '推荐分数(0-1)',
+  `is_clicked` tinyint NULL DEFAULT 0 COMMENT '是否点击: 0-未点击,1-已点击',
+  `is_purchased` tinyint NULL DEFAULT 0 COMMENT '是否购买: 0-未购买,1-已购买',
+  `created_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `clicked_time` datetime NULL DEFAULT NULL COMMENT '点击时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
+  INDEX `idx_created_time`(`created_time` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI智能推荐记录表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for ai_usage_stats
+-- ----------------------------
+DROP TABLE IF EXISTS `ai_usage_stats`;
+CREATE TABLE `ai_usage_stats`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '统计ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `date` date NOT NULL COMMENT '日期',
+  `chat_count` int NULL DEFAULT 0 COMMENT '对话次数',
+  `total_tokens` int NULL DEFAULT 0 COMMENT '总消耗tokens',
+  `analysis_count` int NULL DEFAULT 0 COMMENT '分析报告次数',
+  `recommendation_count` int NULL DEFAULT 0 COMMENT '推荐课程次数',
+  `created_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_user_date`(`user_id` ASC, `date` ASC) USING BTREE,
+  INDEX `idx_date`(`date` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI使用统计表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for category
@@ -46,6 +124,27 @@ CREATE TABLE `chapter`  (
   INDEX `course_id`(`course_id` ASC) USING BTREE,
   CONSTRAINT `chapter_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 24 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '章节表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for chat_history
+-- ----------------------------
+DROP TABLE IF EXISTS `chat_history`;
+CREATE TABLE `chat_history`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '对话历史ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `conversation_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '对话会话ID',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '角色: user(用户)/assistant(AI)',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息内容',
+  `course_id` bigint NULL DEFAULT NULL COMMENT '关联课程ID(可选)',
+  `lesson_id` bigint NULL DEFAULT NULL COMMENT '关联课时ID(可选)',
+  `tokens` int NULL DEFAULT 0 COMMENT '消耗的tokens数',
+  `model` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT 'deepseek-chat' COMMENT '使用的AI模型',
+  `created_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_conversation_id`(`conversation_id` ASC) USING BTREE,
+  INDEX `idx_created_time`(`created_time` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI对话历史表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for comment
@@ -165,7 +264,7 @@ CREATE TABLE `note`  (
   `created_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '笔记表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '笔记表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for order
