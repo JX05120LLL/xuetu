@@ -94,4 +94,46 @@ public interface UserService extends IService<User> {
      * @return 权限列表
      */
     List<String> getUserPermissions(Long userId);
+
+    /**
+     * 禁用用户账号
+     * 
+     * @param userId 用户ID
+     * @return 操作结果
+     */
+    Boolean disableUser(Long userId);
+
+    /**
+     * 启用用户账号
+     * 
+     * @param userId 用户ID
+     * @return 操作结果
+     */
+    Boolean enableUser(Long userId);
+
+    /**
+     * 更新用户状态
+     * 
+     * @param userId 用户ID
+     * @param status 状态(0:禁用,1:启用)
+     * @return 操作结果
+     */
+    Boolean updateUserStatus(Long userId, Integer status);
+
+    /**
+     * 修改用户密码
+     * 
+     * @param userId 用户ID
+     * @param request 修改密码请求
+     * @return 操作结果
+     */
+    Boolean changePassword(Long userId, com.star.user.dto.ChangePasswordRequest request);
+
+    /**
+     * 获取用户详情（不含敏感信息）
+     * 
+     * @param userId 用户ID
+     * @return 用户信息
+     */
+    User getUserInfo(Long userId);
 }

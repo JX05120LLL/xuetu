@@ -130,7 +130,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         claims.put("roles", roles);
         claims.put("permissions", permissions);
         
-        String token = JwtUtil.generateToken(claims, CommonConstant.JWT.EXPIRE_TIME);
+        String token = JwtUtil.generateToken(claims, CommonConstant.JWT.EXPIRE_TIME.longValue());
         if (token == null) {
             throw new UserAuthException("Token生成失败，请稍后重试");
         }
@@ -194,6 +194,143 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public List<String> getUserPermissions(Long userId) {
         return userMapper.findUserPermissions(userId);
+    }
+
+    @Override
+    public Boolean disableUser(Long userId) {
+        log.info("禁用用户账号: userId={}", userId);
+        
+        User user = getById(userId);
+        if (user == null) {
+            throw new UserAuthException("用户不存在");
+        }
+        
+        if (user.getStatus() == 0) {
+            throw new UserAuthException("用户已经是禁用状态");
+        }
+        
+        user.setStatus(0); // 0:禁用
+        boolean result = updateById(user);
+        
+        if (result) {
+            log.info("用户禁用成功: userId={}, username={}", userId, user.getUsername());
+        } else {
+            log.error("用户禁用失败: userId={}", userId);
+        }
+        
+        return result;
+    }
+
+    @Override
+    public Boolean enableUser(Long userId) {
+        log.info("启用用户账号: userId={}", userId);
+        
+        User user = getById(userId);
+        if (user == null) {
+            throw new UserAuthException("用户不存在");
+        }
+        
+        if (user.getStatus() == 1) {
+            throw new UserAuthException("用户已经是启用状态");
+        }
+        
+        user.setStatus(1); // 1:启用
+        boolean result = updateById(user);
+        
+        if (result) {
+            log.info("用户启用成功: userId={}, username={}", userId, user.getUsername());
+        } else {
+            log.error("用户启用失败: userId={}", userId);
+        }
+        
+        return result;
+    }
+
+    @Override
+    public Boolean updateUserStatus(Long userId, Integer status) {
+        log.info("更新用户状态: userId={}, status={}", userId, status);
+        
+        // 验证状态值
+        if (status != 0 && status != 1) {
+            throw new UserAuthException("状态值无效，只能是0或1");
+        }
+        
+        User user = getById(userId);
+        if (user == null) {
+            throw new UserAuthException("用户不存在");
+        }
+        
+        if (user.getStatus().equals(status)) {
+            String statusText = status == 1 ? "启用" : "禁用";
+            throw new UserAuthException("用户已经是" + statusText + "状态");
+        }
+        
+        user.setStatus(status);
+        boolean result = updateById(user);
+        
+        if (result) {
+            String statusText = status == 1 ? "启用" : "禁用";
+            log.info("用户状态更新成功: userId={}, username={}, status={}", 
+                    userId, user.getUsername(), statusText);
+        } else {
+            log.error("用户状态更新失败: userId={}", userId);
+        }
+        
+        return result;
+    }
+
+    @Override
+    public Boolean changePassword(Long userId, com.star.user.dto.ChangePasswordRequest request) {
+        log.info("修改用户密码: userId={}", userId);
+        
+        // 1. 检查用户是否存在
+        User user = getById(userId);
+        if (user == null) {
+            throw new UserAuthException("用户不存在");
+        }
+        
+        // 2. 验证新密码和确认密码是否一致
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new UserAuthException("两次输入的密码不一致");
+        }
+        
+        // 3. 验证旧密码是否正确
+        if (!PasswordUtil.matches(request.getOldPassword(), user.getPassword())) {
+            throw new UserAuthException("旧密码错误");
+        }
+        
+        // 4. 检查新密码是否与旧密码相同
+        if (request.getOldPassword().equals(request.getNewPassword())) {
+            throw new UserAuthException("新密码不能与旧密码相同");
+        }
+        
+        // 5. 更新密码
+        String encodedNewPassword = PasswordUtil.encode(request.getNewPassword());
+        user.setPassword(encodedNewPassword);
+        boolean result = updateById(user);
+        
+        if (result) {
+            log.info("密码修改成功: userId={}, username={}", userId, user.getUsername());
+        } else {
+            log.error("密码修改失败: userId={}", userId);
+        }
+        
+        return result;
+    }
+
+    @Override
+    public User getUserInfo(Long userId) {
+        log.info("获取用户信息: userId={}", userId);
+        
+        User user = getById(userId);
+        if (user == null) {
+            throw new UserAuthException("用户不存在");
+        }
+        
+        // 清除敏感信息
+        user.setPassword(null);
+        
+        return user;
     }
 
     /**
