@@ -32,47 +32,100 @@ spring:
     
     # 网关路由配置
     gateway:
-      # 路由规则配置 - 简化版本
+      # 路由规则配置 - 完整版本
       routes:
-        # 用户服务路由
+        # ========== 认证服务路由 ==========
+        - id: auth-service
+          uri: lb://user-service
+          predicates:
+            - Path=/auth/**
+          
+        # ========== 用户服务路由 ==========
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/api/user/**
-          filters:
-            - StripPrefix=2
+            - Path=/user/**
             
-        # 课程服务路由  
+        # ========== 课程服务路由 ==========
         - id: course-service
           uri: lb://course-service
           predicates:
-            - Path=/api/course/**
-          filters:
-            - StripPrefix=2
+            - Path=/course/**
             
-        # 订单服务路由
+        # 分类服务路由
+        - id: category-service
+          uri: lb://course-service
+          predicates:
+            - Path=/category/**
+            
+        # 章节服务路由
+        - id: chapter-service
+          uri: lb://course-service
+          predicates:
+            - Path=/chapter/**
+            
+        # 课时服务路由
+        - id: lesson-service
+          uri: lb://course-service
+          predicates:
+            - Path=/lesson/**
+            
+        # 评论服务路由
+        - id: comment-service
+          uri: lb://course-service
+          predicates:
+            - Path=/comment/**
+            
+        # ========== 订单服务路由 ==========
         - id: order-service  
           uri: lb://order-service
           predicates:
-            - Path=/api/order/**
-          filters:
-            - StripPrefix=2
+            - Path=/api/orders/**
             
-        # 学习服务路由
+        # 支付服务路由
+        - id: payment-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/payments/**
+            
+        # 用户课程服务路由
+        - id: user-course-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/user-courses/**
+            
+        # ========== 学习服务路由 ==========
         - id: learning-service
           uri: lb://learning-service
           predicates:
-            - Path=/api/learning/**
-          filters:
-            - StripPrefix=2
+            - Path=/learning/**
             
-        # AI服务路由
-        - id: ai-service
+        # ========== AI服务路由 ==========
+        - id: ai-chat-service
           uri: lb://ai-service
           predicates:
-            - Path=/api/ai/**
-          filters:
-            - StripPrefix=2
+            - Path=/chat/**
+            
+        - id: ai-analysis-service
+          uri: lb://ai-service
+          predicates:
+            - Path=/analysis/**
+            
+        - id: ai-recommend-service
+          uri: lb://ai-service
+          predicates:
+            - Path=/recommend/**
+            
+        # ========== 管理服务路由 ==========
+        - id: role-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/role/**
+            
+        - id: permission-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/permission/**
             
         # API文档路由配置
         - id: user-service-docs

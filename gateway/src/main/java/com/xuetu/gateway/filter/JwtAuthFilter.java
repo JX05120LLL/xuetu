@@ -38,25 +38,47 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     /**
      * 白名单路径 - 这些路径不需要JWT认证
+     * 游客可以访问的公开接口
      */
     private static final List<String> WHITE_LIST = Arrays.asList(
-            "/api/user/login",      // 用户登录
-            "/api/user/register",   // 用户注册
-            "/api/user/captcha",    // 验证码
-            "/api/course/courses",  // 课程列表（游客可访问）
-            "/api/course/categories", // 课程分类（游客可访问）
-            "/doc.html",            // API文档首页
-            "/swagger-ui",          // Swagger UI静态资源
-            "/v3/api-docs",         // OpenAPI文档
-            "/api/user/v3/api-docs", // 用户服务API文档
-            "/api/course/v3/api-docs", // 课程服务API文档
-            "/api/order/v3/api-docs", // 订单服务API文档
-            "/api/learning/v3/api-docs", // 学习服务API文档
-            "/webjars",             // 静态资源
-            "/swagger-resources",   // Swagger资源
-            "/actuator",            // 健康检查
-            "/favicon.ico",         // 网站图标
-            "/api-docs"             // 自定义聚合API文档页面
+            // ========== 认证相关（公开） ==========
+            "/auth/register",           // 用户注册
+            "/auth/login",              // 用户登录
+            "/auth/check-username",     // 检查用户名
+            "/auth/check-email",        // 检查邮箱
+            "/auth/health",             // 认证服务健康检查
+            
+            // ========== 课程服务（游客可浏览） ==========
+            "/course/list",             // 课程列表
+            "/course/search",           // 搜索课程
+            "/course/hot",              // 热门课程
+            "/course/health",           // 课程服务健康检查
+            "/course/",                 // 课程详情 /course/{id}
+            
+            // ========== 分类服务（公开） ==========
+            "/category/list",           // 分类列表
+            "/category/tree",           // 分类树
+            "/category/children",       // 子分类
+            "/category/",               // 分类详情 /category/{id}
+            "/category/health",         // 分类服务健康检查
+            
+            // ========== 章节课时（游客可查看目录） ==========
+            "/chapter/course",          // 课程章节 /chapter/course/{courseId}
+            "/lesson/chapter",          // 章节课时 /lesson/chapter/{chapterId}
+            
+            // ========== 评论（游客可查看） ==========
+            "/comment/list",            // 评论列表
+            "/comment/course",          // 课程评论
+            
+            // ========== API文档和健康检查 ==========
+            "/doc.html",                // API文档首页
+            "/swagger-ui",              // Swagger UI
+            "/v3/api-docs",             // OpenAPI文档
+            "/webjars",                 // 静态资源
+            "/swagger-resources",       // Swagger资源
+            "/actuator",                // 健康检查端点
+            "/favicon.ico",             // 网站图标
+            "/health"                   // 通用健康检查
     );
 
     @Override
