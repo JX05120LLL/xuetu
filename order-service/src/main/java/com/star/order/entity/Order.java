@@ -15,7 +15,7 @@ import java.math.BigDecimal;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("order")
+@TableName("`order`")
 @Schema(description = "订单信息")
 public class Order extends BaseEntity {
 

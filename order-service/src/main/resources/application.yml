@@ -1,6 +1,6 @@
 # 订单服务配置
 server:
-  port: 8055  # 订单服务端口
+  port: 8033  # 订单服务端口
 
 spring:
   application:
@@ -103,6 +103,16 @@ management:
   endpoint:
     health:
       show-details: always
+
+# Feign配置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+  circuitbreaker:
+    enabled: false  # 暂时禁用熔断器
 
 # 订单服务特有配置
 order:

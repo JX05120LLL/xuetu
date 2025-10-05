@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.star.common.dto.PageParam;
 import com.star.common.dto.PageResult;
 import com.star.common.utils.PageUtil;
+import com.star.order.entity.Order;
 import com.star.order.entity.OrderItem;
 import com.star.order.entity.UserCourse;
+import com.star.order.mapper.OrderMapper;
 import com.star.order.mapper.UserCourseMapper;
 import com.star.order.service.OrderItemService;
 import com.star.order.service.UserCourseService;
@@ -31,6 +33,7 @@ public class UserCourseServiceImpl extends ServiceImpl<UserCourseMapper, UserCou
 
     private final UserCourseMapper userCourseMapper;
     private final OrderItemService orderItemService;
+    private final OrderMapper orderMapper;
 
     @Override
     public PageResult<UserCourse> getUserCourses(Long userId, PageParam pageParam) {
@@ -144,12 +147,14 @@ public class UserCourseServiceImpl extends ServiceImpl<UserCourseMapper, UserCou
     }
 
     /**
-     * 从订单ID获取用户ID（简化实现）
-     * 实际应该注入OrderService或通过其他方式获取
+     * 从订单ID获取用户ID
      */
     private Long getUserIdFromOrder(Long orderId) {
-        // 这里应该通过OrderService获取，为了简化暂时返回1L
-        // 实际实现中需要注入OrderService或者通过数据库查询
-        return 1L;
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            log.error("订单不存在，订单ID: {}", orderId);
+            throw new RuntimeException("订单不存在");
+        }
+        return order.getUserId();
     }
 }

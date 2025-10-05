@@ -38,6 +38,12 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
         
+        <!-- LoadBalancer负载均衡 (Feign必需) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+        
         <!-- Sentinel限流熔断 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

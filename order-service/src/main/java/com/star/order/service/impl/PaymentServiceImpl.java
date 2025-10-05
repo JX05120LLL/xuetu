@@ -9,11 +9,11 @@ import com.star.order.exception.OrderException;
 import com.star.order.exception.PaymentException;
 import com.star.order.mapper.OrderMapper;
 import com.star.order.mapper.PaymentRecordMapper;
+import com.star.order.service.OrderService;
 import com.star.order.service.PaymentService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,12 +31,19 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class PaymentServiceImpl extends ServiceImpl<PaymentRecordMapper, PaymentRecord> implements PaymentService {
 
     private final PaymentRecordMapper paymentRecordMapper;
     private final OrderMapper orderMapper;
-    private final ApplicationEventPublisher eventPublisher;
+    private final OrderService orderService;
+
+    public PaymentServiceImpl(PaymentRecordMapper paymentRecordMapper,
+                             OrderMapper orderMapper,
+                             @Lazy OrderService orderService) {
+        this.paymentRecordMapper = paymentRecordMapper;
+        this.orderMapper = orderMapper;
+        this.orderService = orderService;
+    }
 
     // 支付单号生成器
     private static final AtomicLong PAYMENT_SEQUENCE = new AtomicLong(1);

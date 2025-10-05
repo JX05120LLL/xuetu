@@ -13,6 +13,30 @@
     <description>API网关服务，负责路由转发、认证鉴权、限流等功能</description>
 
     <dependencies>
+        <!-- 引入公共模块 -->
+        <dependency>
+            <groupId>com.star</groupId>
+            <artifactId>common-service</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <!-- 排除Web Starter，因为Gateway使用WebFlux -->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </exclusion>
+                <!-- 排除MyBatis Plus，网关不需要 -->
+                <exclusion>
+                    <groupId>com.baomidou</groupId>
+                    <artifactId>mybatis-plus-boot-starter</artifactId>
+                </exclusion>
+                <!-- 排除MySQL驱动，网关不需要 -->
+                <exclusion>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
         <!-- Spring Cloud Gateway -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

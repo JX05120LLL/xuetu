@@ -13,10 +13,8 @@ import com.star.order.dto.OrderItemDTO;
 import com.star.order.dto.PaymentRecordDTO;
 import com.star.order.entity.Order;
 import com.star.order.entity.OrderItem;
-import com.star.order.entity.PaymentRecord;
 import com.star.order.exception.OrderException;
 import com.star.order.feign.CourseServiceClient;
-import com.star.order.feign.UserServiceClient;
 import com.star.order.mapper.OrderMapper;
 import com.star.order.service.OrderItemService;
 import com.star.order.service.OrderService;
@@ -50,7 +48,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final OrderItemService orderItemService;
     private final PaymentService paymentService;
     private final UserCourseService userCourseService;
-    private final UserServiceClient userServiceClient;
     private final CourseServiceClient courseServiceClient;
 
     // 订单号生成器
@@ -61,25 +58,42 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public OrderDTO createOrder(Long userId, CreateOrderRequest request) {
         log.info("用户 {} 开始创建订单，课程列表: {}", userId, request.getCourseIds());
         
-        // 1. 验证用户是否存在
-        R<Boolean> userExistsResult = userServiceClient.checkUserExists(userId);
-        if (userExistsResult == null || !Boolean.TRUE.equals(userExistsResult.getData())) {
-            throw OrderException.createFailed("用户不存在");
+        // 1. 验证订单参数
+        if (request.getCourseIds() == null || request.getCourseIds().isEmpty()) {
+            throw OrderException.createFailed("课程列表不能为空");
         }
 
-        // 2. 检查是否可以创建订单
-        if (!checkCanCreateOrder(userId, request.getCourseIds())) {
-            throw OrderException.createFailed("存在已购买的课程或课程不可购买");
+        // 2. 检查用户是否已购买这些课程
+        for (Long courseId : request.getCourseIds()) {
+            if (userCourseService.checkUserHasCourse(userId, courseId)) {
+                log.warn("用户 {} 已购买课程 {}", userId, courseId);
+                throw OrderException.createFailed("课程已购买，无需重复购买");
+            }
         }
 
-        // 3. 获取课程信息
-        R<List<Object>> coursesResult = courseServiceClient.getCoursesByIds(request.getCourseIds());
-        if (coursesResult == null || coursesResult.getData() == null || coursesResult.getData().isEmpty()) {
-            throw OrderException.courseNotAvailable(0L);
+        // 3. 获取课程信息并构建订单项
+        List<Object> courses = new java.util.ArrayList<>();
+        for (Long courseId : request.getCourseIds()) {
+            try {
+                R<Object> courseResult = courseServiceClient.getCourseById(courseId);
+                if (courseResult != null && courseResult.getData() != null) {
+                    courses.add(courseResult.getData());
+                } else {
+                    log.warn("课程信息不存在: {}", courseId);
+                    throw OrderException.courseNotAvailable(courseId);
+                }
+            } catch (Exception e) {
+                log.error("获取课程信息失败, courseId: {}", courseId, e);
+                throw OrderException.courseNotAvailable(courseId);
+            }
+        }
+
+        if (courses.isEmpty()) {
+            throw OrderException.createFailed("无法获取课程信息");
         }
 
         // 4. 计算订单金额
-        BigDecimal totalAmount = calculateTotalAmount(coursesResult.getData());
+        BigDecimal totalAmount = calculateTotalAmount(courses);
         BigDecimal actualAmount = totalAmount; // 暂时不考虑优惠
         BigDecimal discountAmount = BigDecimal.ZERO;
 
@@ -96,7 +110,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         save(order);
 
         // 6. 创建订单项
-        List<OrderItem> orderItems = createOrderItems(order.getId(), coursesResult.getData());
+        List<OrderItem> orderItems = createOrderItems(order.getId(), courses);
         orderItemService.saveBatch(orderItems);
 
         log.info("订单创建成功，订单号: {}, 订单ID: {}", order.getOrderNo(), order.getId());
@@ -240,13 +254,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 log.warn("用户 {} 已购买课程 {}", userId, courseId);
                 return false;
             }
-            
-            // 检查课程是否可购买
-            R<Boolean> purchasableResult = courseServiceClient.checkCoursePurchasable(courseId);
-            if (purchasableResult == null || !Boolean.TRUE.equals(purchasableResult.getData())) {
-                log.warn("课程 {} 不可购买", courseId);
-                return false;
-            }
         }
         return true;
     }
@@ -288,23 +295,71 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * 计算订单总金额
      */
     private BigDecimal calculateTotalAmount(List<Object> courses) {
-        // 这里需要根据实际的课程数据结构来计算
-        // 暂时返回固定金额，实际应该从课程信息中获取价格
-        return BigDecimal.valueOf(99.00 * courses.size());
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (Object courseObj : courses) {
+            if (courseObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> courseMap = (Map<String, Object>) courseObj;
+                Object priceObj = courseMap.get("price");
+                if (priceObj != null) {
+                    BigDecimal price;
+                    if (priceObj instanceof BigDecimal) {
+                        price = (BigDecimal) priceObj;
+                    } else if (priceObj instanceof Number) {
+                        price = BigDecimal.valueOf(((Number) priceObj).doubleValue());
+                    } else {
+                        price = new BigDecimal(priceObj.toString());
+                    }
+                    totalAmount = totalAmount.add(price);
+                }
+            }
+        }
+        return totalAmount;
     }
 
     /**
      * 创建订单项
      */
     private List<OrderItem> createOrderItems(Long orderId, List<Object> courses) {
-        return courses.stream().map(course -> {
+        return courses.stream().map(courseObj -> {
             OrderItem item = new OrderItem();
             item.setOrderId(orderId);
-            // 这里需要根据实际的课程数据结构来设置
-            // item.setCourseId(...);
-            // item.setCourseTitle(...);
-            // item.setPrice(...);
-            // quantity字段已从数据库移除，不再设置
+            
+            if (courseObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> courseMap = (Map<String, Object>) courseObj;
+                
+                // 设置课程ID
+                Object idObj = courseMap.get("id");
+                if (idObj != null) {
+                    item.setCourseId(Long.valueOf(idObj.toString()));
+                }
+                
+                // 设置课程标题
+                Object titleObj = courseMap.get("title");
+                if (titleObj != null) {
+                    item.setCourseTitle(titleObj.toString());
+                }
+                
+                // 设置课程封面
+                Object coverObj = courseMap.get("coverImage");
+                if (coverObj != null) {
+                    item.setCourseCover(coverObj.toString());
+                }
+                
+                // 设置价格
+                Object priceObj = courseMap.get("price");
+                if (priceObj != null) {
+                    if (priceObj instanceof BigDecimal) {
+                        item.setPrice((BigDecimal) priceObj);
+                    } else if (priceObj instanceof Number) {
+                        item.setPrice(BigDecimal.valueOf(((Number) priceObj).doubleValue()));
+                    } else {
+                        item.setPrice(new BigDecimal(priceObj.toString()));
+                    }
+                }
+            }
+            
             return item;
         }).collect(Collectors.toList());
     }

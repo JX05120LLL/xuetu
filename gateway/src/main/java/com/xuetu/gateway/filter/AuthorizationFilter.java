@@ -1,7 +1,6 @@
 package com.xuetu.gateway.filter;
 
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.star.common.result.R;
@@ -43,7 +42,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthorizationFilter implements GlobalFilter, Ordered {
 
-    private final PermissionConfig permissionConfig;
     private final ObjectMapper objectMapper;
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
@@ -116,26 +114,17 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
 
     /**
      * 根据请求路径获取所需权限
+     * 当前实现中权限和角色使用同一配置
      */
     private List<String> getRequiredPermissions(String path) {
-        for (Map.Entry<String, List<String>> entry : permissionConfig.urlPermissionMap().entrySet()) {
-            if (antPathMatcher.match(entry.getKey(), path)) {
-                return entry.getValue();
-            }
-        }
-        return null;
+        return PermissionConfig.getRequiredRoles(path);
     }
 
     /**
      * 根据请求路径获取所需角色
      */
     private List<String> getRequiredRoles(String path) {
-        for (Map.Entry<String, List<String>> entry : permissionConfig.urlRoleMap().entrySet()) {
-            if (antPathMatcher.match(entry.getKey(), path)) {
-                return entry.getValue();
-            }
-        }
-        return null;
+        return PermissionConfig.getRequiredRoles(path);
     }
 
     /**
@@ -146,7 +135,7 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
         response.setStatusCode(HttpStatus.FORBIDDEN);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        R<Object> result = R.fail(HttpStatus.FORBIDDEN.value(), message);
+        R<Object> result = R.error(HttpStatus.FORBIDDEN.value(), message);
         byte[] bytes;
         try {
             bytes = objectMapper.writeValueAsBytes(result);
