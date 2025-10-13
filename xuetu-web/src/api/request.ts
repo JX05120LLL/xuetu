@@ -6,11 +6,13 @@ import router from '@/router'
 
 // 创建axios实例
 const service: AxiosInstance = axios.create({
-  // 开发环境使用Vite代理，baseURL留空
-  // 生产环境通过环境变量配置
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  // 所有请求直接发送到后端网关
+  baseURL: 'http://localhost:8080',
   timeout: 10000,
-  withCredentials: false
+  withCredentials: false,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 })
 
 // 请求拦截器
@@ -52,7 +54,43 @@ service.interceptors.response.use(
   },
   (error) => {
     console.error('响应错误:', error)
-    ElMessage.error(error.message || '网络错误，请稍后重试')
+    
+    // 处理HTTP错误状态码
+    if (error.response) {
+      const { status, data } = error.response
+      let message = data?.message || error.message
+      
+      switch (status) {
+        case 401:
+          message = '未授权，请重新登录'
+          const userStore = useUserStore()
+          userStore.token = ''
+          userStore.userInfo = null
+          localStorage.removeItem('token')
+          localStorage.removeItem('userInfo')
+          router.push('/login')
+          break
+        case 403:
+          message = data?.message || '没有权限访问'
+          break
+        case 404:
+          message = '请求的资源不存在'
+          break
+        case 500:
+          message = '服务器错误'
+          break
+        case 503:
+          message = '服务暂时不可用'
+          break
+        default:
+          message = data?.message || `请求失败: ${status}`
+      }
+      
+      ElMessage.error(message)
+    } else {
+      ElMessage.error(error.message || '网络错误，请稍后重试')
+    }
+    
     return Promise.reject(error)
   }
 )

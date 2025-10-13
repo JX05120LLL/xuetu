@@ -110,7 +110,7 @@ const userStore = useUserStore()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 
-const registerForm = reactive<RegisterRequest & { confirmPassword: string; agree: boolean }>({
+const registerForm = reactive<RegisterRequest & { agree: boolean }>({
   username: '',
   email: '',
   phone: '',
@@ -169,7 +169,8 @@ const handleRegister = async () => {
         username: registerForm.username,
         email: registerForm.email,
         phone: registerForm.phone,
-        password: registerForm.password
+        password: registerForm.password,
+        confirmPassword: registerForm.confirmPassword
       })
       
       if (success) {

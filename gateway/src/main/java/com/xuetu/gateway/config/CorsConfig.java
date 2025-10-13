@@ -35,9 +35,11 @@ public class CorsConfig {
         
         // 1. 允许的源（前端域名）
         // 开发环境
+        config.addAllowedOrigin("http://localhost:5173");    // Vite默认端口
         config.addAllowedOrigin("http://localhost:3000");    // React默认端口
         config.addAllowedOrigin("http://localhost:8081");    // Vue默认端口
         config.addAllowedOrigin("http://localhost:8082");    // Angular默认端口
+        config.addAllowedOrigin("http://127.0.0.1:5173");    // 本地IP访问
         config.addAllowedOrigin("http://127.0.0.1:3000");    // 本地IP访问
         
         // 生产环境（根据实际情况配置）
@@ -80,7 +82,7 @@ public class CorsConfig {
         source.registerCorsConfiguration("/**", config);  // 匹配所有路径
         
         log.info("网关跨域配置初始化完成");
-        log.info("允许的源: localhost:3000, localhost:8081, localhost:8082");
+        log.info("允许的源: localhost:5173, localhost:3000, localhost:8081, localhost:8082");
         log.info("允许的方法: GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH");
         log.info("允许携带凭证: true");
         

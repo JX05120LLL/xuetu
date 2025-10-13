@@ -27,6 +27,7 @@ export interface LoginResponse {
 export interface RegisterRequest {
   username: string
   password: string
+  confirmPassword: string
   email: string
   phone?: string
   nickname?: string

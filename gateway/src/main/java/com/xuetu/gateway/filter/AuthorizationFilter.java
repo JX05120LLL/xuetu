@@ -57,7 +57,7 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
 
         // 如果是白名单路径，直接放行
         if (userRoles != null && userRoles.contains("ANONYMOUS")) {
-            log.debug("匿名访问路径: {}", path);
+            log.debug("匿名访问路径放行: {}", path);
             return chain.filter(exchange);
         }
 

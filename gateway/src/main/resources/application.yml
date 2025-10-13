@@ -6,21 +6,27 @@ spring:
   application:
     name: gateway  # 服务名称
   
+  # 默认使用local配置（本地开发模式）
+  profiles:
+    active: local
+  
   # 配置数据导入（Spring Boot 2.4+ 必需）
+  # 本地开发模式下禁用Nacos配置导入
   config:
     import:
-      - optional:nacos:gateway.yml  # 从Nacos导入主配置
-      - optional:nacos:common-config.yml  # 从Nacos导入公共配置
+      - optional:nacos:gateway.yml  # 从Nacos导入主配置（仅生产环境）
+      - optional:nacos:common-config.yml  # 从Nacos导入公共配置（仅生产环境）
     
   # Spring Cloud Gateway 配置
   cloud:
-    # Nacos配置
+    # Nacos配置（本地开发模式下会被local配置覆盖）
     nacos:
       # 服务发现配置
       discovery:
         server-addr: localhost:8848  # Nacos服务器地址
         namespace: public  # 命名空间
         group: DEFAULT_GROUP  # 分组
+        enabled: false  # 本地开发模式禁用
         
       # 配置中心（可选）
       config:

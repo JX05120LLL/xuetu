@@ -91,8 +91,12 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
         // 1. 检查是否为白名单路径
         if (isWhiteListPath(path)) {
-            log.info("白名单路径，直接放行: {}", path);
-            return chain.filter(exchange);
+            log.debug("白名单路径，直接放行: {}", path);
+            // 添加匿名标记，让AuthorizationFilter知道这是公开路径
+            ServerHttpRequest newRequest = request.mutate()
+                    .header("X-User-Roles", "ANONYMOUS")
+                    .build();
+            return chain.filter(exchange.mutate().request(newRequest).build());
         }
 
         // 2. 获取Authorization请求头
