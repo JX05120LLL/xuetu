@@ -11,7 +11,7 @@
  Target Server Version : 80039 (8.0.39)
  File Encoding         : 65001
 
- Date: 13/10/2025 19:24:38
+ Date: 14/10/2025 19:04:31
 */
 
 SET NAMES utf8mb4;
@@ -36,7 +36,7 @@ CREATE TABLE `ai_analysis_report`  (
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_report_type`(`report_type` ASC) USING BTREE,
   INDEX `idx_created_time`(`created_time` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI分析报告表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI分析报告表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_analysis_report
@@ -87,7 +87,7 @@ CREATE TABLE `ai_recommendation`  (
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
   INDEX `idx_created_time`(`created_time` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI智能推荐记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI智能推荐记录表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_recommendation
@@ -110,7 +110,7 @@ CREATE TABLE `ai_usage_stats`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_date`(`user_id` ASC, `date` ASC) USING BTREE,
   INDEX `idx_date`(`date` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI使用统计表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI使用统计表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_usage_stats
@@ -211,7 +211,7 @@ CREATE TABLE `chat_history`  (
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_conversation_id`(`conversation_id` ASC) USING BTREE,
   INDEX `idx_created_time`(`created_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI对话历史表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI对话历史表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of chat_history
@@ -220,6 +220,12 @@ INSERT INTO `chat_history` VALUES (1, 1, 'conv-123456', 'user', '什么是Spring
 INSERT INTO `chat_history` VALUES (2, 1, 'conv-123456', 'assistant', '你好呀！我是小途，学途教育的AI学习助手。很高兴为你解答问题！\n\n**Spring Boot** 是一个基于 **Spring Framework** 的开源 Java 框架，它的主要目的是简化 Spring 应用程序的开发和部署。简单来说，它让开发者可以更快速、更方便地创建独立的、生产级的 Spring 应用。\n\n### Spring Boot 的特点：\n\n1. **开箱即用**  \n   Spring Boot 提供了默认配置，不需要你手动写很多繁琐的 XML 或注解配置，大大减少了开发时间。\n\n2. **内嵌服务器**  \n   它支持内嵌的 Tomcat、Jetty 或 Undertow 服务器，你可以直接运行一个 `.jar` 文件启动应用，而不需要额外安装服务器。\n\n3. **自动配置**  \n   Spring Boot 根据你添加的依赖自动配置你的应用，比如如果你引入了数据库依赖，它会自动配置数据源。\n\n4. **简化依赖管理**  \n   使用 Spring Boot 的 `starter` 依赖（如 `spring-boot-starter-web`、`spring-boot-starter-data-jpa` 等），可以快速引入常用功能模块。\n\n5. **健康检查和监控**  \n   Spring Boot 提供了 `/actuator` 接口，可以方便地进行应用监控和健康检查。\n\n---\n\n### 举个例子：\n如果你想写一个简单的 Web 应用，使用 Spring Boot 只需要几行代码就可以实现：\n\n```java\n@SpringBootApplication\npublic class MyApplication {\n    public static void main(String[] args) {\n        SpringApplication.run(MyApplication.class, args);\n    }\n}\n\n@RestController\npublic class HelloController {\n    @GetMapping(\"/hello\")\n    public String hello() {\n        return \"Hello, Spring Boot!\";\n    }\n}\n```\n\n运行这个程序后，访问 `http://localhost:8080/hello` 就能看到输出。\n\n---\n\n### 适合学习 Spring Boot 的人：\n- 学习 Java 后想进一步做 Web 开发的同学。\n- 想快速上手企业级项目开发的人。\n- 对 Java 后端开发感兴趣的学习者。\n\n---\n\n如果你对 Spring Boot 感兴趣，我还可以推荐一些适合初学者的学习课程哦！你想了解哪些内容呢？比如：如何搭建环境、如何开发 RESTful API、如何连接数据库等？', 1, 1, 0, 'qwen-turbo', '2025-10-02 16:26:55');
 INSERT INTO `chat_history` VALUES (3, 1, 'conv-123456', 'user', '什么是Java?', 1, 1, 0, 'qwen-turbo', '2025-10-02 16:30:27');
 INSERT INTO `chat_history` VALUES (4, 1, 'conv-123456', 'assistant', '你好呀！我是小途，学途教育的AI学习助手。很高兴为你解答问题！\n\n**Java** 是一种广泛使用的高级编程语言，由 Sun Microsystems（现在属于 Oracle 公司）于 1995 年推出。Java 的设计目标是让开发者能够“一次编写，到处运行”（Write Once, Run Anywhere），这得益于它的 **跨平台能力**。\n\n---\n\n### 🔹 Java 的特点：\n\n1. **跨平台性**  \n   Java 程序不是直接编译成机器码，而是先编译成一种中间代码（字节码），然后在 **Java 虚拟机（JVM）** 上运行。只要系统上有 JVM，就可以运行 Java 程序，所以它可以在 Windows、Linux、Mac 等各种操作系统上运行。\n\n2. **面向对象**  \n   Java 是一种 **面向对象的编程语言（OOP）**，支持类、对象、继承、封装、多态等特性，使代码更清晰、易维护。\n\n3. **简单易学**  \n   Java 的语法相对简洁，不像 C++ 那样复杂，适合初学者入门。\n\n4. **安全性高**  \n   Java 提供了多种安全机制，比如内存管理（自动垃圾回收）、访问控制等，减少了程序出错的可能性。\n\n5. **强大的生态系统**  \n   Java 拥有庞大的开发工具、框架和库，比如 Spring、Hibernate、MyBatis 等，适用于各种类型的应用开发。\n\n---\n\n### 🔹 Java 的应用领域：\n\n- **Web 开发**：使用 Java 开发网站后端（如 Spring Boot、Servlet、JSP 等）。\n- **移动应用**：Android 应用开发主要使用 Java 或 Kotlin。\n- **企业级应用**：很多大型企业的后端系统都是用 Java 构建的。\n- **大数据技术**：Hadoop、Spark 等大数据框架也基于 Java。\n- **金融、电信、医疗等行业**：Java 在这些行业中有广泛应用。\n\n---\n\n### 🔹 Java 的基本结构示例：\n\n```java\npublic class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n    }\n}\n```\n\n这段代码会在控制台输出 `Hello, World!`，这就是一个最简单的 Java 程序。\n\n---\n\n### 🔹 学习 Java 的建议：\n\n- 如果你是编程小白，可以从基础语法开始学起，比如变量、循环、条件语句、类和对象等。\n- 推荐学习一些主流的 Java 开发框架，比如：\n  - **Spring**：用于企业级应用开发。\n  - **Spring Boot**：简化 Spring 应用的开发。\n  - **Hibernate**：用于数据库操作。\n- 可以结合项目实战来巩固知识，比如做一个图书管理系统、博客系统等。\n\n---\n\n如果你对 Java 感兴趣，我还可以推荐一些适合初学者的学习课程哦！你想从哪里开始学？比如：Java 基础语法、面向对象编程、Web 开发等？', 1, 1, 0, 'qwen-turbo', '2025-10-02 16:30:27');
+INSERT INTO `chat_history` VALUES (5, 104, 'ae3bbfa5-6741-4d50-91a1-1e9f59d3dd16', 'user', '推荐适合我的课程', NULL, NULL, 0, 'qwen-turbo', '2025-10-14 18:11:35');
+INSERT INTO `chat_history` VALUES (6, 104, 'ae3bbfa5-6741-4d50-91a1-1e9f59d3dd16', 'assistant', '你好呀！我是小途，学途教育平台的AI学习助手。为了给你推荐最适合的课程，我需要先了解一些你的具体情况哦！\n\n你可以告诉我：\n1. **你目前的年级或学习阶段**（比如小学、初中、高中、大学，或者正在备考某个考试）？\n2. **你感兴趣的学习领域**（比如数学、英语、编程、艺术、科学等）？\n3. **你希望提升哪些方面**（比如成绩提高、兴趣培养、考前冲刺、技能学习等）？\n4. **有没有特别想学的内容或目标**（比如准备高考、雅思、编程入门、画画、音乐等）？\n\n这样我就能为你量身定制一套适合的学习方案啦！😊', NULL, NULL, 0, 'qwen-turbo', '2025-10-14 18:11:35');
+INSERT INTO `chat_history` VALUES (7, 104, '48d50c7b-7954-44ad-8ab1-5422535acaf7', 'user', '分析我的学习情况', NULL, NULL, 0, 'qwen-turbo', '2025-10-14 18:11:52');
+INSERT INTO `chat_history` VALUES (8, 104, '48d50c7b-7954-44ad-8ab1-5422535acaf7', 'assistant', '你好呀！我是小途，你的学习助手。为了更好地分析你的学习情况，我需要先了解一些基本信息：\n\n1. 你目前的年级和学科（比如：初中数学、高中物理等）？\n2. 你最近在学习哪些内容？有没有特别感兴趣的科目？\n3. 你觉得自己在学习中遇到的主要困难是什么？（比如：理解不了知识点、做题慢、记不住公式等）\n4. 你平时的学习方式是怎样的？（比如：自学、上课听讲、刷题、看网课等）\n\n如果你愿意分享这些信息，我可以根据你的具体情况给出更精准的学习建议和课程推荐哦！😊', NULL, NULL, 0, 'qwen-turbo', '2025-10-14 18:11:52');
+INSERT INTO `chat_history` VALUES (9, 104, '2de4faf4-c21b-4f12-8d80-045ddbd7e507', 'user', '如何高效学习编程', NULL, NULL, 0, 'qwen-turbo', '2025-10-14 18:12:09');
+INSERT INTO `chat_history` VALUES (10, 104, '2de4faf4-c21b-4f12-8d80-045ddbd7e507', 'assistant', '你好呀！我是小途，学途教育的AI学习助手。很高兴你对编程感兴趣！学习编程其实就像学一门新语言一样，只要方法得当，就能高效掌握。下面是一些高效学习编程的建议，希望对你有帮助：\n\n---\n\n### 一、明确目标，选择适合的语言\n编程有很多语言，比如：\n- **Python**：适合初学者，语法简单，应用广泛（数据分析、人工智能等）\n- **Java**：适合学习面向对象编程，常用于企业开发\n- **JavaScript**：适合前端开发，也可以做后端（Node.js）\n- **C/C++**：适合理解底层逻辑，常用于游戏开发或系统编程\n\n👉 **建议**：根据你的兴趣和目标选择一门语言开始学习，不要一开始就“贪多”。\n\n---\n\n### 二、打好基础，循序渐进\n1. **理解基本语法**：如变量、循环、条件语句、函数等。\n2. **掌握数据结构与算法**：这是编程的核心，能提升解决问题的能力。\n3. **了解编程思想**：比如面向对象、函数式编程、模块化设计等。\n\n📌 小贴士：可以使用一些在线平台（如LeetCode、Codecademy、慕课网）来练习。\n\n---\n\n### 三、多写代码，动手实践\n编程不是看出来的，是“写”出来的！\n\n- 每天坚持写一点代码，哪怕只是一个小程序。\n- 做项目比刷题更有成就感，比如：\n  - 写一个计算器\n  - 开发一个简单的待办事项列表\n  - 制作一个个人博客网站\n\n💡 **记住**：遇到问题时，不要怕查资料，多问、多试、多改。\n\n---\n\n### 四、善用资源和工具\n- **学习平台**：如B站、慕课网、Coursera、Udemy等\n- **代码社区**：GitHub、Stack Overflow、知乎、掘金等\n- **IDE工具**：如VS Code、PyCharm、Sublime Text等\n\n---\n\n### 五、养成良好的学习习惯\n- **定期复习**：巩固所学内容\n- **做笔记**：记录关键知识点和易错点\n- **参与交流**：加入编程学习群组，和他人一起进步\n\n---\n\n### 六、推荐课程（如果你需要）\n如果你正在找系统的学习路径，我也可以帮你推荐适合的课程哦！比如：\n- Python入门课程\n- Web开发全栈课程\n- 数据分析/人工智能方向课程\n\n你想从哪个方向开始呢？我可以根据你的需求给你更具体的建议！😊', NULL, NULL, 0, 'qwen-turbo', '2025-10-14 18:12:09');
 
 -- ----------------------------
 -- Table structure for comment
@@ -475,12 +481,16 @@ CREATE TABLE `order`  (
   `updated_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `order_no`(`order_no` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of order
 -- ----------------------------
 INSERT INTO `order` VALUES (2, 'ORD202510051722210003', 1, 548.00, 548.00, 0.00, 0, '购买Java课程', NULL, '2025-10-05 17:22:21', '2025-10-05 17:22:21');
+INSERT INTO `order` VALUES (3, 'ORD202510141841310001', 103, 99.00, 99.00, 0.00, 0, NULL, NULL, '2025-10-14 18:41:32', '2025-10-14 18:41:32');
+INSERT INTO `order` VALUES (4, 'ORD202510141847130002', 103, 846.00, 846.00, 0.00, 0, NULL, NULL, '2025-10-14 18:47:14', '2025-10-14 18:47:14');
+INSERT INTO `order` VALUES (5, 'ORD202510141850010003', 103, 846.00, 846.00, 0.00, 0, NULL, NULL, '2025-10-14 18:50:02', '2025-10-14 18:50:02');
+INSERT INTO `order` VALUES (6, 'ORD202510141855500004', 103, 846.00, 846.00, 0.00, 0, NULL, NULL, '2025-10-14 18:55:51', '2025-10-14 18:55:51');
 
 -- ----------------------------
 -- Table structure for order_item
@@ -498,13 +508,26 @@ CREATE TABLE `order_item`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `order_id`(`order_id` ASC) USING BTREE,
   CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单项表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单项表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of order_item
 -- ----------------------------
 INSERT INTO `order_item` VALUES (1, 2, 4, 'Python数据分析入门', 'https://example.com/covers/python-data.jpg', 149.00, '2025-10-05 17:22:21', '2025-10-05 17:22:21');
 INSERT INTO `order_item` VALUES (2, 2, 5, 'Python机器学习实战', 'https://example.com/covers/python-ml.jpg', 399.00, '2025-10-05 17:22:21', '2025-10-05 17:22:21');
+INSERT INTO `order_item` VALUES (3, 3, 1, 'Java零基础入门教程', 'https://www.itcast.cn/files/image/202103/20210302154551447.png', 99.00, '2025-10-14 18:41:32', '2025-10-14 18:41:32');
+INSERT INTO `order_item` VALUES (4, 4, 1, 'Java零基础入门教程', 'https://www.itcast.cn/files/image/202103/20210302154551447.png', 99.00, '2025-10-14 18:47:14', '2025-10-14 18:47:14');
+INSERT INTO `order_item` VALUES (5, 4, 5, 'Python机器学习实战', 'https://example.com/covers/python-ml.jpg', 399.00, '2025-10-14 18:47:14', '2025-10-14 18:47:14');
+INSERT INTO `order_item` VALUES (6, 4, 4, 'Python数据分析入门', 'https://example.com/covers/python-data.jpg', 149.00, '2025-10-14 18:47:14', '2025-10-14 18:47:14');
+INSERT INTO `order_item` VALUES (7, 4, 2, 'Java进阶：Spring Boot实战', 'https://example.com/covers/springboot.jpg', 199.00, '2025-10-14 18:47:14', '2025-10-14 18:47:14');
+INSERT INTO `order_item` VALUES (8, 5, 1, 'Java零基础入门教程', 'https://www.itcast.cn/files/image/202103/20210302154551447.png', 99.00, '2025-10-14 18:50:02', '2025-10-14 18:50:02');
+INSERT INTO `order_item` VALUES (9, 5, 5, 'Python机器学习实战', 'https://example.com/covers/python-ml.jpg', 399.00, '2025-10-14 18:50:02', '2025-10-14 18:50:02');
+INSERT INTO `order_item` VALUES (10, 5, 4, 'Python数据分析入门', 'https://example.com/covers/python-data.jpg', 149.00, '2025-10-14 18:50:02', '2025-10-14 18:50:02');
+INSERT INTO `order_item` VALUES (11, 5, 2, 'Java进阶：Spring Boot实战', 'https://example.com/covers/springboot.jpg', 199.00, '2025-10-14 18:50:02', '2025-10-14 18:50:02');
+INSERT INTO `order_item` VALUES (12, 6, 1, 'Java零基础入门教程', 'https://www.itcast.cn/files/image/202103/20210302154551447.png', 99.00, '2025-10-14 18:55:51', '2025-10-14 18:55:51');
+INSERT INTO `order_item` VALUES (13, 6, 5, 'Python机器学习实战', 'https://example.com/covers/python-ml.jpg', 399.00, '2025-10-14 18:55:51', '2025-10-14 18:55:51');
+INSERT INTO `order_item` VALUES (14, 6, 4, 'Python数据分析入门', 'https://example.com/covers/python-data.jpg', 149.00, '2025-10-14 18:55:51', '2025-10-14 18:55:51');
+INSERT INTO `order_item` VALUES (15, 6, 2, 'Java进阶：Spring Boot实战', 'https://example.com/covers/springboot.jpg', 199.00, '2025-10-14 18:55:51', '2025-10-14 18:55:51');
 
 -- ----------------------------
 -- Table structure for payment
@@ -522,7 +545,7 @@ CREATE TABLE `payment`  (
   `updated_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_order_id`(`order_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of payment
@@ -547,13 +570,20 @@ CREATE TABLE `payment_record`  (
   INDEX `idx_order_id`(`order_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_payment_time`(`payment_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of payment_record
 -- ----------------------------
 INSERT INTO `payment_record` VALUES (1, 1, 'PAY202501160001', 199.00, 1, 1, '2025-01-16 10:30:00', '2025-08-16 19:14:23', '2025-08-16 19:14:23');
 INSERT INTO `payment_record` VALUES (2, 2, 'PAY202501160002', 299.00, 0, 1, '2025-01-16 11:15:00', '2025-08-16 19:14:23', '2025-08-16 19:14:23');
+INSERT INTO `payment_record` VALUES (3, 5, 'PAY202510141855040001', 846.00, 3, 0, NULL, '2025-10-14 18:55:04', '2025-10-14 18:55:04');
+INSERT INTO `payment_record` VALUES (4, 6, 'PAY202510141855530002', 846.00, 3, 0, NULL, '2025-10-14 18:55:54', '2025-10-14 18:55:54');
+INSERT INTO `payment_record` VALUES (5, 6, 'PAY202510141856100003', 846.00, 2, 0, NULL, '2025-10-14 18:56:10', '2025-10-14 18:56:10');
+INSERT INTO `payment_record` VALUES (6, 6, 'PAY202510141856120004', 846.00, 1, 0, NULL, '2025-10-14 18:56:13', '2025-10-14 18:56:13');
+INSERT INTO `payment_record` VALUES (7, 6, 'PAY202510141856170005', 846.00, 3, 0, NULL, '2025-10-14 18:56:17', '2025-10-14 18:56:17');
+INSERT INTO `payment_record` VALUES (8, 6, 'PAY202510141856210006', 846.00, 3, 0, NULL, '2025-10-14 18:56:22', '2025-10-14 18:56:22');
+INSERT INTO `payment_record` VALUES (9, 6, 'PAY202510141856510007', 846.00, 3, 0, NULL, '2025-10-14 18:56:52', '2025-10-14 18:56:52');
 
 -- ----------------------------
 -- Table structure for permission
@@ -836,16 +866,17 @@ CREATE TABLE `user`  (
   UNIQUE INDEX `phone`(`phone` ASC) USING BTREE,
   UNIQUE INDEX `uk_email`(`email` ASC) USING BTREE,
   UNIQUE INDEX `uk_phone`(`phone` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 104 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户信息表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES (1, 'testuser', '$2a$10$8/u5XFZ84z81OUwsfn0X.u4Uej/Y/ovzMUiQgus.fIoSUFYL4bg2S', 'test@example.com', '13888888888', '测试用户', NULL, 1, '2025-08-13 19:51:53', '2025-08-13 19:51:53');
+INSERT INTO `user` VALUES (1, 'testuser', '123456', 'test@example.com', '13888888888', '测试用户', NULL, 1, '2025-08-13 19:51:53', '2025-10-14 18:23:59');
 INSERT INTO `user` VALUES (100, 'admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lLy6fFz2JVHfHDcXm', 'admin@xuetu.com', NULL, '系统管理员', NULL, 1, '2025-10-02 17:36:59', '2025-10-02 17:36:59');
 INSERT INTO `user` VALUES (101, 'teacher', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lLy6fFz2JVHfHDcXm', 'teacher@xuetu.com', NULL, '测试讲师', NULL, 1, '2025-10-02 17:36:59', '2025-10-02 17:36:59');
 INSERT INTO `user` VALUES (102, 'vip', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lLy6fFz2JVHfHDcXm', 'vip@xuetu.com', NULL, 'VIP会员', NULL, 1, '2025-10-02 17:36:59', '2025-10-02 17:36:59');
 INSERT INTO `user` VALUES (103, 'testuser1', '$2a$10$WoEWi1JM3JxfVmS8UaiupOXaFEnUByq1O2SVezxaWL5e816h.iDqC', 'test@example11.com', '13888888878', '测试用户1', NULL, 1, '2025-10-03 16:56:03', '2025-10-03 16:56:03');
+INSERT INTO `user` VALUES (104, 'test555', '$2a$10$TvLdN49GnedsJyto8NAukOGggtycLlHXNpx1gi7X6k.m/43Wgwhhe', '2052619274@qq.com', '19391629120', 'test555', NULL, 1, '2025-10-13 19:47:26', '2025-10-13 19:47:26');
 
 -- ----------------------------
 -- Table structure for user_course

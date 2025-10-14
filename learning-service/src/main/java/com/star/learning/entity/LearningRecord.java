@@ -40,6 +40,11 @@ public class LearningRecord implements Serializable {
      * 学习进度(秒)
      */
     private Integer progress;
+    
+    /**
+     * 上次播放位置(秒)
+     */
+    private Integer lastPosition;
 
     /**
      * 是否完成(0:否,1:是)

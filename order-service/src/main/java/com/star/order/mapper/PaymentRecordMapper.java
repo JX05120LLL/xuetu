@@ -21,7 +21,12 @@ public interface PaymentRecordMapper extends BaseMapper<PaymentRecord> {
     /**
      * 根据支付单号查询支付记录
      */
-    @Select("SELECT * FROM payment_record WHERE payment_no = #{paymentNo} LIMIT 1")
+    @Select("SELECT id, order_id AS orderId, payment_no AS paymentNo, " +
+            "total_amount AS paymentAmount, payment_type AS paymentType, status AS paymentStatus, " +
+            "transaction_id AS transactionId, payment_time AS paymentTime, " +
+            "callback_time AS callbackTime, callback_content AS callbackContent, " +
+            "remark, created_time AS createdTime, updated_time AS updatedTime " +
+            "FROM payment_record WHERE payment_no = #{paymentNo} LIMIT 1")
     PaymentRecord selectByPaymentNo(@Param("paymentNo") String paymentNo);
 
     /**

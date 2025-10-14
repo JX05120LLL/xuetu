@@ -35,6 +35,16 @@ export function getOrderDetail(orderId: number): Promise<Order> {
 }
 
 /**
+ * 根据订单号获取订单详情
+ */
+export function getOrderByOrderNo(orderNo: string): Promise<Order> {
+  return request({
+    url: `/api/orders/order-no/${orderNo}`,
+    method: 'get'
+  })
+}
+
+/**
  * 取消订单
  */
 export function cancelOrder(orderId: number) {

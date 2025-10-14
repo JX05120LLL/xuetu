@@ -1,7 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { User, LoginRequest, RegisterRequest } from '@/types/user'
-import { login, register, logout as logoutApi, getUserInfo as getUserInfoApi } from '@/api/user'
+import type { User, LoginRequest, RegisterRequest, UpdateProfileRequest } from '@/types/user'
+import { 
+  login, 
+  register, 
+  logout as logoutApi, 
+  getUserInfo as getUserInfoApi,
+  updateProfile as updateProfileApi,
+  updateAvatar as updateAvatarApi
+} from '@/api/user'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
 
@@ -84,6 +91,38 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // 更新用户资料
+  async function updateUserProfile(data: UpdateProfileRequest) {
+    if (!userId.value) return false
+    
+    try {
+      const updatedUser = await updateProfileApi(userId.value, data)
+      userInfo.value = updatedUser
+      localStorage.setItem('userInfo', JSON.stringify(updatedUser))
+      ElMessage.success('个人资料已更新')
+      return true
+    } catch (error) {
+      console.error('更新用户资料失败:', error)
+      return false
+    }
+  }
+
+  // 更新用户头像
+  async function updateUserAvatar(avatarUrl: string) {
+    if (!userId.value) return false
+    
+    try {
+      const updatedUser = await updateAvatarApi(userId.value, avatarUrl)
+      userInfo.value = updatedUser
+      localStorage.setItem('userInfo', JSON.stringify(updatedUser))
+      ElMessage.success('头像已更新')
+      return true
+    } catch (error) {
+      console.error('更新头像失败:', error)
+      return false
+    }
+  }
+
   return {
     token,
     userInfo,
@@ -92,6 +131,8 @@ export const useUserStore = defineStore('user', () => {
     login: userLogin,
     register: userRegister,
     logout: userLogout,
-    getUserInfo
+    getUserInfo,
+    updateProfile: updateUserProfile,
+    updateAvatar: updateUserAvatar
   }
 })

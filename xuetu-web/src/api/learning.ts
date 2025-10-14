@@ -19,10 +19,18 @@ export interface UserCourse {
   id: number
   userId: number
   courseId: number
-  progress: number
+  courseName: string
+  coverImage: string
+  courseDescription: string
+  teacherId: number
+  teacherName: string
   totalDuration: number
+  progress: number
   studyDuration: number
   lastStudyTime: string
+  purchaseTime: string
+  orderId: number
+  status: number
 }
 
 export interface Note {
@@ -44,6 +52,26 @@ export function getMyCourses(params: PageParam): Promise<PageResult<UserCourse>>
     url: '/api/user-courses/my',
     method: 'get',
     params
+  })
+}
+
+/**
+ * 获取课程详情
+ */
+export function getUserCourseDetail(courseId: number): Promise<UserCourse> {
+  return request({
+    url: `/api/user-courses/my/${courseId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 检查用户是否已购买课程
+ */
+export function checkUserHasCourse(courseId: number): Promise<boolean> {
+  return request({
+    url: `/api/user-courses/check/${courseId}`,
+    method: 'get'
   })
 }
 

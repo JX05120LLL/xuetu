@@ -20,10 +20,13 @@
             <img :src="course.coverImage" :alt="course.title" />
             <div class="price-section">
               <div class="price">{{ formatPrice(course.price) }}</div>
-              <el-button type="primary" size="large" block @click="handleBuyNow">
+              <el-button v-if="!hasAccess" type="primary" size="large" block @click="handleBuyNow">
                 立即购买
               </el-button>
-              <el-button size="large" block @click="handleAddToCart">
+              <el-button v-else type="success" size="large" block @click="handleContinueLearning">
+                继续学习
+              </el-button>
+              <el-button v-if="!hasAccess" size="large" block @click="handleAddToCart">
                 加入购物车
               </el-button>
             </div>
@@ -49,7 +52,10 @@
                   </div>
                   <template v-else>
                     <div v-for="lesson in chapterLessons[chapter.id]" :key="lesson.id" class="lesson-item">
-                      <router-link :to="`/course/${course.id}/play?lessonId=${lesson.id}`">
+                      <router-link 
+                        v-if="hasAccess || lesson.isFree === 1"
+                        :to="`/course/${course.id}/play?lessonId=${lesson.id}`"
+                      >
                         <div class="lesson-info">
                           <span class="lesson-title">{{ lesson.title }}</span>
                           <div class="lesson-meta">
@@ -60,6 +66,17 @@
                           </div>
                         </div>
                       </router-link>
+                      <div 
+                        v-else
+                        class="lesson-info locked"
+                        @click="handleBuyNowPrompt"
+                      >
+                        <span class="lesson-title">{{ lesson.title }} <el-icon><Lock /></el-icon></span>
+                        <div class="lesson-meta">
+                          <span class="lesson-duration">{{ formatDuration(lesson.duration) }}</span>
+                          <span class="lesson-tag">付费</span>
+                        </div>
+                      </div>
                     </div>
                     <div v-if="chapterLessons[chapter.id]?.length === 0" class="no-lessons">
                       暂无课时
@@ -144,8 +161,9 @@ import Footer from '@/components/Footer.vue'
 import { useCourseStore } from '@/stores/course'
 import { useCartStore } from '@/stores/cart'
 import { formatPrice, formatNumber } from '@/utils/format'
-import { ArrowDown, ArrowUp, ThumbUp } from '@element-plus/icons-vue'
+import { ArrowDown, ArrowUp, ThumbUp, Lock } from '@element-plus/icons-vue'
 import { getChapterLessons, getCourseComments } from '@/api/course'
+import { checkUserHasCourse } from '@/api/learning'
 import type { Course, Chapter, Lesson, Comment } from '@/types/course'
 import { ElMessage } from 'element-plus'
 
@@ -158,6 +176,7 @@ const loading = ref(false)
 const course = ref<Course | null>(null)
 const chapters = ref<Chapter[]>([])
 const activeTab = ref('catalog')
+const hasAccess = ref(false)
 
 // 章节和课时相关
 const openChapters = reactive<Record<number, boolean>>({})
@@ -178,10 +197,15 @@ const fetchCourseDetail = async () => {
     course.value = await courseStore.fetchCourseDetail(courseId)
     chapters.value = await courseStore.fetchChapters(courseId)
     
+    // 检查用户是否购买了课程
+    hasAccess.value = await checkUserHasCourse(courseId)
+    
     // 默认打开第一个章节
     if (chapters.value.length > 0) {
       openChapters[chapters.value[0].id] = true
-      fetchLessons(chapters.value[0].id)
+      if (hasAccess.value || chapters.value[0].isFree === 1) {
+        fetchLessons(chapters.value[0].id)
+      }
     }
   } catch (error) {
     console.error('获取课程详情失败:', error)
@@ -233,6 +257,25 @@ const handleAddToCart = () => {
   if (course.value) {
     cartStore.addToCart(course.value)
   }
+}
+
+const handleContinueLearning = () => {
+  if (course.value) {
+    router.push(`/course/${course.value.id}/play`)
+  }
+}
+
+const handleBuyNowPrompt = () => {
+  ElMessage({
+    message: '请先购买课程再学习',
+    type: 'warning',
+    duration: 2000,
+    showClose: true,
+    onClose: () => {
+      // 滚动到页面顶部购买区域
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  })
 }
 
 // 获取评论列表
@@ -462,6 +505,20 @@ onMounted(() => {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            
+            &.locked {
+              cursor: pointer;
+              color: #909399;
+              
+              &:hover {
+                color: #f56c6c;
+              }
+              
+              .el-icon {
+                margin-left: 5px;
+                font-size: 14px;
+              }
+            }
             
             .lesson-title {
               flex: 1;

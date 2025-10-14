@@ -96,7 +96,7 @@ import { useRouter } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import { VideoPlay, Clock, Calendar, Check } from '@element-plus/icons-vue'
-import { getMyCourses } from '@/api/learning'
+import { getMyCourses, checkUserHasCourse } from '@/api/learning'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -150,12 +150,23 @@ const handleCurrentChange = (val: number) => {
 
 // 跳转到播放页
 const goToPlay = (course: any) => {
+  // 检查是否有课程章节信息
   router.push(`/course/${course.courseId}/play`)
 }
 
 // 跳转到课程详情
 const goToCourseDetail = (courseId: number) => {
-  router.push(`/course/${courseId}`)
+  // 先检查是否有权限访问这个课程
+  checkUserHasCourse(courseId).then(hasAccess => {
+    if (hasAccess) {
+      router.push(`/course/${courseId}`)
+    } else {
+      ElMessage.warning('您还没有购买该课程')
+    }
+  }).catch(error => {
+    console.error('检查课程权限失败:', error)
+    ElMessage.error('检查课程权限失败')
+  })
 }
 
 // 进度条颜色

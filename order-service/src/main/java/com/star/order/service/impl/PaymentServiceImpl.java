@@ -107,6 +107,19 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentRecordMapper, Payment
             throw PaymentException.notFound(paymentNo);
         }
         
+        // ===== 调试日志 =====
+        log.info("【调试】支付记录详情 - ID: {}, 订单ID: {}, 支付状态值: {}, 支付类型: {}, 金额: {}", 
+                 paymentRecord.getId(), 
+                 paymentRecord.getOrderId(), 
+                 paymentRecord.getPaymentStatus(),
+                 paymentRecord.getPaymentType(),
+                 paymentRecord.getPaymentAmount());
+        log.info("【调试】PENDING枚举值: {}, 实际状态值: {}, 是否相等: {}", 
+                 PaymentRecord.PaymentStatus.PENDING.getValue(),
+                 paymentRecord.getPaymentStatus(),
+                 PaymentRecord.PaymentStatus.PENDING.getValue().equals(paymentRecord.getPaymentStatus()));
+        // ==================
+        
         // 2. 验证支付状态
         if (!PaymentRecord.PaymentStatus.PENDING.getValue().equals(paymentRecord.getPaymentStatus())) {
             throw PaymentException.invalidStatus("支付", getPaymentStatusName(paymentRecord.getPaymentStatus()));

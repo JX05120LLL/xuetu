@@ -265,7 +265,7 @@ const quickAccess = ref([
     description: '智能推荐个性化学习',
     icon: 'ChatDotRound',
     gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    path: '/ai/chat'
+    path: '/ai'
   },
   {
     id: 4,

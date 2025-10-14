@@ -101,16 +101,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import DPlayer from 'dplayer'
 import type { ChapterDTO, LessonDTO } from '@/types/course'
 import type { NoteDTO, CreateNoteRequest, UpdateNoteRequest } from '@/types/learning'
 import { getChaptersByCourseId } from '@/api/course'
-import { getNotesByLesson, createNote, updateNote, deleteNote as deleteNoteApi, saveProgress } from '@/api/learning'
+import { getNotesByLesson, createNote, updateNote, deleteNote as deleteNoteApi, updateLearningProgress, checkUserHasCourse } from '@/api/learning'
 import { formatDuration as formatDurationUtil, formatDate } from '@/utils/format'
 
 const route = useRoute()
+const router = useRouter()
 const courseId = Number(route.params.id)
 
 // 播放器
@@ -121,6 +122,7 @@ const loading = ref(false)
 const chapters = ref<ChapterDTO[]>([])
 const currentChapter = ref<ChapterDTO>()
 const currentLesson = ref<LessonDTO>()
+const hasAccess = ref(false)
 
 // 笔记相关
 const activeTab = ref('catalog')
@@ -149,21 +151,80 @@ const formatTime = (seconds: number) => {
 const loadChapters = async () => {
   loading.value = true
   try {
+    // 检查用户是否有权限访问该课程
+    hasAccess.value = await checkUserHasCourse(courseId)
+    
+    // 获取课程章节
     chapters.value = await getChaptersByCourseId(courseId)
     
-    // 自动播放第一课时
-    if (chapters.value.length > 0 && chapters.value[0].lessons && chapters.value[0].lessons.length > 0) {
-      playLesson(chapters.value[0], chapters.value[0].lessons[0])
+    // 获取要播放的课时ID（如果URL中有指定）
+    const lessonIdParam = route.query.lessonId ? Number(route.query.lessonId) : undefined
+    
+    // 自动播放指定课时或第一课时
+    if (chapters.value.length > 0) {
+      if (lessonIdParam) {
+        // 查找指定课时
+        for (const chapter of chapters.value) {
+          if (chapter.lessons) {
+            const lesson = chapter.lessons.find(l => l.id === lessonIdParam)
+            if (lesson) {
+              // 检查是否有权限播放
+              if (hasAccess.value || lesson.isFree === 1) {
+                playLesson(chapter, lesson)
+                break
+              } else {
+                ElMessage.warning('您还未购买该课程，无法播放付费课时')
+                // 尝试播放免费课时
+                playFreeLesson()
+              }
+            }
+          }
+        }
+      } else {
+        // 播放第一课时
+        playFreeLesson()
+      }
     }
   } catch (error) {
+    console.error('加载课程失败:', error)
     ElMessage.error('加载课程目录失败')
+    
+    // 跳回课程详情页
+    setTimeout(() => {
+      router.push(`/course/${courseId}`)
+    }, 2000)
   } finally {
     loading.value = false
   }
 }
 
+// 播放免费课时或第一课时（如果已购买）
+const playFreeLesson = () => {
+  for (const chapter of chapters.value) {
+    if (chapter.lessons && chapter.lessons.length > 0) {
+      // 如果已购买或有免费课时，则播放
+      const freeLesson = chapter.lessons.find(l => l.isFree === 1)
+      if (hasAccess.value) {
+        // 已购买，播放第一课时
+        playLesson(chapter, chapter.lessons[0])
+        break
+      } else if (freeLesson) {
+        // 未购买但有免费课时，播放免费课时
+        playLesson(chapter, freeLesson)
+        break
+      }
+    }
+  }
+}
+
 // 播放课时
 const playLesson = (chapter: ChapterDTO, lesson: LessonDTO) => {
+  // 检查是否有权限播放
+  if (!hasAccess.value && lesson.isFree !== 1) {
+    ElMessage.warning('您还未购买该课程，无法播放付费课时')
+    return
+  }
+  
   currentChapter.value = chapter
   currentLesson.value = lesson
   
@@ -222,7 +283,8 @@ const savePlayProgress = async (currentTime: number, totalTime: number) => {
   if (!currentLesson.value) return
   
   try {
-    await saveProgress({
+    await updateLearningProgress({
+      courseId: courseId,
       lessonId: currentLesson.value.id,
       progress: Math.floor((currentTime / totalTime) * 100),
       lastPosition: currentTime

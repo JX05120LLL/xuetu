@@ -4,10 +4,13 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 
+// 获取环境变量中的API基础URL
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+
 // 创建axios实例
 const service: AxiosInstance = axios.create({
   // 所有请求直接发送到后端网关
-  baseURL: 'http://localhost:8080',
+  baseURL,
   timeout: 10000,
   withCredentials: false,
   headers: {

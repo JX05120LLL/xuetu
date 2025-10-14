@@ -37,21 +37,37 @@
                     <span>全部分类</span>
                     <el-icon v-if="!filters.categoryId"><Check /></el-icon>
                   </div>
-                  <div
-                    v-for="category in categories"
-                    :key="category.id"
-                    class="category-item"
-                    :class="{ active: filters.categoryId === category.id }"
-                    @click="selectCategory(category.id)"
-                  >
-                    <span>{{ category.name }}</span>
-                    <el-badge 
-                      v-if="category.courseCount" 
-                      :value="category.courseCount" 
-                      :max="999"
-                      class="count-badge"
-                    />
-                    <el-icon v-if="filters.categoryId === category.id"><Check /></el-icon>
+                  
+                  <!-- 一级分类及其子分类 -->
+                  <div v-for="parentCategory in parentCategories" :key="parentCategory.id" class="parent-category">
+                    <div
+                      class="category-item parent"
+                      :class="{ active: filters.categoryId === parentCategory.id, expanded: expandedCategories[parentCategory.id] }"
+                      @click="toggleCategory(parentCategory.id)"
+                    >
+                      <span>{{ parentCategory.name }}</span>
+                      <el-icon v-if="getChildCategories(parentCategory.id).length > 0" class="expand-icon">
+                        <ArrowDown v-if="!expandedCategories[parentCategory.id]" />
+                        <ArrowUp v-else />
+                      </el-icon>
+                      <el-icon v-if="filters.categoryId === parentCategory.id && getChildCategories(parentCategory.id).length === 0"><Check /></el-icon>
+                    </div>
+                    
+                    <!-- 二级分类 -->
+                    <transition name="slide-fade">
+                      <div v-show="expandedCategories[parentCategory.id]" class="child-categories">
+                        <div
+                          v-for="childCategory in getChildCategories(parentCategory.id)"
+                          :key="childCategory.id"
+                          class="category-item child"
+                          :class="{ active: filters.categoryId === childCategory.id }"
+                          @click.stop="selectCategory(childCategory.id)"
+                        >
+                          <span>{{ childCategory.name }}</span>
+                          <el-icon v-if="filters.categoryId === childCategory.id"><Check /></el-icon>
+                        </div>
+                      </div>
+                    </transition>
                   </div>
                 </div>
               </div>
@@ -137,7 +153,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { Check, Star, TrendCharts, Trophy } from '@element-plus/icons-vue'
+import { Check, Star, TrendCharts, Trophy, ArrowDown, ArrowUp } from '@element-plus/icons-vue'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import CourseCard from '@/components/CourseCard.vue'
@@ -153,6 +169,7 @@ const courseList = ref<Course[]>([])
 const total = ref(0)
 const categories = ref<any[]>([])
 const sortType = ref('latest')
+const expandedCategories = reactive<Record<number, boolean>>({})
 
 const pagination = reactive({
   current: 1,
@@ -178,6 +195,29 @@ const levelOptions = [
   { value: 2, label: '中级', icon: 'TrendCharts', color: '#E6A23C' },
   { value: 3, label: '高级', icon: 'Trophy', color: '#F56C6C' }
 ]
+
+// 父级分类（一级分类）
+const parentCategories = computed(() => {
+  return categories.value.filter(c => !c.parentId || c.parentId === 0)
+})
+
+// 获取子分类
+const getChildCategories = (parentId: number) => {
+  return categories.value.filter(c => c.parentId === parentId)
+}
+
+// 切换分类展开状态
+const toggleCategory = (categoryId: number) => {
+  const hasChildren = getChildCategories(categoryId).length > 0
+  
+  if (hasChildren) {
+    // 如果有子分类，只切换展开状态
+    expandedCategories[categoryId] = !expandedCategories[categoryId]
+  } else {
+    // 如果没有子分类，选择该分类
+    selectCategory(categoryId)
+  }
+}
 
 // 当前分类名称
 const currentCategoryName = computed(() => {
@@ -231,6 +271,12 @@ const fetchCourseList = async () => {
 const fetchCategories = async () => {
   const result = await courseStore.fetchCategories()
   categories.value = result
+  
+  // 自动展开第一个有子分类的一级分类
+  const firstParentWithChildren = parentCategories.value.find(p => getChildCategories(p.id).length > 0)
+  if (firstParentWithChildren) {
+    expandedCategories[firstParentWithChildren.id] = true
+  }
 }
 
 // 筛选变化
@@ -317,6 +363,10 @@ onMounted(() => {
   gap: 8px;
 }
 
+.parent-category {
+  margin-bottom: 4px;
+}
+
 .category-item {
   display: flex;
   align-items: center;
@@ -334,14 +384,33 @@ onMounted(() => {
     transition: color 0.3s;
   }
 
-  .count-badge {
-    margin-left: auto;
-    margin-right: 8px;
-  }
-
   .el-icon {
     color: #667eea;
     font-weight: bold;
+  }
+
+  .expand-icon {
+    margin-left: auto;
+    color: #999;
+    transition: transform 0.3s;
+  }
+
+  &.parent {
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    
+    &.expanded {
+      .expand-icon {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  &.child {
+    padding-left: 32px;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid #f0f0f0;
   }
 
   &:hover {
@@ -350,6 +419,10 @@ onMounted(() => {
 
     span {
       color: #667eea;
+    }
+    
+    &.parent {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
     }
   }
 
@@ -367,6 +440,29 @@ onMounted(() => {
       color: #fff;
     }
   }
+}
+
+.child-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding-left: 0;
+}
+
+// 动画
+.slide-fade-enter-active {
+  transition: all 0.3s ease;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
 }
 
 .level-grid {

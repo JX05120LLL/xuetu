@@ -122,6 +122,12 @@ const routes: RouteRecordRaw[] = [
     name: 'Cart',
     component: () => import('@/views/Cart/Index.vue'),
     meta: { title: '购物车', requiresAuth: true }
+  },
+  {
+    path: '/ai',
+    name: 'AIDashboard',
+    component: () => import('@/views/AI/Dashboard.vue'),
+    meta: { title: 'AI助手', requiresAuth: true }
   }
 ]
 
