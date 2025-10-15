@@ -90,3 +90,17 @@ export function getCourseComments(params: PageParam & { courseId: number }): Pro
     params
   })
 }
+
+/**
+ * 获取课程章节（包含课时）
+ */
+export interface ChapterDTO extends Chapter {
+  lessons?: Lesson[]
+}
+
+export function getChaptersByCourseId(courseId: number): Promise<ChapterDTO[]> {
+  return request({
+    url: `/chapter/course/${courseId}`,
+    method: 'get'
+  })
+}

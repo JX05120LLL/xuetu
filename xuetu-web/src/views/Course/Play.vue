@@ -39,8 +39,7 @@
                   >
                     <i class="el-icon-video-play"></i>
                     <span class="lesson-title">{{ lesson.title }}</span>
-                    <span class="lesson-duration">{{ formatDuration(lesson.duration) }}</span>
-                    <el-tag v-if="lesson.isFree" type="success" size="small">试看</el-tag>
+                    <span class="lesson-duration">{{ formatDuration(lesson.duration * 60) }}</span>
                   </div>
                 </div>
               </div>

@@ -60,3 +60,17 @@ export interface Comment {
   createdTime: string
   updatedTime: string
 }
+
+/**
+ * 章节DTO（包含课时列表）
+ */
+export interface ChapterDTO extends Chapter {
+  lessons?: LessonDTO[]
+}
+
+/**
+ * 课时DTO
+ */
+export interface LessonDTO extends Lesson {
+  videoUrl: string
+}

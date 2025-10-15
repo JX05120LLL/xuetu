@@ -7,7 +7,6 @@ import com.star.course.dto.ChapterRequest;
 import com.star.course.dto.LessonDTO;
 import com.star.course.entity.Chapter;
 import com.star.course.entity.Lesson;
-import com.star.course.exception.CategoryException;
 import com.star.course.exception.ChapterException;
 import com.star.course.exception.CourseServiceException;
 import com.star.course.mapper.ChapterMapper;
@@ -35,6 +34,7 @@ public class ChapterServiceImpl extends ServiceImpl<ChapterMapper, Chapter> impl
 
     private final ChapterMapper chapterMapper;
     private final CourseService courseService;
+    private final com.star.course.mapper.LessonMapper lessonMapper;
 
     @Override
     public List<ChapterDTO> getChaptersByCourseId(Long courseId) {
@@ -43,7 +43,8 @@ public class ChapterServiceImpl extends ServiceImpl<ChapterMapper, Chapter> impl
         // 使用MyBatis Plus的LambdaQueryWrapper
         LambdaQueryWrapper<Chapter> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Chapter::getCourseId, courseId)
-                    .orderByAsc(Chapter::getSortOrder, Chapter::getId);
+                    .orderByAsc(Chapter::getSortOrder)
+                    .orderByAsc(Chapter::getId);
 
         List<Chapter> chapters = list(queryWrapper);
         return chapters.stream()
@@ -178,12 +179,31 @@ public class ChapterServiceImpl extends ServiceImpl<ChapterMapper, Chapter> impl
         ChapterDTO dto = new ChapterDTO();
         BeanUtils.copyProperties(chapter, dto);
 
-        // 查询课时数量
-        LambdaQueryWrapper<Lesson> lessonQueryWrapper = new LambdaQueryWrapper<>();
-        lessonQueryWrapper.eq(Lesson::getChapterId, chapter.getId());
-        // 这里需要注入LessonService，暂时设置为0
-        dto.setLessonCount(0);
+        // 查询该章节的所有课时
+        LambdaQueryWrapper<Lesson> lessonWrapper = new LambdaQueryWrapper<>();
+        lessonWrapper.eq(Lesson::getChapterId, chapter.getId())
+                     .orderByAsc(Lesson::getSortOrder)
+                     .orderByAsc(Lesson::getId);
+        
+        List<Lesson> lessons = lessonMapper.selectList(lessonWrapper);
+        
+        // 转换为DTO
+        List<LessonDTO> lessonDTOs = lessons.stream()
+                .map(this::convertLessonToDTO)
+                .collect(Collectors.toList());
+        
+        dto.setLessons(lessonDTOs);
+        dto.setLessonCount(lessonDTOs.size());
 
+        return dto;
+    }
+    
+    /**
+     * 转换课时为DTO
+     */
+    private LessonDTO convertLessonToDTO(Lesson lesson) {
+        LessonDTO dto = new LessonDTO();
+        BeanUtils.copyProperties(lesson, dto);
         return dto;
     }
 }

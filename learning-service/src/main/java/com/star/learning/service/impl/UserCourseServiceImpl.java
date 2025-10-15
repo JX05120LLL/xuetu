@@ -133,17 +133,33 @@ public class UserCourseServiceImpl extends ServiceImpl<UserCourseMapper, UserCou
         
         try {
             // 调用课程服务获取课程详情
+            log.debug("调用课程服务获取课程详情，课程ID: {}", userCourse.getCourseId());
             R<Object> courseResult = courseServiceClient.getCourseById(userCourse.getCourseId());
+            
+            log.debug("课程服务返回结果: {}", courseResult);
+            
             if (courseResult != null && courseResult.getData() != null) {
                 Map<String, Object> courseMap = (Map<String, Object>) courseResult.getData();
                 
+                log.debug("课程详情Map: {}", courseMap);
+                
                 // 填充课程信息
-                dto.setCourseName(getStringValue(courseMap, "title"));
-                dto.setCoverImage(getStringValue(courseMap, "coverImage"));
+                String title = getStringValue(courseMap, "title");
+                String coverImage = getStringValue(courseMap, "coverImage");
+                
+                log.debug("课程名称: {}, 封面图: {}", title, coverImage);
+                
+                dto.setCourseName(title);
+                dto.setCoverImage(coverImage);
                 dto.setCourseDescription(getStringValue(courseMap, "description"));
                 dto.setTeacherId(getLongValue(courseMap, "teacherId"));
                 dto.setTeacherName("讲师"); // 默认值，可以后续从用户服务获取
                 dto.setTotalDuration(getIntegerValue(courseMap, "totalDuration"));
+            } else {
+                log.warn("课程服务返回数据为空，课程ID: {}", userCourse.getCourseId());
+                // 设置默认值
+                dto.setCourseName("课程名称未知");
+                dto.setCoverImage("");
             }
         } catch (Exception e) {
             log.error("获取课程详情失败，课程ID: {}", userCourse.getCourseId(), e);

@@ -118,6 +118,12 @@ const fetchCourses = async () => {
     })
     courses.value = res.records || []
     total.value = res.total || 0
+    
+    // 调试日志：检查返回的数据
+    console.log('📚 我的课程数据:', courses.value)
+    if (courses.value.length > 0) {
+      console.log('第一个课程的封面图:', courses.value[0].coverImage)
+    }
   } catch (error) {
     console.error('获取课程列表失败:', error)
     ElMessage.error('获取课程列表失败')
@@ -156,17 +162,8 @@ const goToPlay = (course: any) => {
 
 // 跳转到课程详情
 const goToCourseDetail = (courseId: number) => {
-  // 先检查是否有权限访问这个课程
-  checkUserHasCourse(courseId).then(hasAccess => {
-    if (hasAccess) {
-      router.push(`/course/${courseId}`)
-    } else {
-      ElMessage.warning('您还没有购买该课程')
-    }
-  }).catch(error => {
-    console.error('检查课程权限失败:', error)
-    ElMessage.error('检查课程权限失败')
-  })
+  // 课程详情页是公开的，直接跳转即可
+  router.push(`/course/${courseId}`)
 }
 
 // 进度条颜色

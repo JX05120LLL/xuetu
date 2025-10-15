@@ -78,15 +78,16 @@ public class UserCourseController {
      */
     private Long getUserIdFromRequest(HttpServletRequest request) {
         String userIdHeader = request.getHeader("X-User-Id");
-        if (userIdHeader != null) {
+        if (userIdHeader != null && !userIdHeader.isEmpty()) {
             try {
                 return Long.parseLong(userIdHeader);
             } catch (NumberFormatException e) {
-                log.warn("无效的用户ID: {}", userIdHeader);
+                log.error("无效的用户ID格式: {}", userIdHeader, e);
+                throw new RuntimeException("用户认证信息格式错误，请重新登录");
             }
         }
         
-        log.warn("未能从请求中获取用户ID，使用默认值");
-        return 1L;
+        log.error("未能从请求头中获取用户ID");
+        throw new RuntimeException("用户未登录或登录已过期，请重新登录");
     }
 }
