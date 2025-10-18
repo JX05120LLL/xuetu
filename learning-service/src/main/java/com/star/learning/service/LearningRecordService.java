@@ -63,4 +63,15 @@ public interface LearningRecordService {
      * 批量更新学习进度
      */
     Boolean batchUpdateProgress(List<LearningRecord> records);
+    
+    /**
+     * 同步课程进度到user_course表
+     * 根据learning_record计算该课程的总体进度，并同步到user_course表
+     * 只要有学习记录就算已学（支持快进、跳看等场景）
+     * 
+     * @param userId 用户ID
+     * @param courseId 课程ID
+     * @return 是否同步成功
+     */
+    Boolean syncCourseProgress(Long userId, Long courseId);
 }

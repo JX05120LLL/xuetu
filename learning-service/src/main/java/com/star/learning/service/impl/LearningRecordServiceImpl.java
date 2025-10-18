@@ -199,13 +199,50 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
         return updated > 0;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean syncCourseProgress(Long userId, Long courseId) {
+        log.info("同步课程进度: userId={}, courseId={}", userId, courseId);
+        
+        try {
+            // 使用新的计算方法：只要有学习记录就算已学（支持快进、跳看等场景）
+            Double actualProgress = learningRecordMapper.calculateActualCourseProgress(userId, courseId);
+            
+            if (actualProgress != null) {
+                int progressInt = actualProgress.intValue();
+                log.info("计算出的实际进度: {}%", progressInt);
+                
+                // 更新user_course表的progress字段
+                int updated = userCourseMapper.updateCourseProgress(userId, courseId, progressInt);
+                
+                if (updated > 0) {
+                    log.info("课程进度同步成功: userId={}, courseId={}, progress={}%", 
+                            userId, courseId, progressInt);
+                    return true;
+                } else {
+                    log.warn("未找到对应的user_course记录: userId={}, courseId={}", userId, courseId);
+                    return false;
+                }
+            } else {
+                log.warn("无法计算课程进度: userId={}, courseId={}", userId, courseId);
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("同步课程进度失败: userId={}, courseId={}", userId, courseId, e);
+            throw e;
+        }
+    }
+
     /**
      * 更新课程总体进度
      */
     private void updateCourseOverallProgress(Long userId, Long courseId) {
-        Double progress = getCourseProgress(userId, courseId);
+        // 使用新的计算方法（只要有学习记录就算已学）
+        Double progress = learningRecordMapper.calculateActualCourseProgress(userId, courseId);
         if (progress != null) {
             userCourseMapper.updateCourseProgress(userId, courseId, progress.intValue());
+            log.info("自动同步课程进度: userId={}, courseId={}, progress={}%", 
+                    userId, courseId, progress.intValue());
         }
     }
 

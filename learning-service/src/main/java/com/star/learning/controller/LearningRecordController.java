@@ -43,6 +43,20 @@ public class LearningRecordController {
     }
 
     /**
+     * 同步课程进度到user_course表
+     * 当用户学习课时时，自动同步进度到user_course表，便于前端快速查询
+     */
+    @PostMapping("/sync-course-progress/{courseId}")
+    @Operation(summary = "同步课程进度", description = "同步用户课程学习进度到user_course表")
+    public R<Boolean> syncCourseProgress(
+            @Parameter(description = "课程ID", required = true) @PathVariable Long courseId,
+            HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromRequest(httpRequest);
+        Boolean result = learningRecordService.syncCourseProgress(userId, courseId);
+        return R.ok(result, "课程进度同步成功");
+    }
+
+    /**
      * 获取课程学习记录
      */
     @GetMapping("/course/{courseId}")

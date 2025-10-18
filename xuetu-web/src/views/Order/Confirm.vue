@@ -61,14 +61,18 @@ import Footer from '@/components/Footer.vue'
 import { getCourseDetail } from '@/api/course'
 import { createOrder } from '@/api/order'
 import { formatPrice } from '@/utils/format'
+import { useCartStore } from '@/stores/cart'
 import type { Course } from '@/types/course'
 
 const route = useRoute()
 const router = useRouter()
+const cartStore = useCartStore()
 
 const loading = ref(false)
 const submitting = ref(false)
 const selectedCourses = ref<Course[]>([])
+// 标记是否来自购物车
+const isFromCart = ref(false)
 
 const totalAmount = computed(() => {
   return selectedCourses.value.reduce((sum, course) => sum + course.price, 0)
@@ -81,6 +85,10 @@ const loadSelectedCourses = async () => {
     const courseIds = (route.query.courseIds as string).split(',').map(Number)
     const promises = courseIds.map(id => getCourseDetail(id))
     selectedCourses.value = await Promise.all(promises)
+    
+    // 检查是否来自购物车（通过查询参数或检查课程是否在购物车中）
+    isFromCart.value = route.query.from === 'cart' || 
+      courseIds.some(id => cartStore.isInCart(id))
   } catch (error) {
     console.error('加载课程失败:', error)
     ElMessage.error('加载课程失败')
@@ -95,6 +103,16 @@ const handleSubmitOrder = async () => {
   try {
     const courseIds = selectedCourses.value.map(course => course.id)
     const order = await createOrder({ courseIds })
+    
+    // 订单创建成功后，如果是从购物车来的，清除购物车中对应的课程
+    if (isFromCart.value) {
+      courseIds.forEach(courseId => {
+        if (cartStore.isInCart(courseId)) {
+          cartStore.removeFromCart(courseId)
+        }
+      })
+      console.log('已从购物车移除已购买的课程')
+    }
     
     ElMessage.success('订单创建成功')
     router.push(`/order/pay/${order.orderNo}`)

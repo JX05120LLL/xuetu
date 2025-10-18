@@ -84,3 +84,13 @@ export function getPaymentRecord(paymentNo: string): Promise<PaymentRecord> {
     method: 'get'
   })
 }
+
+/**
+ * 查询支付状态
+ */
+export function getPaymentStatus(paymentNo: string): Promise<number> {
+  return request({
+    url: `/api/payments/${paymentNo}/status`,
+    method: 'get'
+  })
+}

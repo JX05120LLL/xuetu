@@ -89,6 +89,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import { useCartStore } from '@/stores/cart'
@@ -117,11 +118,17 @@ const handleSelectAll = (value: boolean) => {
 }
 
 const handleCheckout = () => {
-  // 携带选中的课程ID去订单确认页
+  if (selectedCourses.value.length === 0) {
+    ElMessage.warning('请至少选择一门课程')
+    return
+  }
+  
+  // 携带选中的课程ID去订单确认页，标记来自购物车
   router.push({
     path: '/order/confirm',
     query: {
-      courseIds: selectedCourses.value.join(',')
+      courseIds: selectedCourses.value.join(','),
+      from: 'cart' // 标记来自购物车
     }
   })
 }

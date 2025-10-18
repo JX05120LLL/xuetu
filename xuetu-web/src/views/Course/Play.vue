@@ -106,7 +106,7 @@ import DPlayer from 'dplayer'
 import type { ChapterDTO, LessonDTO } from '@/types/course'
 import type { NoteDTO, CreateNoteRequest, UpdateNoteRequest } from '@/types/learning'
 import { getChaptersByCourseId } from '@/api/course'
-import { getNotesByLesson, createNote, updateNote, deleteNote as deleteNoteApi, updateLearningProgress, checkUserHasCourse } from '@/api/learning'
+import { getNotesByLesson, createNote, updateNote, deleteNote as deleteNoteApi, updateLearningProgress, checkUserHasCourse, syncCourseProgress } from '@/api/learning'
 import { formatDuration as formatDurationUtil, formatDate } from '@/utils/format'
 
 const route = useRoute()
@@ -217,11 +217,20 @@ const playFreeLesson = () => {
 }
 
 // 播放课时
-const playLesson = (chapter: ChapterDTO, lesson: LessonDTO) => {
+const playLesson = async (chapter: ChapterDTO, lesson: LessonDTO) => {
   // 检查是否有权限播放
   if (!hasAccess.value && lesson.isFree !== 1) {
     ElMessage.warning('您还未购买该课程，无法播放付费课时')
     return
+  }
+  
+  // 切换课时前，先保存并同步当前课程进度
+  if (dp && currentLesson.value) {
+    const currentTime = Math.floor(dp.video.currentTime)
+    const totalTime = Math.floor(dp.video.duration)
+    if (currentTime > 0 && totalTime > 0) {
+      await savePlayProgress(currentTime, totalTime, true) // 同步进度
+    }
   }
   
   currentChapter.value = chapter
@@ -267,18 +276,18 @@ const initPlayer = (lesson: LessonDTO) => {
     const currentTime = Math.floor(dp!.video.currentTime)
     if (currentTime - lastSaveTime >= 10) { // 每10秒保存一次
       lastSaveTime = currentTime
-      savePlayProgress(currentTime, Math.floor(dp!.video.duration))
+      savePlayProgress(currentTime, Math.floor(dp!.video.duration), false) // 不同步
     }
   })
   
-  // 播放结束时保存进度
+  // 播放结束时保存进度并同步
   dp.on('ended', () => {
-    savePlayProgress(Math.floor(dp!.video.duration), Math.floor(dp!.video.duration))
+    savePlayProgress(Math.floor(dp!.video.duration), Math.floor(dp!.video.duration), true) // 同步
   })
 }
 
 // 保存播放进度
-const savePlayProgress = async (currentTime: number, totalTime: number) => {
+const savePlayProgress = async (currentTime: number, totalTime: number, shouldSync: boolean = false) => {
   if (!currentLesson.value) return
   
   try {
@@ -288,6 +297,16 @@ const savePlayProgress = async (currentTime: number, totalTime: number) => {
       progress: Math.floor((currentTime / totalTime) * 100),
       lastPosition: currentTime
     })
+    
+    // 只在特定时机同步进度（避免请求过于频繁）
+    if (shouldSync) {
+      try {
+        await syncCourseProgress(courseId)
+        console.log('✅ 课程进度已同步到数据库')
+      } catch (syncError) {
+        console.warn('⚠️ 同步课程进度失败:', syncError)
+      }
+    }
   } catch (error) {
     console.error('保存学习进度失败:', error)
   }
@@ -400,7 +419,17 @@ onMounted(() => {
 })
 
 // 组件卸载
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
+  // 离开页面前，先保存并同步当前课程进度
+  if (dp && currentLesson.value) {
+    const currentTime = Math.floor(dp.video.currentTime)
+    const totalTime = Math.floor(dp.video.duration)
+    if (currentTime > 0 && totalTime > 0) {
+      await savePlayProgress(currentTime, totalTime, true) // 同步进度
+      console.log('📤 离开页面，已同步课程进度')
+    }
+  }
+  
   if (dp) {
     dp.destroy()
     dp = null

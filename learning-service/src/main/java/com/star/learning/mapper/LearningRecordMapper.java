@@ -168,4 +168,14 @@ public interface LearningRecordMapper extends BaseMapper<LearningRecord> {
      */
     @Select("SELECT COALESCE(SUM(progress), 0) FROM learning_record WHERE user_id = #{userId} AND course_id = #{courseId}")
     Integer sumStudyDuration(@Param("userId") Long userId, @Param("courseId") Long courseId);
+    
+    /**
+     * 计算课程进度（只要有学习记录就算已学，支持快进、跳看等场景）
+     * 计算公式：已学课时数 / 总课时数 * 100
+     *
+     * @param userId   用户ID
+     * @param courseId 课程ID
+     * @return 课程进度（百分比，0-100）
+     */
+    Double calculateActualCourseProgress(@Param("userId") Long userId, @Param("courseId") Long courseId);
 }

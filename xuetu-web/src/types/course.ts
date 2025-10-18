@@ -50,17 +50,6 @@ export interface Lesson {
   sortOrder: number
 }
 
-export interface Comment {
-  id: number
-  userId: number
-  courseId: number
-  content: string
-  rating: number
-  likeCount: number
-  createdTime: string
-  updatedTime: string
-}
-
 /**
  * 章节DTO（包含课时列表）
  */

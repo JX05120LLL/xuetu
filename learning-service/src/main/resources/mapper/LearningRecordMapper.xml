@@ -131,4 +131,21 @@
             updated_time = #{updatedTime}
     </insert>
 
+    <!-- 计算实际课程进度（只要有学习记录就算已学，支持快进、跳看等场景） -->
+    <select id="calculateActualCourseProgress" resultType="java.lang.Double">
+        SELECT IFNULL(
+            ROUND(
+                (SELECT COUNT(DISTINCT lr.lesson_id) 
+                 FROM learning_record lr 
+                 WHERE lr.user_id = #{userId} AND lr.course_id = #{courseId}) * 100.0 /
+                NULLIF((SELECT COUNT(*) 
+                 FROM lesson l 
+                 INNER JOIN chapter c ON l.chapter_id = c.id 
+                 WHERE c.course_id = #{courseId}), 0), 
+                2
+            ), 
+            0.0
+        ) as progress
+    </select>
+
 </mapper>

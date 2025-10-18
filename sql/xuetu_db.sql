@@ -11,7 +11,7 @@
  Target Server Version : 80039 (8.0.39)
  File Encoding         : 65001
 
- Date: 14/10/2025 19:04:31
+ Date: 18/10/2025 18:43:05
 */
 
 SET NAMES utf8mb4;
@@ -36,7 +36,7 @@ CREATE TABLE `ai_analysis_report`  (
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_report_type`(`report_type` ASC) USING BTREE,
   INDEX `idx_created_time`(`created_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI分析报告表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI分析报告表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_analysis_report
@@ -87,7 +87,7 @@ CREATE TABLE `ai_recommendation`  (
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
   INDEX `idx_created_time`(`created_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI智能推荐记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI智能推荐记录表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_recommendation
@@ -110,7 +110,7 @@ CREATE TABLE `ai_usage_stats`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_date`(`user_id` ASC, `date` ASC) USING BTREE,
   INDEX `idx_date`(`date` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI使用统计表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI使用统计表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_usage_stats
@@ -172,7 +172,7 @@ CREATE TABLE `chapter`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `course_id`(`course_id` ASC) USING BTREE,
   CONSTRAINT `chapter_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 24 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '章节表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 104 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '章节表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of chapter
@@ -191,6 +191,37 @@ INSERT INTO `chapter` VALUES (20, 6, '第一章：Vue.js 3.0 新特性介绍', 1
 INSERT INTO `chapter` VALUES (21, 6, '第二章：Composition API详解', 2, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
 INSERT INTO `chapter` VALUES (22, 6, '第三章：组件化开发实战', 3, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
 INSERT INTO `chapter` VALUES (23, 6, '第四章：路由与状态管理', 4, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
+INSERT INTO `chapter` VALUES (30, 3, '第一章：微服务架构基础', 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (31, 3, '第二章：Spring Cloud核心组件', 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (32, 3, '第三章：服务注册与发现', 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (33, 3, '第四章：Docker容器化部署', 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (34, 3, '第五章：Kubernetes实战', 5, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (40, 4, '第一章：Python数据分析基础', 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (41, 4, '第二章：NumPy数组计算', 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (42, 4, '第三章：Pandas数据处理', 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (43, 4, '第四章：数据可视化Matplotlib', 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (50, 5, '第一章：机器学习基础', 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (51, 5, '第二章：监督学习算法', 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (52, 5, '第三章：无监督学习', 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (53, 5, '第四章：深度学习入门', 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (54, 5, '第五章：项目实战', 5, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (70, 7, '第一章：React基础回顾', 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (71, 7, '第二章：React Hooks深入', 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (72, 7, '第三章：Redux状态管理', 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (73, 7, '第四章：React Router路由', 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (74, 7, '第五章：企业级项目实战', 5, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (80, 8, '第一章：MySQL基础', 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (81, 8, '第二章：数据库设计', 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (82, 8, '第三章：索引与优化', 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (83, 8, '第四章：高级特性', 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (90, 9, '第一章：Redis入门', 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (91, 9, '第二章：Redis数据类型', 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (92, 9, '第三章：Redis高级特性', 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (93, 9, '第四章：缓存设计实战', 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (100, 10, '第一章：K8s基础概念', 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (101, 10, '第二章：核心组件详解', 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (102, 10, '第三章：应用部署实战', 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `chapter` VALUES (103, 10, '第四章：高级特性', 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
 
 -- ----------------------------
 -- Table structure for chat_history
@@ -211,7 +242,7 @@ CREATE TABLE `chat_history`  (
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_conversation_id`(`conversation_id` ASC) USING BTREE,
   INDEX `idx_created_time`(`created_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI对话历史表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI对话历史表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of chat_history
@@ -226,6 +257,16 @@ INSERT INTO `chat_history` VALUES (7, 104, '48d50c7b-7954-44ad-8ab1-5422535acaf7
 INSERT INTO `chat_history` VALUES (8, 104, '48d50c7b-7954-44ad-8ab1-5422535acaf7', 'assistant', '你好呀！我是小途，你的学习助手。为了更好地分析你的学习情况，我需要先了解一些基本信息：\n\n1. 你目前的年级和学科（比如：初中数学、高中物理等）？\n2. 你最近在学习哪些内容？有没有特别感兴趣的科目？\n3. 你觉得自己在学习中遇到的主要困难是什么？（比如：理解不了知识点、做题慢、记不住公式等）\n4. 你平时的学习方式是怎样的？（比如：自学、上课听讲、刷题、看网课等）\n\n如果你愿意分享这些信息，我可以根据你的具体情况给出更精准的学习建议和课程推荐哦！😊', NULL, NULL, 0, 'qwen-turbo', '2025-10-14 18:11:52');
 INSERT INTO `chat_history` VALUES (9, 104, '2de4faf4-c21b-4f12-8d80-045ddbd7e507', 'user', '如何高效学习编程', NULL, NULL, 0, 'qwen-turbo', '2025-10-14 18:12:09');
 INSERT INTO `chat_history` VALUES (10, 104, '2de4faf4-c21b-4f12-8d80-045ddbd7e507', 'assistant', '你好呀！我是小途，学途教育的AI学习助手。很高兴你对编程感兴趣！学习编程其实就像学一门新语言一样，只要方法得当，就能高效掌握。下面是一些高效学习编程的建议，希望对你有帮助：\n\n---\n\n### 一、明确目标，选择适合的语言\n编程有很多语言，比如：\n- **Python**：适合初学者，语法简单，应用广泛（数据分析、人工智能等）\n- **Java**：适合学习面向对象编程，常用于企业开发\n- **JavaScript**：适合前端开发，也可以做后端（Node.js）\n- **C/C++**：适合理解底层逻辑，常用于游戏开发或系统编程\n\n👉 **建议**：根据你的兴趣和目标选择一门语言开始学习，不要一开始就“贪多”。\n\n---\n\n### 二、打好基础，循序渐进\n1. **理解基本语法**：如变量、循环、条件语句、函数等。\n2. **掌握数据结构与算法**：这是编程的核心，能提升解决问题的能力。\n3. **了解编程思想**：比如面向对象、函数式编程、模块化设计等。\n\n📌 小贴士：可以使用一些在线平台（如LeetCode、Codecademy、慕课网）来练习。\n\n---\n\n### 三、多写代码，动手实践\n编程不是看出来的，是“写”出来的！\n\n- 每天坚持写一点代码，哪怕只是一个小程序。\n- 做项目比刷题更有成就感，比如：\n  - 写一个计算器\n  - 开发一个简单的待办事项列表\n  - 制作一个个人博客网站\n\n💡 **记住**：遇到问题时，不要怕查资料，多问、多试、多改。\n\n---\n\n### 四、善用资源和工具\n- **学习平台**：如B站、慕课网、Coursera、Udemy等\n- **代码社区**：GitHub、Stack Overflow、知乎、掘金等\n- **IDE工具**：如VS Code、PyCharm、Sublime Text等\n\n---\n\n### 五、养成良好的学习习惯\n- **定期复习**：巩固所学内容\n- **做笔记**：记录关键知识点和易错点\n- **参与交流**：加入编程学习群组，和他人一起进步\n\n---\n\n### 六、推荐课程（如果你需要）\n如果你正在找系统的学习路径，我也可以帮你推荐适合的课程哦！比如：\n- Python入门课程\n- Web开发全栈课程\n- 数据分析/人工智能方向课程\n\n你想从哪个方向开始呢？我可以根据你的需求给你更具体的建议！😊', NULL, NULL, 0, 'qwen-turbo', '2025-10-14 18:12:09');
+INSERT INTO `chat_history` VALUES (11, 103, '3c0fc45a-0669-4294-a913-58a094325117', 'user', '你好，我叫周文，我怎么成为架构师', NULL, NULL, 0, 'qwen-turbo', '2025-10-15 19:55:18');
+INSERT INTO `chat_history` VALUES (12, 103, '3c0fc45a-0669-4294-a913-58a094325117', 'assistant', '你好，周文！很高兴认识你，我是小途，学途教育平台的AI学习助手。你想成为架构师，这是一个非常有挑战性也很有成就感的职业方向。下面我来给你详细说说，如何一步步成长为一名优秀的架构师。\n\n---\n\n### 一、什么是架构师？\n\n架构师是负责设计系统整体结构的人，他们需要考虑系统的性能、可扩展性、安全性、可维护性等多方面因素。架构师通常不直接写代码，但需要对技术有深入的理解，并能指导开发团队进行开发。\n\n---\n\n### 二、成为架构师的基本路径\n\n#### 1. **打好编程基础**\n- 学好一门或几门编程语言（如 Java、Python、C++、JavaScript 等）。\n- 掌握数据结构与算法，这是解决复杂问题的基础。\n- 熟悉常用开发工具和版本控制（如 Git）。\n\n👉 **推荐课程：**  \n- 编程入门（如《Java编程基础》）\n- 数据结构与算法（如《算法导论》）\n\n#### 2. **掌握软件工程知识**\n- 学习软件开发流程（如敏捷开发、DevOps）\n- 了解系统设计原则（如 SOLID 原则）\n- 熟悉常见的设计模式（如工厂模式、单例模式、观察者模式等）\n\n👉 **推荐课程：**  \n- 《软件工程导论》\n- 《设计模式精讲》\n\n#### 3. **深入了解系统架构**\n- 学习微服务、分布式系统、云原生等现代架构设计理念。\n- 熟悉主流架构框架（如 Spring Cloud、Kubernetes、Docker 等）。\n- 了解数据库设计、缓存策略、负载均衡等技术。\n\n👉 **推荐课程：**  \n- 《微服务架构实战》\n- 《云原生架构设计》\n\n#### 4. **积累项目经验**\n- 多参与实际项目，尤其是中大型项目的开发。\n- 尝试从设计阶段开始参与，理解整个系统是如何构建的。\n- 通过实践不断优化自己的设计能力。\n\n👉 **推荐课程：**  \n- 《企业级项目实战》\n- 《全栈开发项目实践》\n\n#### 5. **持续学习与提升**\n- 架构师需要紧跟技术趋势，比如 AI、大数据、区块链等新技术。\n- 阅读经典书籍（如《设计数据密集型应用》《架构师修炼之道》等）。\n- 参加技术社区、技术大会，与同行交流。\n\n---\n\n### 三、推荐的学习路线图（以 Java 为例）\n\n| 阶段 | 内容 | 目标 |\n|------|------|------|\n| 初级 | 编程基础、数据结构与算法 | 能够独立完成简单项目 |\n| 中级 | 软件工程、设计模式、数据库设计 | 能够参与中型项目开发 |\n| 高级 | 分布式系统、微服务、云原生 | 能够设计并实现复杂系统 |\n| 架构师 | 系统架构设计、性能调优、技术选型 | 能够主导大型系统设计 |\n\n---\n\n### 四、有哪些适合你的课程推荐？\n\n如果你正在准备成为架构师，我建议你先从以下几门课程入手：\n\n1. **《Java架构师成长计划》**  \n   - 内容：涵盖 Java 基础、Spring 框架、微服务、分布式系统等\n   - 适合对象：有一定 Java 开发基础，想向架构师方向发展的同学\n\n2. **《系统架构设计与实践》**  \n   - 内容：系统设计原理、架构模式、高并发场景设计等\n   - 适合对象：希望提升系统设计能力的同学\n\n3. **《云原生架构与 DevOps 实践》**  \n   - 内容：容器化、Kubernetes、CI/CD 等\n   - 适合对象：想进入互联网大厂或云计算领域的同学\n\n---\n\n### 五、你目前的水平如何？是否已经有编程基础？\n\n如果你愿意告诉我你现在的能力水平（比如是否会写代码、有没有做过项目、学过哪些技术），我可以为你定制一个更具体的提升计划哦！\n\n---\n\n如果你有任何疑问，或者需要我帮你规划学习路径，随时来找我！祝你早日成为优秀的架构师！🚀', NULL, NULL, 0, 'qwen-turbo', '2025-10-15 19:55:19');
+INSERT INTO `chat_history` VALUES (13, 103, '3c0fc45a-0669-4294-a913-58a094325117', 'user', '你好，我叫周文，我该如何学习编程，\n我怎么成为架构师', NULL, NULL, 0, 'qwen-turbo', '2025-10-15 19:56:12');
+INSERT INTO `chat_history` VALUES (14, 103, '3c0fc45a-0669-4294-a913-58a094325117', 'assistant', '你好，周文！很高兴再次见到你。你是想**学习编程**，并最终成为**架构师**，这是一个非常有前途的方向！我来为你详细规划一下，从零基础开始，如何一步步走向架构师的路径。\n\n---\n\n## 🧭 一、学习编程的基本步骤\n\n### 1. **明确目标：你想用编程做什么？**\n- 比如：做网页开发、App 开发、数据分析、人工智能、后端系统开发等。\n- 不同方向需要掌握不同的语言和工具。\n\n👉 **建议**：如果你刚开始学习，可以先选择一门**广泛使用的语言**作为入门，比如：\n- **Python**（适合初学者，应用广泛）\n- **Java**（企业级应用、安卓开发、架构方向常用）\n- **JavaScript**（前端开发、全栈开发）\n\n### 2. **学习基础知识**\n无论选择哪种语言，都需要掌握以下基础内容：\n\n| 内容 | 说明 |\n|------|------|\n| 编程语法 | 变量、循环、条件语句、函数等 |\n| 数据结构 | 数组、链表、栈、队列、字典等 |\n| 算法基础 | 排序、查找、递归、动态规划等 |\n| 面向对象编程（OOP） | 类、对象、继承、多态等 |\n\n👉 **推荐学习资源：**\n- 免费平台：[Codecademy](https://www.codecademy.com/)、[freeCodeCamp](https://www.freecodecamp.org/)\n- 视频课程：B站、YouTube 上的编程入门教程\n- 书籍：《Python编程：从入门到实践》《算法导论》\n\n### 3. **动手写代码**\n- 学完一个知识点，就尝试自己写一个小程序。\n- 做一些小项目：比如计算器、猜数字游戏、待办事项管理器等。\n\n---\n\n## 🌐 二、进阶学习：从程序员到架构师\n\n### 1. **掌握软件工程与系统设计**\n- 学习软件开发流程（如敏捷开发、Scrum）\n- 学习系统设计原则（SOLID、DRY、KISS 等）\n- 学习常见设计模式（工厂模式、策略模式、观察者模式等）\n\n👉 **推荐课程：**\n- 《软件工程导论》\n- 《设计模式精讲》\n\n### 2. **深入了解系统架构**\n- 学习分布式系统、微服务、云原生等现代架构理念\n- 熟悉主流技术栈（如 Spring Cloud、Docker、Kubernetes、Redis、MQ 等）\n\n👉 **推荐课程：**\n- 《微服务架构实战》\n- 《云原生架构设计》\n\n### 3. **参与项目实践**\n- 多参与实际项目，尤其是中大型项目。\n- 尝试从设计阶段参与，理解整个系统的构建过程。\n- 通过实践不断优化自己的设计能力。\n\n👉 **推荐课程：**\n- 《企业级项目实战》\n- 《全栈开发项目实践》\n\n### 4. **持续学习与提升**\n- 架构师需要紧跟技术趋势，比如 AI、大数据、区块链等新技术。\n- 阅读经典书籍（如《设计数据密集型应用》《架构师修炼之道》等）。\n- 参加技术社区、技术大会，与同行交流。\n\n---\n\n## 🎯 三、推荐的学习路线图（以 Java 为例）\n\n| 阶段 | 内容 | 目标 |\n|------|------|------|\n| 初级 | 编程基础、数据结构与算法 | 能够独立完成简单项目 |\n| 中级 | 软件工程、设计模式、数据库设计 | 能够参与中型项目开发 |\n| 高级 | 分布式系统、微服务、云原生 | 能够设计并实现复杂系统 |\n| 架构师 | 系统架构设计、性能调优、技术选型 | 能够主导大型系统设计 |\n\n---\n\n## 📚 四、适合你的课程推荐（根据你目前情况）\n\n如果你是**零基础**，我们可以这样安排：\n\n### ✅ 第一阶段：编程入门\n- 课程：《Python编程入门》或《Java编程基础》\n- 时间：2~3个月\n- 目标：掌握编程基础，能写出简单程序\n\n### ✅ 第二阶段：进阶开发\n- 课程：《Java高级编程》《Spring Boot 入门》\n- 时间：3~6个月\n- 目标：能够开发小型 Web 应用，理解 MVC 架构\n\n### ✅ 第三阶段：系统设计与架构\n- 课程：《系统架构设计与实践》《微服务架构实战》\n- 时间：6~12个月\n- 目标：具备系统设计能力，能够参与架构设计\n\n---\n\n## 💡 五、你需要哪些帮助？\n\n你可以告诉我：\n- 你是否有编程经验？\n- 你更感兴趣的是哪个方向（比如前端、后端、全栈、AI）？\n- 你希望在什么时间范围内达到什么样的目标？\n\n我会根据你的具体情况，为你定制一份**专属的学习计划**！\n\n---\n\n如果你想现在就开始学习，我可以推荐一些**免费资源**或者**学途教育的入门课程**给你。随时告诉我你的想法哦！😊\n\n祝你学习顺利，早日成为一名优秀的架构师！🚀', NULL, NULL, 0, 'qwen-turbo', '2025-10-15 19:56:12');
+INSERT INTO `chat_history` VALUES (15, 103, '2495bc46-ad81-48a8-b33a-de4129a6b649', 'user', '推荐适合我的课程', NULL, NULL, 0, 'qwen-turbo', '2025-10-15 19:56:19');
+INSERT INTO `chat_history` VALUES (16, 103, '2495bc46-ad81-48a8-b33a-de4129a6b649', 'assistant', '你好呀！我是小途，很高兴为你服务。为了给你推荐最适合的课程，我需要先了解一些关于你的信息哦。\n\n你可以告诉我：\n1. 你目前的年级或学习阶段（比如小学、初中、高中、大学等）？\n2. 你对哪些科目比较感兴趣或者需要帮助？（比如数学、语文、英语、物理、化学等）\n3. 有没有特别想提高的方面？比如考试成绩、写作能力、口语表达、逻辑思维等？\n4. 你希望课程是线上还是线下？或者更倾向于哪种学习方式？（比如直播课、录播课、一对一辅导等）\n\n这样我就能为你量身定制最适合的学习计划啦！😊', NULL, NULL, 0, 'qwen-turbo', '2025-10-15 19:56:19');
+INSERT INTO `chat_history` VALUES (17, 103, '2495bc46-ad81-48a8-b33a-de4129a6b649', 'user', '我想成为Java架构师', NULL, NULL, 0, 'qwen-turbo', '2025-10-15 19:56:43');
+INSERT INTO `chat_history` VALUES (18, 103, '2495bc46-ad81-48a8-b33a-de4129a6b649', 'assistant', '太棒了！想成为Java架构师是一个非常有前景的目标！作为架构师，你需要掌握扎实的编程基础、系统设计能力以及对大型应用的架构理解。接下来我为你推荐一些适合你的课程和学习路径，帮助你一步步走向Java架构师的道路。\n\n### 一、学习路径建议\n\n#### 1. **基础阶段（掌握Java核心技能）**\n- **目标**：熟练掌握Java语言本身，包括语法、集合、多线程、IO、JVM等。\n- **推荐课程**：\n  - 《Java编程思想》（书籍）\n  - 《Java核心技术卷Ⅰ》（书籍）\n  - 学途教育的《Java开发入门与进阶》课程\n  - 《Java高级编程》课程（涉及面向对象、泛型、异常处理等）\n\n#### 2. **进阶阶段（深入Java技术栈）**\n- **目标**：熟悉Java在企业级开发中的应用，如Spring框架、数据库操作、Web开发等。\n- **推荐课程**：\n  - 《Spring框架实战》课程\n  - 《MyBatis与MySQL数据库开发》课程\n  - 《Java Web开发实战》课程\n  - 《Java高并发与多线程编程》课程\n\n#### 3. **架构阶段（掌握系统设计与架构思维）**\n- **目标**：学习如何设计可扩展、高性能、稳定的系统架构。\n- **推荐课程**：\n  - 《Java分布式系统设计》课程\n  - 《微服务架构（Spring Cloud）》课程\n  - 《高并发系统设计与优化》课程\n  - 《架构师必修课：系统设计与性能调优》课程\n\n#### 4. **拓展阶段（提升综合能力）**\n- **目标**：了解DevOps、云原生、容器化（如Docker、Kubernetes）、大数据等相关技术。\n- **推荐课程**：\n  - 《Docker与Kubernetes实战》课程\n  - 《云原生与Spring Cloud Alibaba》课程\n  - 《大数据与Hadoop生态》课程\n  - 《AI与机器学习基础》课程（选修，拓宽视野）\n\n---\n\n### 二、学习建议\n\n1. **打好基础**：不要急于追求“架构师”，先练好Java基本功。\n2. **动手实践**：多做项目，尝试自己搭建小型系统或参与开源项目。\n3. **阅读经典书籍**：如《设计模式：可复用面向对象软件的基础》、《架构整洁之道》等。\n4. **关注行业动态**：关注Java社区、技术博客（如掘金、CSDN、知乎），了解最新的技术趋势。\n5. **考取认证**：如Oracle Java认证（OCP）、阿里云ACP、AWS相关认证等，增加竞争力。\n\n---\n\n### 三、推荐课程（学途教育）\n\n| 课程名称 | 适合人群 | 内容概要 |\n|----------|----------|----------|\n| Java开发入门与进阶 | 初学者 | Java基础语法、面向对象、集合、多线程等 |\n| Spring框架实战 | 中级开发者 | Spring、Spring Boot、Spring MVC等 |\n| Java分布式系统设计 | 高级开发者 | 微服务、分布式事务、负载均衡等 |\n| 架构师必修课：系统设计与性能调优 | 有经验开发者 | 系统设计方法、性能优化、高可用性设计 |\n\n---\n\n如果你愿意，我可以根据你的当前水平，帮你制定一个更详细的学习计划。你目前是刚入门还是有一定Java基础呢？😊', NULL, NULL, 0, 'qwen-turbo', '2025-10-15 19:56:43');
+INSERT INTO `chat_history` VALUES (19, 103, '1d58aa33-cd24-4693-af0b-332f0499ef98', 'user', '什么是微服务，什么是分布式', NULL, NULL, 0, 'qwen-turbo', '2025-10-18 18:26:21');
+INSERT INTO `chat_history` VALUES (20, 103, '1d58aa33-cd24-4693-af0b-332f0499ef98', 'assistant', '你好呀，我是小途，很高兴为你解答学习中的问题！\n\n我们来一起了解一下“微服务”和“分布式”这两个概念。它们都是现代软件开发中非常重要的技术，特别是在大型系统或互联网应用中经常被使用。\n\n---\n\n### 一、什么是“微服务”？\n\n**微服务（Microservices）** 是一种软件架构风格，它将一个大的应用程序拆分成多个**小型、独立的服务**，每个服务都运行在自己的进程中，并通过轻量级的通信机制（比如 HTTP 或消息队列）进行交互。\n\n#### 微服务的特点：\n\n1. **独立性**：每个服务都可以独立开发、测试、部署和扩展。\n2. **松耦合**：各个服务之间相互依赖少，修改一个服务不影响其他服务。\n3. **技术多样性**：不同的服务可以用不同的编程语言、数据库等技术实现。\n4. **可伸缩性**：可以根据需求单独扩展某个服务，而不是整个系统。\n\n#### 举个例子：\n\n想象你有一个电商网站，传统做法是一个大系统做所有事情。但用微服务的话，可以拆成：\n- 用户服务（处理登录、注册）\n- 订单服务（处理下单、支付）\n- 商品服务（管理商品信息）\n- 支付服务（处理支付）\n\n每个服务都可以独立运行和维护。\n\n---\n\n### 二、什么是“分布式”？\n\n**分布式（Distributed）** 是指将一个系统拆分成多个部分，这些部分运行在不同的计算机上，彼此之间通过网络进行通信和协调，共同完成一个任务。\n\n#### 分布式系统的特点：\n\n1. **多节点协作**：多个服务器、机器或进程协同工作。\n2. **高可用性**：即使某个节点故障，系统仍能继续运行。\n3. **负载均衡**：任务可以分配到不同节点上，提高效率。\n4. **容错性**：系统能够容忍部分失败并自动恢复。\n\n#### 举个例子：\n\n比如你访问一个大型网站，后台可能有几十台服务器同时处理请求，每台服务器负责一部分任务。这就是典型的分布式系统。\n\n---\n\n### 三、微服务和分布式有什么关系？\n\n微服务通常是在**分布式系统**的基础上构建的。也就是说，微服务是一种**基于分布式架构的设计方式**。\n\n- 每个微服务可以部署在不同的服务器上；\n- 服务之间通过网络通信；\n- 系统整体是分布式的，但每个服务是独立的。\n\n所以可以说：**微服务是分布式的一种实现方式**。\n\n---\n\n### 四、总结一下\n\n| 项目 | 微服务 | 分布式 |\n|------|--------|--------|\n| 定义 | 将系统拆分为多个独立的小服务 | 将系统拆分为多个节点，协同工作 |\n| 特点 | 独立、松耦合、可扩展 | 多节点、高可用、容错 |\n| 关系 | 微服务是分布式的一种实现方式 | 分布式是更广义的概念 |\n\n---\n\n如果你对这些概念感兴趣，我还可以推荐一些相关的课程或者学习资源哦！你想了解哪方面的内容呢？比如 Java 微服务、Spring Cloud、分布式系统设计等等？', NULL, NULL, 0, 'qwen-turbo', '2025-10-18 18:26:21');
 
 -- ----------------------------
 -- Table structure for comment
@@ -244,13 +285,15 @@ CREATE TABLE `comment`  (
   `is_teacher` tinyint NULL DEFAULT 0,
   `is_top` tinyint NULL DEFAULT 0 COMMENT '是否置顶(0:否,1:是)',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '评论表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '评论表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of comment
 -- ----------------------------
 INSERT INTO `comment` VALUES (1, 1, 1, '这门课程很棒，讲解得很详细！', 5, '2025-08-13 22:40:53', '2025-10-05 15:49:10', 0, 1, 0, 0);
 INSERT INTO `comment` VALUES (2, 1, 1, '这门课程很棒，讲解得很详细！测试评论', 5, '2025-10-05 15:47:25', '2025-10-05 15:53:49', 0, 0, 0, 0);
+INSERT INTO `comment` VALUES (3, 103, 1, '测试数据', 3, '2025-10-18 16:34:49', '2025-10-18 16:34:49', 0, 1, 0, 0);
+INSERT INTO `comment` VALUES (4, 103, 2, '测试2222', 5, '2025-10-18 16:35:29', '2025-10-18 16:35:29', 0, 1, 0, 0);
 
 -- ----------------------------
 -- Table structure for comment_like
@@ -296,17 +339,16 @@ CREATE TABLE `course`  (
 -- ----------------------------
 -- Records of course
 -- ----------------------------
-INSERT INTO `course` VALUES (1, 'Java零基础入门教程', '从零开始学习Java编程语言，包含语法基础、面向对象编程、异常处理等核心知识点。适合编程初学者，通过大量实战项目快速掌握Java开发技能。', 'https://www.itcast.cn/files/image/202103/20210302154551447.png', 99.00, 199.00, 1, 100, 0, 1, 1200, 1570, '2025-08-13 21:07:18', '2025-10-05 18:45:49');
-INSERT INTO `course` VALUES (2, 'Java进阶：Spring Boot实战', '深入学习Spring Boot框架，从入门到精通。包含自动配置、起步依赖、Actuator监控、部署等高级特性。通过实际项目开发掌握企业级开发技能。', 'https://example.com/covers/springboot.jpg', 199.00, 299.00, 1, 102, 1, 1, 1800, 856, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `course` VALUES (3, 'Java微服务架构实战', '学习微服务架构设计与实现，包含Spring Cloud、Docker、Kubernetes等技术栈。通过大型项目实战，掌握分布式系统开发与部署。', 'https://example.com/covers/microservice.jpg', 299.00, 399.00, 1, 101, 2, 1, 2400, 423, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `course` VALUES (4, 'Python数据分析入门', '学习Python数据分析的核心库：NumPy、Pandas、Matplotlib。从数据清洗到可视化，掌握数据分析的完整流程。', 'https://example.com/covers/python-data.jpg', 149.00, 249.00, 2, 11, 0, 1, 1500, 732, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `course` VALUES (5, 'Python机器学习实战', '深入学习机器学习算法与实现，包含监督学习、无监督学习、深度学习等。使用scikit-learn、TensorFlow等主流框架。', 'https://example.com/covers/python-ml.jpg', 399.00, 599.00, 2, 5, 2, 1, 3000, 289, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `course` VALUES (6, 'Vue.js 3.0 全家桶开发', '学习Vue.js 3.0的新特性，包含Composition API、Vite构建工具、Vue Router、Vuex状态管理等。通过实战项目掌握现代前端开发。', 'https://example.com/covers/vue3.jpg', 179.00, 279.00, 3, 20, 1, 1, 1600, 945, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `course` VALUES (7, 'React企业级开发实战', '深入学习React生态系统，包含Hooks、Redux、React Router、Next.js等。通过大型SPA项目掌握企业级前端开发技能。', 'https://example.com/covers/react.jpg', 229.00, 329.00, 3, 21, 1, 1, 2000, 567, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `course` VALUES (8, 'MySQL数据库设计与优化', '系统学习MySQL数据库，从基础语法到高级优化。包含索引设计、查询优化、存储过程、主从复制等企业级技能。', 'https://example.com/covers/mysql.jpg', 129.00, 199.00, 4, 30, 0, 1, 1000, 1234, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `course` VALUES (9, 'Redis缓存技术实战', '深入学习Redis缓存技术，包含数据类型、持久化、集群、哨兵等高级特性。掌握高并发系统的缓存设计与优化。', 'https://example.com/covers/redis.jpg', 199.00, 299.00, 4, 31, 1, 1, 1200, 678, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `course` VALUES (10, 'Kubernetes容器编排', '学习Kubernetes容器编排技术，包含Pod、Service、Deployment等核心概念。掌握云原生应用的部署与管理。', 'https://example.com/covers/k8s.jpg', 349.00, 449.00, 5, 1, 2, 2, 2200, 0, '2025-08-13 21:07:18', '2025-10-05 16:06:12');
-INSERT INTO `course` VALUES (11, 'Java基础入门教程，测试数据', '从零开始学习Java编程语言', 'https://example.com/cover.jpg', 99.00, 199.00, 1, 1, 0, 0, 0, 0, '2025-10-05 16:01:05', '2025-10-05 16:01:05');
+INSERT INTO `course` VALUES (1, 'Java零基础入门教程', '从零开始学习Java编程语言，包含语法基础、面向对象编程、异常处理等核心知识点。适合编程初学者，通过大量实战项目快速掌握Java开发技能。', 'http://8.141.106.92/media/covers/Java零基础.jpg', 99.00, 199.00, 1, 10, 0, 1, 1200, 1570, '2025-08-13 21:07:18', '2025-10-18 17:19:25');
+INSERT INTO `course` VALUES (2, 'Java进阶：Spring Boot实战', '深入学习Spring Boot框架，从入门到精通。包含自动配置、起步依赖、Actuator监控、部署等高级特性。通过实际项目开发掌握企业级开发技能。', 'http://8.141.106.92/media/covers/springboot实战.jpg', 199.00, 299.00, 1, 10, 1, 1, 1800, 856, '2025-08-13 21:07:18', '2025-10-18 17:21:05');
+INSERT INTO `course` VALUES (3, 'Java微服务架构实战', '学习微服务架构设计与实现，包含Spring Cloud、Docker、Kubernetes等技术栈。通过大型项目实战，掌握分布式系统开发与部署。', 'http://8.141.106.92/media/covers/微服务.png', 299.00, 399.00, 1, 10, 2, 1, 2400, 423, '2025-08-13 21:07:18', '2025-10-18 17:18:26');
+INSERT INTO `course` VALUES (4, 'Python数据分析入门', '学习Python数据分析的核心库：NumPy、Pandas、Matplotlib。从数据清洗到可视化，掌握数据分析的完整流程。', 'http://8.141.106.92/media/covers/python数据分析入门.png', 149.00, 249.00, 2, 11, 0, 1, 1500, 732, '2025-08-13 21:07:18', '2025-10-18 17:23:46');
+INSERT INTO `course` VALUES (5, 'Python机器学习实战', '深入学习机器学习算法与实现，包含监督学习、无监督学习、深度学习等。使用scikit-learn、TensorFlow等主流框架。', 'http://8.141.106.92/media/covers/Python机器学习实战.jpg', 399.00, 599.00, 2, 11, 2, 1, 3000, 289, '2025-08-13 21:07:18', '2025-10-18 17:25:32');
+INSERT INTO `course` VALUES (6, 'Vue.js 3.0 全家桶开发', '学习Vue.js 3.0的新特性，包含Composition API、Vite构建工具、Vue Router、Vuex状态管理等。通过实战项目掌握现代前端开发。', 'http://8.141.106.92/media/covers/Vue.js 3.0 全家桶开发.png', 179.00, 279.00, 3, 20, 1, 1, 1600, 945, '2025-08-13 21:07:18', '2025-10-18 17:26:58');
+INSERT INTO `course` VALUES (7, 'React企业级开发实战', '深入学习React生态系统，包含Hooks、Redux、React Router、Next.js等。通过大型SPA项目掌握企业级前端开发技能。', 'http://8.141.106.92/media/covers/React企业级开发实战.png', 229.00, 329.00, 3, 21, 1, 1, 2000, 567, '2025-08-13 21:07:18', '2025-10-18 17:28:20');
+INSERT INTO `course` VALUES (8, 'MySQL数据库设计与优化', '系统学习MySQL数据库，从基础语法到高级优化。包含索引设计、查询优化、存储过程、主从复制等企业级技能。', 'http://8.141.106.92/media/covers/MySQL数据库设计与优化.jpg', 129.00, 199.00, 4, 30, 0, 1, 1000, 1234, '2025-08-13 21:07:18', '2025-10-18 17:29:23');
+INSERT INTO `course` VALUES (9, 'Redis缓存技术实战', '深入学习Redis缓存技术，包含数据类型、持久化、集群、哨兵等高级特性。掌握高并发系统的缓存设计与优化。', 'http://8.141.106.92/media/covers/Redis缓存技术实战.png', 199.00, 299.00, 4, 31, 1, 1, 1200, 678, '2025-08-13 21:07:18', '2025-10-18 17:30:21');
+INSERT INTO `course` VALUES (10, 'Kubernetes容器编排', '学习Kubernetes容器编排技术，包含Pod、Service、Deployment等核心概念。掌握云原生应用的部署与管理。', 'http://8.141.106.92/media/covers/Kubernetes容器编排.png', 349.00, 449.00, 5, 10, 2, 1, 2200, 0, '2025-08-13 21:07:18', '2025-10-18 17:40:41');
 
 -- ----------------------------
 -- Table structure for course_tag
@@ -392,6 +434,10 @@ INSERT INTO `learning_record` VALUES (2, 1, 10, 2100, 1, '2025-01-15 11:00:00', 
 INSERT INTO `learning_record` VALUES (2, 1, 11, 1500, 1, '2025-01-15 11:30:00', '2025-01-15 09:25:00', '2025-01-15 11:30:00');
 INSERT INTO `learning_record` VALUES (2, 1, 12, 2400, 1, '2025-01-15 12:00:00', '2025-01-15 09:25:00', '2025-01-15 12:00:00');
 INSERT INTO `learning_record` VALUES (2, 1, 13, 1800, 0, '2025-01-15 14:30:00', '2025-01-15 09:25:00', '2025-01-15 14:30:00');
+INSERT INTO `learning_record` VALUES (103, 1, 1, 100, 0, '2025-10-18 18:36:51', '2025-10-15 19:26:01', '2025-10-18 18:36:51');
+INSERT INTO `learning_record` VALUES (103, 1, 2, 99, 0, '2025-10-18 18:37:19', '2025-10-15 19:21:19', '2025-10-18 18:37:19');
+INSERT INTO `learning_record` VALUES (103, 1, 3, 69, 0, '2025-10-18 18:37:23', '2025-10-18 18:37:22', '2025-10-18 18:37:23');
+INSERT INTO `learning_record` VALUES (103, 1, 23, 21, 0, '2025-10-18 18:36:58', '2025-10-18 16:00:24', '2025-10-18 18:36:58');
 
 -- ----------------------------
 -- Table structure for lesson
@@ -410,22 +456,170 @@ CREATE TABLE `lesson`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `chapter_id`(`chapter_id` ASC) USING BTREE,
   CONSTRAINT `lesson_ibfk_1` FOREIGN KEY (`chapter_id`) REFERENCES `chapter` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 24 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '课时表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 172 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '课时表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of lesson
 -- ----------------------------
-INSERT INTO `lesson` VALUES (1, 1, '1.1 测试数据', 'https://example.com/video.mp4', 30, 1, 1, '2025-08-13 21:07:18', '2025-10-05 16:17:34');
-INSERT INTO `lesson` VALUES (2, 1, '1.2 JDK安装与配置', 'https://example.com/videos/java-1-2.mp4', 25, 1, 2, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `lesson` VALUES (3, 1, '1.3 开发工具IDEA安装', 'https://example.com/videos/java-1-3.mp4', 20, 1, 3, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `lesson` VALUES (4, 1, '1.4 第一个Java程序', 'https://example.com/videos/java-1-4.mp4', 30, 0, 4, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `lesson` VALUES (11, 2, '2.2 变量与常量', 'https://example.com/videos/java-2-2.mp4', 25, 0, 2, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `lesson` VALUES (12, 2, '2.3 运算符与表达式', 'https://example.com/videos/java-2-3.mp4', 40, 0, 3, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `lesson` VALUES (13, 2, '2.4 控制流程语句', 'https://example.com/videos/java-2-4.mp4', 45, 0, 4, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `lesson` VALUES (20, 10, '1.1 Spring Boot简介', 'https://example.com/videos/sb-1-1.mp4', 20, 1, 1, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `lesson` VALUES (21, 10, '1.2 创建第一个Spring Boot项目', 'https://example.com/videos/sb-1-2.mp4', 35, 1, 2, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `lesson` VALUES (22, 10, '1.3 项目结构分析', 'https://example.com/videos/sb-1-3.mp4', 25, 0, 3, '2025-08-13 21:07:18', '2025-08-13 21:07:18');
-INSERT INTO `lesson` VALUES (23, 1, '1.1 Java环境搭建test', 'https://example.com/video.mp4', 30, 1, 1, '2025-10-05 16:13:59', '2025-10-05 16:13:59');
+INSERT INTO `lesson` VALUES (1, 1, '1.1 测试数据', 'http://8.141.106.92/media/videos/Java0.mp4', 30, 1, 1, '2025-08-13 21:07:18', '2025-10-18 18:36:06');
+INSERT INTO `lesson` VALUES (2, 1, '1.2 JDK安装与配置', 'http://8.141.106.92/media/videos/Java0.mp4', 25, 1, 2, '2025-08-13 21:07:18', '2025-10-18 18:36:10');
+INSERT INTO `lesson` VALUES (3, 1, '1.3 开发工具IDEA安装', 'http://8.141.106.92/media/videos/Java0.mp4', 20, 1, 3, '2025-08-13 21:07:18', '2025-10-18 18:36:20');
+INSERT INTO `lesson` VALUES (4, 1, '1.4 第一个Java程序', 'http://8.141.106.92/media/videos/Java0.mp4', 30, 0, 4, '2025-08-13 21:07:18', '2025-10-18 18:36:23');
+INSERT INTO `lesson` VALUES (11, 2, '2.2 变量与常量', 'http://8.141.106.92/media/videos/Java.mp4', 25, 0, 2, '2025-08-13 21:07:18', '2025-10-15 18:50:22');
+INSERT INTO `lesson` VALUES (12, 2, '2.3 运算符与表达式', 'http://8.141.106.92/media/videos/Java.mp4', 40, 0, 3, '2025-08-13 21:07:18', '2025-10-15 18:50:24');
+INSERT INTO `lesson` VALUES (13, 2, '2.4 控制流程语句', 'http://8.141.106.92/media/videos/Java.mp4', 45, 0, 4, '2025-08-13 21:07:18', '2025-10-15 18:50:26');
+INSERT INTO `lesson` VALUES (20, 10, '1.1 Spring Boot简介', 'http://8.141.106.92/media/videos/Java.mp4', 20, 1, 1, '2025-08-13 21:07:18', '2025-10-15 18:50:28');
+INSERT INTO `lesson` VALUES (21, 10, '1.2 创建第一个Spring Boot项目', 'http://8.141.106.92/media/videos/Java.mp4', 35, 1, 2, '2025-08-13 21:07:18', '2025-10-15 18:50:30');
+INSERT INTO `lesson` VALUES (22, 10, '1.3 项目结构分析', 'http://8.141.106.92/media/videos/Java.mp4', 25, 0, 3, '2025-08-13 21:07:18', '2025-10-15 18:50:32');
+INSERT INTO `lesson` VALUES (23, 1, '1.1 Java环境搭建test', 'http://8.141.106.92/media/videos/Java.mp4', 30, 1, 1, '2025-10-05 16:13:59', '2025-10-15 18:50:34');
+INSERT INTO `lesson` VALUES (24, 30, '1.1 微服务架构概述', 'https://example.com/videos/ms-1-1.mp4', 25, 1, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (25, 30, '1.2 单体应用vs微服务', 'https://example.com/videos/ms-1-2.mp4', 30, 1, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (26, 30, '1.3 微服务设计原则', 'https://example.com/videos/ms-1-3.mp4', 35, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (27, 30, '1.4 服务拆分策略', 'https://example.com/videos/ms-1-4.mp4', 40, 0, 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (28, 31, '2.1 Spring Cloud简介', 'https://example.com/videos/ms-2-1.mp4', 20, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (29, 31, '2.2 Eureka服务注册中心', 'https://example.com/videos/ms-2-2.mp4', 45, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (30, 31, '2.3 Ribbon负载均衡', 'https://example.com/videos/ms-2-3.mp4', 35, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (31, 31, '2.4 Feign声明式服务调用', 'https://example.com/videos/ms-2-4.mp4', 40, 0, 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (32, 32, '3.1 Nacos配置中心', 'https://example.com/videos/ms-3-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (33, 32, '3.2 Gateway网关配置', 'https://example.com/videos/ms-3-2.mp4', 40, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (34, 32, '3.3 Sentinel流量控制', 'https://example.com/videos/ms-3-3.mp4', 45, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (35, 33, '4.1 Docker基础入门', 'https://example.com/videos/ms-4-1.mp4', 30, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (36, 33, '4.2 编写Dockerfile', 'https://example.com/videos/ms-4-2.mp4', 35, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (37, 33, '4.3 Docker Compose多容器部署', 'https://example.com/videos/ms-4-3.mp4', 40, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (38, 34, '5.1 K8s架构原理', 'https://example.com/videos/ms-5-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (39, 34, '5.2 部署Spring Cloud到K8s', 'https://example.com/videos/ms-5-2.mp4', 50, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (40, 34, '5.3 监控与日志管理', 'https://example.com/videos/ms-5-3.mp4', 45, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (41, 40, '1.1 数据分析入门', 'https://example.com/videos/py-data-1-1.mp4', 20, 1, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (42, 40, '1.2 Jupyter Notebook使用', 'https://example.com/videos/py-data-1-2.mp4', 25, 1, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (43, 40, '1.3 数据分析流程', 'https://example.com/videos/py-data-1-3.mp4', 30, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (44, 41, '2.1 NumPy数组创建', 'https://example.com/videos/py-data-2-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (45, 41, '2.2 数组索引与切片', 'https://example.com/videos/py-data-2-2.mp4', 30, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (46, 41, '2.3 数组运算与统计', 'https://example.com/videos/py-data-2-3.mp4', 40, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (47, 42, '3.1 Pandas数据结构', 'https://example.com/videos/py-data-3-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (48, 42, '3.2 数据清洗技巧', 'https://example.com/videos/py-data-3-2.mp4', 45, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (49, 42, '3.3 数据聚合与分组', 'https://example.com/videos/py-data-3-3.mp4', 40, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (50, 43, '4.1 Matplotlib绘图基础', 'https://example.com/videos/py-data-4-1.mp4', 30, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (51, 43, '4.2 统计图表绘制', 'https://example.com/videos/py-data-4-2.mp4', 35, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (52, 43, '4.3 综合案例实战', 'https://example.com/videos/py-data-4-3.mp4', 50, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (53, 50, '1.1 机器学习概述', 'https://example.com/videos/ml-1-1.mp4', 30, 1, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (54, 50, '1.2 环境搭建与工具', 'https://example.com/videos/ml-1-2.mp4', 25, 1, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (55, 50, '1.3 特征工程基础', 'https://example.com/videos/ml-1-3.mp4', 40, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (56, 51, '2.1 线性回归算法', 'https://example.com/videos/ml-2-1.mp4', 45, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (57, 51, '2.2 逻辑回归分类', 'https://example.com/videos/ml-2-2.mp4', 40, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (58, 51, '2.3 决策树与随机森林', 'https://example.com/videos/ml-2-3.mp4', 50, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (59, 51, '2.4 支持向量机SVM', 'https://example.com/videos/ml-2-4.mp4', 45, 0, 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (60, 52, '3.1 聚类算法K-Means', 'https://example.com/videos/ml-3-1.mp4', 40, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (61, 52, '3.2 降维算法PCA', 'https://example.com/videos/ml-3-2.mp4', 35, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (62, 53, '4.1 神经网络基础', 'https://example.com/videos/ml-4-1.mp4', 45, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (63, 53, '4.2 TensorFlow入门', 'https://example.com/videos/ml-4-2.mp4', 50, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (64, 53, '4.3 卷积神经网络CNN', 'https://example.com/videos/ml-4-3.mp4', 55, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (65, 54, '5.1 图像分类项目', 'https://example.com/videos/ml-5-1.mp4', 60, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (66, 54, '5.2 推荐系统实战', 'https://example.com/videos/ml-5-2.mp4', 65, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (67, 70, '1.1 React核心概念', 'https://example.com/videos/react-1-1.mp4', 25, 1, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (68, 70, '1.2 JSX语法详解', 'https://example.com/videos/react-1-2.mp4', 30, 1, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (69, 70, '1.3 组件与Props', 'https://example.com/videos/react-1-3.mp4', 35, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (70, 71, '2.1 useState Hook', 'https://example.com/videos/react-2-1.mp4', 30, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (71, 71, '2.2 useEffect Hook', 'https://example.com/videos/react-2-2.mp4', 35, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (72, 71, '2.3 useContext Hook', 'https://example.com/videos/react-2-3.mp4', 30, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (73, 71, '2.4 自定义Hooks', 'https://example.com/videos/react-2-4.mp4', 40, 0, 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (74, 72, '3.1 Redux核心概念', 'https://example.com/videos/react-3-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (75, 72, '3.2 Redux Toolkit', 'https://example.com/videos/react-3-2.mp4', 40, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (76, 72, '3.3 Redux中间件', 'https://example.com/videos/react-3-3.mp4', 35, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (77, 73, '4.1 React Router配置', 'https://example.com/videos/react-4-1.mp4', 30, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (78, 73, '4.2 路由嵌套与参数', 'https://example.com/videos/react-4-2.mp4', 35, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (79, 73, '4.3 路由守卫与懒加载', 'https://example.com/videos/react-4-3.mp4', 40, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (80, 74, '5.1 项目架构设计', 'https://example.com/videos/react-5-1.mp4', 45, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (81, 74, '5.2 组件库封装', 'https://example.com/videos/react-5-2.mp4', 50, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (82, 74, '5.3 性能优化技巧', 'https://example.com/videos/react-5-3.mp4', 45, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (83, 74, '5.4 项目打包部署', 'https://example.com/videos/react-5-4.mp4', 35, 0, 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (84, 80, '1.1 MySQL安装与配置', 'https://example.com/videos/mysql-1-1.mp4', 20, 1, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (85, 80, '1.2 SQL基础语法', 'https://example.com/videos/mysql-1-2.mp4', 30, 1, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (86, 80, '1.3 数据类型详解', 'https://example.com/videos/mysql-1-3.mp4', 25, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (87, 81, '2.1 数据库设计原则', 'https://example.com/videos/mysql-2-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (88, 81, '2.2 ER图与建模', 'https://example.com/videos/mysql-2-2.mp4', 40, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (89, 81, '2.3 三范式设计', 'https://example.com/videos/mysql-2-3.mp4', 35, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (90, 82, '3.1 索引原理与类型', 'https://example.com/videos/mysql-3-1.mp4', 40, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (91, 82, '3.2 查询优化技巧', 'https://example.com/videos/mysql-3-2.mp4', 45, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (92, 82, '3.3 Explain执行计划分析', 'https://example.com/videos/mysql-3-3.mp4', 40, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (93, 83, '4.1 存储过程与函数', 'https://example.com/videos/mysql-4-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (94, 83, '4.2 事务与锁机制', 'https://example.com/videos/mysql-4-2.mp4', 40, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (95, 83, '4.3 主从复制配置', 'https://example.com/videos/mysql-4-3.mp4', 45, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (96, 91, '1.1 Redis简介与安装', 'https://example.com/videos/redis-1-1.mp4', 20, 1, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (97, 90, '1.2 Redis基本命令', 'https://example.com/videos/redis-1-2.mp4', 25, 1, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (98, 90, '1.3 Redis客户端工具', 'https://example.com/videos/redis-1-3.mp4', 20, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (99, 91, '2.1 String字符串类型', 'https://example.com/videos/redis-2-1.mp4', 30, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (100, 91, '2.2 Hash哈希类型', 'https://example.com/videos/redis-2-2.mp4', 30, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (101, 91, '2.3 List列表类型', 'https://example.com/videos/redis-2-3.mp4', 30, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (102, 91, '2.4 Set集合与ZSet', 'https://example.com/videos/redis-2-4.mp4', 35, 0, 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (103, 92, '3.1 持久化RDB与AOF', 'https://example.com/videos/redis-3-1.mp4', 40, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (104, 92, '3.2 主从复制', 'https://example.com/videos/redis-3-2.mp4', 35, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (105, 92, '3.3 哨兵模式', 'https://example.com/videos/redis-3-3.mp4', 40, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (106, 92, '3.4 集群模式', 'https://example.com/videos/redis-3-4.mp4', 45, 0, 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (107, 93, '4.1 缓存穿透解决方案', 'https://example.com/videos/redis-4-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (108, 93, '4.2 缓存雪崩与击穿', 'https://example.com/videos/redis-4-2.mp4', 40, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (109, 93, '4.3 分布式锁实现', 'https://example.com/videos/redis-4-3.mp4', 45, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (110, 100, '1.1 Kubernetes概述', 'https://example.com/videos/k8s-1-1.mp4', 25, 1, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (111, 100, '1.2 环境搭建', 'https://example.com/videos/k8s-1-2.mp4', 30, 1, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (112, 100, '1.3 架构与组件', 'https://example.com/videos/k8s-1-3.mp4', 35, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (113, 101, '2.1 Pod详解', 'https://example.com/videos/k8s-2-1.mp4', 40, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (114, 101, '2.2 Service服务', 'https://example.com/videos/k8s-2-2.mp4', 35, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (115, 101, '2.3 Deployment部署', 'https://example.com/videos/k8s-2-3.mp4', 40, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (116, 101, '2.4 ConfigMap与Secret', 'https://example.com/videos/k8s-2-4.mp4', 35, 0, 4, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (117, 102, '3.1 部署有状态应用', 'https://example.com/videos/k8s-3-1.mp4', 45, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (118, 102, '3.2 Ingress网关配置', 'https://example.com/videos/k8s-3-2.mp4', 40, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (119, 102, '3.3 持久化存储', 'https://example.com/videos/k8s-3-3.mp4', 45, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (120, 103, '4.1 水平扩展HPA', 'https://example.com/videos/k8s-4-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (121, 103, '4.2 监控与日志', 'https://example.com/videos/k8s-4-2.mp4', 40, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (122, 103, '4.3 CI/CD流水线', 'https://example.com/videos/k8s-4-3.mp4', 50, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (123, 2, '2.1 数据类型详解', 'https://example.com/videos/java-2-1.mp4', 30, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (124, 20, '1.2 Vue3环境搭建', 'https://example.com/videos/vue-1-2.mp4', 25, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (125, 20, '1.3 创建第一个Vue3项目', 'https://example.com/videos/vue-1-3.mp4', 30, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (126, 21, '2.1 setup函数详解', 'https://example.com/videos/vue-2-1.mp4', 35, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (127, 21, '2.2 ref与reactive', 'https://example.com/videos/vue-2-2.mp4', 30, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (128, 21, '2.3 computed与watch', 'https://example.com/videos/vue-2-3.mp4', 35, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (129, 22, '3.1 组件通信方式', 'https://example.com/videos/vue-3-1.mp4', 40, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (130, 22, '3.2 插槽与动态组件', 'https://example.com/videos/vue-3-2.mp4', 35, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (131, 22, '3.3 组件最佳实践', 'https://example.com/videos/vue-3-3.mp4', 40, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (132, 23, '4.1 Vue Router配置', 'https://example.com/videos/vue-4-1.mp4', 30, 0, 1, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (133, 23, '4.2 Pinia状态管理', 'https://example.com/videos/vue-4-2.mp4', 40, 0, 2, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (134, 23, '4.3 综合项目实战', 'https://example.com/videos/vue-4-3.mp4', 50, 0, 3, '2025-10-18 17:40:41', '2025-10-18 17:40:41');
+INSERT INTO `lesson` VALUES (135, 3, '3.1 类与对象', 'http://8.141.106.92/media/videos/java-3-1.mp4', 35, 0, 1, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (136, 3, '3.2 封装与访问控制', 'http://8.141.106.92/media/videos/java-3-2.mp4', 30, 0, 2, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (137, 3, '3.3 继承与多态', 'http://8.141.106.92/media/videos/java-3-3.mp4', 40, 0, 3, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (138, 3, '3.4 抽象类与接口', 'http://8.141.106.92/media/videos/java-3-4.mp4', 35, 0, 4, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (139, 3, '3.5 面向对象综合案例', 'http://8.141.106.92/media/videos/java-3-5.mp4', 45, 0, 5, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (140, 4, '4.1 异常机制概述', 'http://8.141.106.92/media/videos/java-4-1.mp4', 25, 0, 1, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (141, 4, '4.2 try-catch-finally', 'http://8.141.106.92/media/videos/java-4-2.mp4', 30, 0, 2, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (142, 4, '4.3 自定义异常', 'http://8.141.106.92/media/videos/java-4-3.mp4', 35, 0, 3, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (143, 4, '4.4 调试技巧与工具', 'http://8.141.106.92/media/videos/java-4-4.mp4', 40, 0, 4, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (144, 5, '5.1 集合框架概述', 'http://8.141.106.92/media/videos/java-5-1.mp4', 30, 0, 1, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (145, 5, '5.2 List接口与实现类', 'http://8.141.106.92/media/videos/java-5-2.mp4', 40, 0, 2, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (146, 5, '5.3 Set接口与实现类', 'http://8.141.106.92/media/videos/java-5-3.mp4', 35, 0, 3, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (147, 5, '5.4 Map接口与实现类', 'http://8.141.106.92/media/videos/java-5-4.mp4', 40, 0, 4, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (148, 5, '5.5 集合工具类与泛型', 'http://8.141.106.92/media/videos/java-5-5.mp4', 35, 0, 5, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (149, 5, '5.6 集合框架综合案例', 'http://8.141.106.92/media/videos/java-5-6.mp4', 45, 0, 6, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (150, 11, '2.1 Spring Boot自动配置机制', 'http://8.141.106.92/media/videos/sb-2-1.mp4', 35, 0, 1, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (151, 11, '2.2 条件注解详解', 'http://8.141.106.92/media/videos/sb-2-2.mp4', 30, 0, 2, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (152, 11, '2.3 自定义Starter', 'http://8.141.106.92/media/videos/sb-2-3.mp4', 40, 0, 3, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (153, 11, '2.4 配置文件详解', 'http://8.141.106.92/media/videos/sb-2-4.mp4', 35, 0, 4, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (154, 12, '3.1 RESTful API设计', 'http://8.141.106.92/media/videos/sb-3-1.mp4', 35, 0, 1, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (155, 12, '3.2 Controller层开发', 'http://8.141.106.92/media/videos/sb-3-2.mp4', 40, 0, 2, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (156, 12, '3.3 参数接收与验证', 'http://8.141.106.92/media/videos/sb-3-3.mp4', 35, 0, 3, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (157, 12, '3.4 统一异常处理', 'http://8.141.106.92/media/videos/sb-3-4.mp4', 30, 0, 4, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (158, 12, '3.5 文件上传下载', 'http://8.141.106.92/media/videos/sb-3-5.mp4', 35, 0, 5, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (159, 12, '3.6 Swagger接口文档', 'http://8.141.106.92/media/videos/sb-3-6.mp4', 30, 0, 6, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (160, 13, '4.1 Spring Data JPA入门', 'http://8.141.106.92/media/videos/sb-4-1.mp4', 40, 0, 1, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (161, 13, '4.2 JPA查询方法', 'http://8.141.106.92/media/videos/sb-4-2.mp4', 35, 0, 2, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (162, 13, '4.3 MyBatis整合', 'http://8.141.106.92/media/videos/sb-4-3.mp4', 45, 0, 3, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (163, 13, '4.4 MyBatis-Plus实战', 'http://8.141.106.92/media/videos/sb-4-4.mp4', 40, 0, 4, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (164, 13, '4.5 多数据源配置', 'http://8.141.106.92/media/videos/sb-4-5.mp4', 35, 0, 5, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (165, 13, '4.6 事务管理', 'http://8.141.106.92/media/videos/sb-4-6.mp4', 40, 0, 6, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (166, 14, '5.1 Spring Security入门', 'http://8.141.106.92/media/videos/sb-5-1.mp4', 40, 0, 1, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (167, 14, '5.2 JWT令牌认证', 'http://8.141.106.92/media/videos/sb-5-2.mp4', 45, 0, 2, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (168, 14, '5.3 权限控制', 'http://8.141.106.92/media/videos/sb-5-3.mp4', 35, 0, 3, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (169, 14, '5.4 Actuator监控', 'http://8.141.106.92/media/videos/sb-5-4.mp4', 30, 0, 4, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (170, 14, '5.5 日志管理', 'http://8.141.106.92/media/videos/sb-5-5.mp4', 30, 0, 5, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
+INSERT INTO `lesson` VALUES (171, 14, '5.6 应用部署与打包', 'http://8.141.106.92/media/videos/sb-5-6.mp4', 35, 0, 6, '2025-10-18 17:50:16', '2025-10-18 17:50:16');
 
 -- ----------------------------
 -- Table structure for note
@@ -481,7 +675,7 @@ CREATE TABLE `order`  (
   `updated_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `order_no`(`order_no` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of order
@@ -491,6 +685,9 @@ INSERT INTO `order` VALUES (3, 'ORD202510141841310001', 103, 99.00, 99.00, 0.00,
 INSERT INTO `order` VALUES (4, 'ORD202510141847130002', 103, 846.00, 846.00, 0.00, 0, NULL, NULL, '2025-10-14 18:47:14', '2025-10-14 18:47:14');
 INSERT INTO `order` VALUES (5, 'ORD202510141850010003', 103, 846.00, 846.00, 0.00, 0, NULL, NULL, '2025-10-14 18:50:02', '2025-10-14 18:50:02');
 INSERT INTO `order` VALUES (6, 'ORD202510141855500004', 103, 846.00, 846.00, 0.00, 0, NULL, NULL, '2025-10-14 18:55:51', '2025-10-14 18:55:51');
+INSERT INTO `order` VALUES (7, 'ORD202510141905300005', 103, 846.00, 846.00, 0.00, 0, NULL, NULL, '2025-10-14 19:05:31', '2025-10-14 19:05:31');
+INSERT INTO `order` VALUES (8, 'ORD202510141909580006', 103, 846.00, 846.00, 0.00, 0, NULL, NULL, '2025-10-14 19:09:59', '2025-10-14 19:09:59');
+INSERT INTO `order` VALUES (9, 'ORD202510141913170001', 103, 846.00, 846.00, 0.00, 1, NULL, NULL, '2025-10-14 19:13:17', '2025-10-14 19:13:17');
 
 -- ----------------------------
 -- Table structure for order_item
@@ -508,7 +705,7 @@ CREATE TABLE `order_item`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `order_id`(`order_id` ASC) USING BTREE,
   CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单项表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 28 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单项表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of order_item
@@ -528,6 +725,18 @@ INSERT INTO `order_item` VALUES (12, 6, 1, 'Java零基础入门教程', 'https:/
 INSERT INTO `order_item` VALUES (13, 6, 5, 'Python机器学习实战', 'https://example.com/covers/python-ml.jpg', 399.00, '2025-10-14 18:55:51', '2025-10-14 18:55:51');
 INSERT INTO `order_item` VALUES (14, 6, 4, 'Python数据分析入门', 'https://example.com/covers/python-data.jpg', 149.00, '2025-10-14 18:55:51', '2025-10-14 18:55:51');
 INSERT INTO `order_item` VALUES (15, 6, 2, 'Java进阶：Spring Boot实战', 'https://example.com/covers/springboot.jpg', 199.00, '2025-10-14 18:55:51', '2025-10-14 18:55:51');
+INSERT INTO `order_item` VALUES (16, 7, 1, 'Java零基础入门教程', 'https://www.itcast.cn/files/image/202103/20210302154551447.png', 99.00, '2025-10-14 19:05:31', '2025-10-14 19:05:31');
+INSERT INTO `order_item` VALUES (17, 7, 5, 'Python机器学习实战', 'https://example.com/covers/python-ml.jpg', 399.00, '2025-10-14 19:05:31', '2025-10-14 19:05:31');
+INSERT INTO `order_item` VALUES (18, 7, 4, 'Python数据分析入门', 'https://example.com/covers/python-data.jpg', 149.00, '2025-10-14 19:05:31', '2025-10-14 19:05:31');
+INSERT INTO `order_item` VALUES (19, 7, 2, 'Java进阶：Spring Boot实战', 'https://example.com/covers/springboot.jpg', 199.00, '2025-10-14 19:05:31', '2025-10-14 19:05:31');
+INSERT INTO `order_item` VALUES (20, 8, 1, 'Java零基础入门教程', 'https://www.itcast.cn/files/image/202103/20210302154551447.png', 99.00, '2025-10-14 19:09:59', '2025-10-14 19:09:59');
+INSERT INTO `order_item` VALUES (21, 8, 5, 'Python机器学习实战', 'https://example.com/covers/python-ml.jpg', 399.00, '2025-10-14 19:09:59', '2025-10-14 19:09:59');
+INSERT INTO `order_item` VALUES (22, 8, 4, 'Python数据分析入门', 'https://example.com/covers/python-data.jpg', 149.00, '2025-10-14 19:09:59', '2025-10-14 19:09:59');
+INSERT INTO `order_item` VALUES (23, 8, 2, 'Java进阶：Spring Boot实战', 'https://example.com/covers/springboot.jpg', 199.00, '2025-10-14 19:09:59', '2025-10-14 19:09:59');
+INSERT INTO `order_item` VALUES (24, 9, 1, 'Java零基础入门教程', 'https://www.itcast.cn/files/image/202103/20210302154551447.png', 99.00, '2025-10-14 19:13:17', '2025-10-14 19:13:17');
+INSERT INTO `order_item` VALUES (25, 9, 5, 'Python机器学习实战', 'https://example.com/covers/python-ml.jpg', 399.00, '2025-10-14 19:13:17', '2025-10-14 19:13:17');
+INSERT INTO `order_item` VALUES (26, 9, 4, 'Python数据分析入门', 'https://example.com/covers/python-data.jpg', 149.00, '2025-10-14 19:13:17', '2025-10-14 19:13:17');
+INSERT INTO `order_item` VALUES (27, 9, 2, 'Java进阶：Spring Boot实战', 'https://example.com/covers/springboot.jpg', 199.00, '2025-10-14 19:13:17', '2025-10-14 19:13:17');
 
 -- ----------------------------
 -- Table structure for payment
@@ -545,7 +754,7 @@ CREATE TABLE `payment`  (
   `updated_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_order_id`(`order_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of payment
@@ -562,7 +771,11 @@ CREATE TABLE `payment_record`  (
   `total_amount` decimal(10, 2) NOT NULL COMMENT '支付金额',
   `payment_type` tinyint NOT NULL DEFAULT 1 COMMENT '支付方式(0:微信,1:支付宝,2:银行卡)',
   `status` tinyint NOT NULL DEFAULT 0 COMMENT '支付状态(0:待支付,1:支付成功,2:支付失败,3:已退款)',
+  `transaction_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '第三方交易流水号',
   `payment_time` datetime NULL DEFAULT NULL COMMENT '支付时间',
+  `callback_time` datetime NULL DEFAULT NULL COMMENT '回调时间',
+  `callback_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '回调内容',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   `created_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
@@ -570,20 +783,16 @@ CREATE TABLE `payment_record`  (
   INDEX `idx_order_id`(`order_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_payment_time`(`payment_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of payment_record
 -- ----------------------------
-INSERT INTO `payment_record` VALUES (1, 1, 'PAY202501160001', 199.00, 1, 1, '2025-01-16 10:30:00', '2025-08-16 19:14:23', '2025-08-16 19:14:23');
-INSERT INTO `payment_record` VALUES (2, 2, 'PAY202501160002', 299.00, 0, 1, '2025-01-16 11:15:00', '2025-08-16 19:14:23', '2025-08-16 19:14:23');
-INSERT INTO `payment_record` VALUES (3, 5, 'PAY202510141855040001', 846.00, 3, 0, NULL, '2025-10-14 18:55:04', '2025-10-14 18:55:04');
-INSERT INTO `payment_record` VALUES (4, 6, 'PAY202510141855530002', 846.00, 3, 0, NULL, '2025-10-14 18:55:54', '2025-10-14 18:55:54');
-INSERT INTO `payment_record` VALUES (5, 6, 'PAY202510141856100003', 846.00, 2, 0, NULL, '2025-10-14 18:56:10', '2025-10-14 18:56:10');
-INSERT INTO `payment_record` VALUES (6, 6, 'PAY202510141856120004', 846.00, 1, 0, NULL, '2025-10-14 18:56:13', '2025-10-14 18:56:13');
-INSERT INTO `payment_record` VALUES (7, 6, 'PAY202510141856170005', 846.00, 3, 0, NULL, '2025-10-14 18:56:17', '2025-10-14 18:56:17');
-INSERT INTO `payment_record` VALUES (8, 6, 'PAY202510141856210006', 846.00, 3, 0, NULL, '2025-10-14 18:56:22', '2025-10-14 18:56:22');
-INSERT INTO `payment_record` VALUES (9, 6, 'PAY202510141856510007', 846.00, 3, 0, NULL, '2025-10-14 18:56:52', '2025-10-14 18:56:52');
+INSERT INTO `payment_record` VALUES (1, 1, 'PAY202501160001', 199.00, 1, 1, NULL, '2025-01-16 10:30:00', NULL, NULL, NULL, '2025-08-16 19:14:23', '2025-08-16 19:14:23');
+INSERT INTO `payment_record` VALUES (2, 2, 'PAY202501160002', 299.00, 0, 1, NULL, '2025-01-16 11:15:00', NULL, NULL, NULL, '2025-08-16 19:14:23', '2025-08-16 19:14:23');
+INSERT INTO `payment_record` VALUES (14, 9, 'PAY202510141913180001', 846.00, 3, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-14 19:13:18', '2025-10-14 19:13:18');
+INSERT INTO `payment_record` VALUES (15, 9, 'PAY202510141916170001', 846.00, 3, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-14 19:16:17', '2025-10-14 19:16:17');
+INSERT INTO `payment_record` VALUES (16, 9, 'PAY202510141918360001', 846.00, 3, 1, 'SIM1760440716169', '2025-10-14 19:18:36', '2025-10-14 19:18:36', '{\"status\":\"success\",\"message\":\"模拟支付成功\"}', '模拟支付 - 自动成功', '2025-10-14 19:18:36', '2025-10-14 19:18:36');
 
 -- ----------------------------
 -- Table structure for permission
@@ -660,12 +869,13 @@ CREATE TABLE `reply`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `comment_id`(`comment_id` ASC) USING BTREE,
   CONSTRAINT `reply_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '回复表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '回复表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of reply
 -- ----------------------------
 INSERT INTO `reply` VALUES (1, 2, 1, '说得很对，我也有同样的感受！', '2025-10-05 15:50:33', '2025-10-05 15:51:51', 2, 1, 1);
+INSERT INTO `reply` VALUES (2, 103, 1, '测试111', '2025-10-18 16:35:09', '2025-10-18 16:35:09', NULL, 0, 1);
 
 -- ----------------------------
 -- Table structure for role
@@ -902,7 +1112,7 @@ CREATE TABLE `user_course`  (
   INDEX `idx_order_id`(`order_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_purchase_time`(`purchase_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户课程关系表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户课程关系表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_course
@@ -910,6 +1120,10 @@ CREATE TABLE `user_course`  (
 INSERT INTO `user_course` VALUES (1, 1, 1, 1, 199.00, '2025-01-16 10:31:00', 50, '2025-10-05 16:41:05', 1, NULL, '2025-08-16 19:14:23', '2025-10-05 16:41:05');
 INSERT INTO `user_course` VALUES (2, 1, 2, 2, 299.00, '2025-01-16 11:16:00', 33, '2025-09-09 18:23:44', 1, NULL, '2025-08-16 19:14:23', '2025-09-09 18:23:44');
 INSERT INTO `user_course` VALUES (3, 2, 1, NULL, 199.00, '2025-01-15 09:20:00', 80, NULL, 1, NULL, '2025-08-16 19:14:23', '2025-08-16 19:14:23');
+INSERT INTO `user_course` VALUES (4, 103, 1, 9, 99.00, '2025-10-14 19:18:36', 0, '2025-10-18 18:37:23', 1, NULL, '2025-10-14 19:18:36', '2025-10-18 18:37:23');
+INSERT INTO `user_course` VALUES (5, 103, 5, 9, 399.00, '2025-10-14 19:18:36', 0, NULL, 1, NULL, '2025-10-14 19:18:36', '2025-10-14 19:18:36');
+INSERT INTO `user_course` VALUES (6, 103, 4, 9, 149.00, '2025-10-14 19:18:36', 0, NULL, 1, NULL, '2025-10-14 19:18:36', '2025-10-14 19:18:36');
+INSERT INTO `user_course` VALUES (7, 103, 2, 9, 199.00, '2025-10-14 19:18:36', 0, NULL, 1, NULL, '2025-10-14 19:18:36', '2025-10-14 19:18:36');
 
 -- ----------------------------
 -- Table structure for user_role

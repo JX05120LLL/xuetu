@@ -188,17 +188,20 @@ const filters = reactive<{
   status: 1  // 只显示已发布的课程
 })
 
-// 难度级别选项
+// 难度级别选项（根据数据库实际的level值：0=初级, 1=中级, 2=高级）
 const levelOptions = [
   { value: undefined, label: '全部', icon: 'Star', color: '#999' },
-  { value: 1, label: '初级', icon: 'Star', color: '#67C23A' },
-  { value: 2, label: '中级', icon: 'TrendCharts', color: '#E6A23C' },
-  { value: 3, label: '高级', icon: 'Trophy', color: '#F56C6C' }
+  { value: 0, label: '初级', icon: 'Star', color: '#67C23A' },
+  { value: 1, label: '中级', icon: 'TrendCharts', color: '#E6A23C' },
+  { value: 2, label: '高级', icon: 'Trophy', color: '#F56C6C' }
 ]
 
-// 父级分类（一级分类）
+// 父级分类（一级分类）- 显示所有分类，不区分层级
 const parentCategories = computed(() => {
-  return categories.value.filter(c => !c.parentId || c.parentId === 0)
+  // 如果有parent_id为0的分类，只显示一级分类
+  const topLevel = categories.value.filter(c => !c.parentId || c.parentId === 0)
+  // 如果没有，显示所有分类
+  return topLevel.length > 0 ? topLevel : categories.value
 })
 
 // 获取子分类
@@ -254,12 +257,20 @@ const clearLevel = () => {
 const fetchCourseList = async () => {
   loading.value = true
   try {
-    const res = await getCourseList({
+    const params = {
       ...pagination,
       ...filters
-    })
+    }
+    console.log('📚 请求课程列表，参数:', params)
+    
+    const res = await getCourseList(params)
     courseList.value = res.records
     total.value = res.total
+    
+    console.log('📚 获取到课程:', res.records.length, '门，总数:', res.total)
+    if (res.records.length > 0) {
+      console.log('📚 第一门课程:', res.records[0])
+    }
   } catch (error) {
     console.error('获取课程列表失败:', error)
   } finally {
@@ -271,6 +282,9 @@ const fetchCourseList = async () => {
 const fetchCategories = async () => {
   const result = await courseStore.fetchCategories()
   categories.value = result
+  
+  console.log('📁 获取到的分类数据:', categories.value)
+  console.log('📁 一级分类:', parentCategories.value)
   
   // 自动展开第一个有子分类的一级分类
   const firstParentWithChildren = parentCategories.value.find(p => getChildCategories(p.id).length > 0)

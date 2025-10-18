@@ -1,5 +1,5 @@
 import request from './request'
-import type { Course, Category, Chapter, Lesson, Comment } from '@/types/course'
+import type { Course, Category, Chapter, Lesson } from '@/types/course'
 import type { PageParam, PageResult } from '@/types/common'
 
 /**
@@ -77,17 +77,6 @@ export function getChapterLessons(chapterId: number): Promise<Lesson[]> {
   return request({
     url: `/lesson/chapter/${chapterId}`,
     method: 'get'
-  })
-}
-
-/**
- * 获取课程评论
- */
-export function getCourseComments(params: PageParam & { courseId: number }): Promise<PageResult<Comment>> {
-  return request({
-    url: '/comment/list',
-    method: 'get',
-    params
   })
 }
 

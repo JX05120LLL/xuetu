@@ -112,6 +112,17 @@ export function updateLearningProgress(data: {
 }
 
 /**
+ * 同步课程进度到user_course表
+ * 用于在前端更新学习进度后，同步数据到数据库的user_course表
+ */
+export function syncCourseProgress(courseId: number): Promise<boolean> {
+  return request({
+    url: `/learning/record/sync-course-progress/${courseId}`,
+    method: 'post'
+  })
+}
+
+/**
  * 获取我的笔记列表
  */
 export function getMyNotes(params: PageParam & { courseId?: number }): Promise<PageResult<Note>> {

@@ -23,27 +23,22 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '注册' }
   },
   {
-    path: '/course',
-    children: [
-      {
-        path: 'list',
-        name: 'CourseList',
-        component: () => import('@/views/Course/List.vue'),
-        meta: { title: '课程列表' }
-      },
-      {
-        path: ':id',
-        name: 'CourseDetail',
-        component: () => import('@/views/Course/Detail.vue'),
-        meta: { title: '课程详情' }
-      },
-      {
-        path: ':id/play',
-        name: 'CoursePlay',
-        component: () => import('@/views/Course/Play.vue'),
-        meta: { title: '课程播放', requiresAuth: true }
-      }
-    ]
+    path: '/course/list',
+    name: 'CourseList',
+    component: () => import('@/views/Course/List.vue'),
+    meta: { title: '课程列表' }
+  },
+  {
+    path: '/course/:id',
+    name: 'CourseDetail',
+    component: () => import('@/views/Course/Detail.vue'),
+    meta: { title: '课程详情' }
+  },
+  {
+    path: '/course/:id/play',
+    name: 'CoursePlay',
+    component: () => import('@/views/Course/Play.vue'),
+    meta: { title: '课程播放', requiresAuth: true }
   },
   {
     path: '/order',
