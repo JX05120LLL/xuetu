@@ -109,13 +109,14 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
                 userId, monthStart, LocalDateTime.now());
         stats.setMonthLearningTime(monthLearningTimeSeconds != null ? monthLearningTimeSeconds.intValue() / 60 : 0);
 
-        // 查询课程统计
-        Integer totalCourses = learningRecordMapper.countLearningCoursesByUserId(userId);
+        // 查询课程统计（从user_course表）
+        Integer totalCourses = userCourseMapper.countTotalCoursesByUserId(userId);
         stats.setTotalCourses(totalCourses != null ? totalCourses : 0);
 
-        Integer completedCourses = learningRecordMapper.countCompletedCoursesByUserId(userId);
+        Integer completedCourses = userCourseMapper.countCompletedCoursesByUserId(userId);
         stats.setCompletedCourses(completedCourses != null ? completedCourses : 0);
 
+        // 正在学习的课程数 = 总课程数 - 完成的课程数
         stats.setLearningCourses(stats.getTotalCourses() - stats.getCompletedCourses());
 
         // 查询完成的课时数
@@ -134,6 +135,10 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
         if (!recentRecords.isEmpty()) {
             stats.setLastLearnTime(recentRecords.get(0).getLastLearnTime());
         }
+
+        // 计算平均进度（从user_course表）
+        Double avgProgress = userCourseMapper.selectAverageProgressByUserId(userId);
+        stats.setAverageProgress(avgProgress != null ? avgProgress.intValue() : 0);
 
         return stats;
     }

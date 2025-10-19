@@ -56,13 +56,22 @@ public class OrderController {
     }
 
     @GetMapping("/my")
-    @Operation(summary = "查询我的订单", description = "分页查询当前用户的订单列表")
+    @Operation(summary = "查询我的订单", description = "分页查询当前用户的订单列表，支持按状态筛选")
     public R<PageResult<OrderDTO>> getMyOrders(@Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer current,
                                                @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Integer size,
+                                               @Parameter(description = "订单状态（可选）") @RequestParam(required = false) Integer status,
                                                HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         PageParam pageParam = new PageParam(current, size);
-        PageResult<OrderDTO> orders = orderService.getUserOrders(userId, pageParam);
+        
+        // 如果指定了status，按状态查询；否则查询所有订单
+        PageResult<OrderDTO> orders;
+        if (status != null) {
+            orders = orderService.getUserOrdersByStatus(userId, status, pageParam);
+        } else {
+            orders = orderService.getUserOrders(userId, pageParam);
+        }
+        
         return R.ok(orders);
     }
 

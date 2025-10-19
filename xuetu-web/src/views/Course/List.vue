@@ -107,6 +107,18 @@
 
           <!-- 课程列表主区域 -->
           <main class="course-list-main">
+            <!-- 搜索关键词显示 -->
+            <div v-if="searchKeyword" class="search-info">
+              <div class="search-tag">
+                <el-icon><Search /></el-icon>
+                <span>搜索：{{ searchKeyword }}</span>
+                <el-icon class="close-icon" @click="clearSearch"><Close /></el-icon>
+              </div>
+              <div class="search-tip">
+                找到 <span class="highlight">{{ total }}</span> 门相关课程
+              </div>
+            </div>
+
             <!-- 排序和搜索 -->
             <div class="list-header">
               <div class="total-count">共 {{ total }} 门课程</div>
@@ -153,11 +165,11 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { Check, Star, TrendCharts, Trophy, ArrowDown, ArrowUp } from '@element-plus/icons-vue'
+import { Check, Star, TrendCharts, Trophy, ArrowDown, ArrowUp, Search, Close } from '@element-plus/icons-vue'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import CourseCard from '@/components/CourseCard.vue'
-import { getCourseList } from '@/api/course'
+import { getCourseList, searchCourses } from '@/api/course'
 import { useCourseStore } from '@/stores/course'
 import type { Course } from '@/types/course'
 
@@ -170,6 +182,7 @@ const total = ref(0)
 const categories = ref<any[]>([])
 const sortType = ref('latest')
 const expandedCategories = reactive<Record<number, boolean>>({})
+const searchKeyword = ref('') // 搜索关键词
 
 const pagination = reactive({
   current: 1,
@@ -257,22 +270,36 @@ const clearLevel = () => {
 const fetchCourseList = async () => {
   loading.value = true
   try {
-    const params = {
-      ...pagination,
-      ...filters
-    }
-    console.log('📚 请求课程列表，参数:', params)
+    let res
     
-    const res = await getCourseList(params)
+    // 判断是否是搜索模式
+    if (searchKeyword.value) {
+      // 使用搜索接口（支持标题+描述搜索）
+      console.log('🔍 搜索课程，关键词:', searchKeyword.value)
+      res = await searchCourses({
+        ...pagination,
+        keyword: searchKeyword.value
+      })
+      console.log('🔍 搜索结果:', res.records.length, '门课程')
+    } else {
+      // 使用普通列表接口（支持筛选）
+      const params = {
+        ...pagination,
+        ...filters
+      }
+      console.log('📚 请求课程列表，参数:', params)
+      res = await getCourseList(params)
+      console.log('📚 获取到课程:', res.records.length, '门，总数:', res.total)
+    }
+    
     courseList.value = res.records
     total.value = res.total
     
-    console.log('📚 获取到课程:', res.records.length, '门，总数:', res.total)
     if (res.records.length > 0) {
       console.log('📚 第一门课程:', res.records[0])
     }
   } catch (error) {
-    console.error('获取课程列表失败:', error)
+    console.error('获取课程失败:', error)
   } finally {
     loading.value = false
   }
@@ -305,13 +332,28 @@ const handleSortChange = () => {
   fetchCourseList()
 }
 
-// 监听路由参数
+// 清除搜索
+const clearSearch = () => {
+  searchKeyword.value = ''
+  // 清空URL中的keyword参数
+  window.history.replaceState({}, '', '/course/list')
+  handleFilterChange()
+}
+
+// 监听路由参数（支持从Header搜索跳转过来）
 watch(
   () => route.query.keyword,
   (newKeyword) => {
     if (newKeyword) {
-      filters.title = newKeyword as string
+      searchKeyword.value = newKeyword as string
+      // 搜索模式下清空筛选条件
+      filters.categoryId = undefined
+      filters.level = undefined
+      filters.title = ''
+      pagination.current = 1
       fetchCourseList()
+    } else {
+      searchKeyword.value = ''
     }
   },
   { immediate: true }
@@ -319,7 +361,10 @@ watch(
 
 onMounted(() => {
   fetchCategories()
-  fetchCourseList()
+  // 如果没有搜索关键词才加载列表，有关键词的话watch会触发
+  if (!route.query.keyword) {
+    fetchCourseList()
+  }
 })
 </script>
 
@@ -526,6 +571,58 @@ onMounted(() => {
 
 .course-list-main {
   flex: 1;
+}
+
+.search-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+
+  .search-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+
+    .el-icon {
+      font-size: 16px;
+    }
+
+    .close-icon {
+      cursor: pointer;
+      margin-left: 4px;
+      transition: all 0.3s;
+
+      &:hover {
+        transform: scale(1.2);
+        color: #ffd700;
+      }
+    }
+  }
+
+  .search-tip {
+    color: #fff;
+    font-size: 14px;
+    opacity: 0.95;
+
+    .highlight {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 4px;
+      color: #ffd700;
+    }
+  }
 }
 
 .list-header {

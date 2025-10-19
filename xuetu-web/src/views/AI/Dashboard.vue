@@ -103,7 +103,7 @@
                           <el-icon><Memo /></el-icon>
                           {{ item.reason }}
                         </p>
-                        <el-button type="primary" @click="goToCourse(item.courseId)">
+                        <el-button type="primary" @click="item.courseId && goToCourse(item.courseId)">
                           查看课程
                         </el-button>
                       </div>
@@ -164,7 +164,7 @@
                         <el-icon><Clock /></el-icon>
                       </div>
                       <div class="stat-info">
-                        <div class="stat-value">{{ formatHours(report.totalStudyTime) }}</div>
+                        <div class="stat-value">{{ report.totalStudyTime }}分钟</div>
                         <div class="stat-label">学习时长</div>
                       </div>
                     </div>
@@ -466,6 +466,7 @@ const loadAnalysisReport = async () => {
   loading.analysis = true
   try {
     report.value = await generateLearningReport()
+    console.log('✅ AI学习分析报告数据:', report.value)
   } catch (error) {
     console.error('加载分析报告失败:', error)
     ElMessage.error('加载分析报告失败')
@@ -502,13 +503,6 @@ const goToCourse = (courseId: number) => {
 const openChat = () => {
   // 通过事件或全局状态打开AI助手
   ElMessage.info('请点击右下角的AI助手按钮开始对话')
-}
-
-// 格式化小时数
-const formatHours = (minutes: number): string => {
-  if (!minutes || minutes === 0) return '0h'
-  const hours = Math.floor(minutes / 60)
-  return `${hours}h`
 }
 
 // 处理图片加载错误

@@ -21,9 +21,10 @@
           class="course-item"
         >
           <img
-            :src="item.courseCover || 'https://via.placeholder.com/80x60'"
+            :src="item.courseCover || '/images/default-course.jpg'"
             :alt="item.courseTitle"
             class="course-cover"
+            @error="handleImageError"
           />
           <div class="course-info">
             <h4>{{ item.courseTitle }}</h4>
@@ -181,6 +182,14 @@ const handleViewDetail = () => {
  */
 const handleGoToCourse = () => {
   router.push('/user/courses')
+}
+
+/**
+ * 图片加载失败处理
+ */
+const handleImageError = (e: Event) => {
+  const target = e.target as HTMLImageElement
+  target.src = '/images/default-course.jpg'
 }
 </script>
 

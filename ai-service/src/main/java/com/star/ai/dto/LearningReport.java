@@ -24,11 +24,17 @@ public class LearningReport implements Serializable {
     @Schema(description = "用户ID")
     private Long userId;
 
-    @Schema(description = "学习时长(小时)")
+    @Schema(description = "正在学习的课程数")
+    private Integer learningCourses;
+
+    @Schema(description = "学习时长(分钟)")
     private Integer learningTime;
 
     @Schema(description = "完成课程数")
     private Integer completedCourses;
+
+    @Schema(description = "平均进度(%)")
+    private Integer averageProgress;
 
     @Schema(description = "连续学习天数")
     private Integer continuousDays;

@@ -54,4 +54,31 @@ public interface UserCourseMapper extends BaseMapper<UserCourse> {
         );
         return course != null;
     }
+
+    /**
+     * 查询用户所有课程的平均进度
+     *
+     * @param userId 用户ID
+     * @return 平均进度(0-100)
+     */
+    @org.apache.ibatis.annotations.Select("SELECT AVG(progress) FROM user_course WHERE user_id = #{userId} AND status = 1")
+    Double selectAverageProgressByUserId(@Param("userId") Long userId);
+
+    /**
+     * 统计用户的总课程数
+     *
+     * @param userId 用户ID
+     * @return 总课程数
+     */
+    @org.apache.ibatis.annotations.Select("SELECT COUNT(*) FROM user_course WHERE user_id = #{userId} AND status = 1")
+    Integer countTotalCoursesByUserId(@Param("userId") Long userId);
+
+    /**
+     * 统计用户已完成的课程数（进度=100%）
+     *
+     * @param userId 用户ID
+     * @return 已完成课程数
+     */
+    @org.apache.ibatis.annotations.Select("SELECT COUNT(*) FROM user_course WHERE user_id = #{userId} AND status = 1 AND progress = 100")
+    Integer countCompletedCoursesByUserId(@Param("userId") Long userId);
 }

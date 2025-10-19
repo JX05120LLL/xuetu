@@ -46,9 +46,10 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
             LearningStatsDTO stats = statsResult.getData();
             
             // 打印统计信息用于调试
-            log.info("用户{}学习统计数据: 总时长={}分钟, 完成课时={}, 连续天数={}, 本周时长={}分钟, 学习课程数={}", 
+            log.info("用户{}学习统计数据: 总时长={}分钟, 完成课时={}, 连续天数={}, 本周时长={}分钟, 学习课程数={}, 完成课程数={}, 平均进度={}%", 
                 userId, stats.getTotalLearningTime(), stats.getCompletedLessons(), 
-                stats.getContinuousDays(), stats.getWeekLearningTime(), stats.getLearningCourses());
+                stats.getContinuousDays(), stats.getWeekLearningTime(), stats.getLearningCourses(),
+                stats.getCompletedCourses(), stats.getAverageProgress());
 
             // 2. 获取课程进度（暂不实现，learning-service还没有这个接口）
             List<UserCourseProgressDTO> courseProgress = new ArrayList<>();
@@ -94,22 +95,22 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
             LearningStatsDTO stats = statsResult.getData();
             
             // 修复null值问题
-            int totalHours = stats.getTotalLearningTime() != null ? stats.getTotalLearningTime() / 60 : 0;
+            int totalMinutes = stats.getTotalLearningTime() != null ? stats.getTotalLearningTime() : 0;
             int completedLessons = stats.getCompletedLessons() != null ? stats.getCompletedLessons() : 0;
             int continuousDays = stats.getContinuousDays() != null ? stats.getContinuousDays() : 0;
-            int weekHours = stats.getWeekLearningTime() != null ? stats.getWeekLearningTime() / 60 : 0;
+            int weekMinutes = stats.getWeekLearningTime() != null ? stats.getWeekLearningTime() : 0;
             
             String prompt = String.format(
                 "根据以下数据给出3-5条具体的学习建议：\n" +
-                "- 总学习时长: %d小时\n" +
+                "- 总学习时长: %d分钟\n" +
                 "- 完成课时: %d个\n" +
                 "- 连续学习: %d天\n" +
-                "- 本周学习: %d小时\n\n" +
+                "- 本周学习: %d分钟\n\n" +
                 "要求：建议要具体、可操作，每条控制在30字以内",
-                totalHours,
+                totalMinutes,
                 completedLessons,
                 continuousDays,
-                weekHours
+                weekMinutes
             );
 
             return qwenAIClient.chat(prompt, null);
@@ -130,16 +131,16 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
         prompt.append("【学习概况】\n");
         
         // 修复null值问题
-        int totalHours = stats.getTotalLearningTime() != null ? stats.getTotalLearningTime() / 60 : 0;
+        int totalMinutes = stats.getTotalLearningTime() != null ? stats.getTotalLearningTime() : 0;
         int completedLessons = stats.getCompletedLessons() != null ? stats.getCompletedLessons() : 0;
         int continuousDays = stats.getContinuousDays() != null ? stats.getContinuousDays() : 0;
-        int weekHours = stats.getWeekLearningTime() != null ? stats.getWeekLearningTime() / 60 : 0;
+        int weekMinutes = stats.getWeekLearningTime() != null ? stats.getWeekLearningTime() : 0;
         int learningCourses = stats.getLearningCourses() != null ? stats.getLearningCourses() : 0;
         
-        prompt.append(String.format("- 总学习时长: %d小时\n", totalHours));
+        prompt.append(String.format("- 总学习时长: %d分钟\n", totalMinutes));
         prompt.append(String.format("- 完成课时数: %d个\n", completedLessons));
         prompt.append(String.format("- 连续学习天数: %d天\n", continuousDays));
-        prompt.append(String.format("- 本周学习时长: %d小时\n", weekHours));
+        prompt.append(String.format("- 本周学习时长: %d分钟\n", weekMinutes));
         prompt.append(String.format("- 正在学习课程: %d门\n\n", learningCourses));
 
         // 课程进度（如果有）
@@ -176,12 +177,20 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
         report.setUserId(userId);
         report.setAiAnalysis(aiAnalysis);
 
-        // 设置基础学习数据（转换为小时）
-        int totalMinutes = stats.getTotalLearningTime() != null ? stats.getTotalLearningTime() : 0;
-        report.setLearningTime(totalMinutes / 60);
+        // 设置基础学习数据
+        // 正在学习的课程数
+        report.setLearningCourses(stats.getLearningCourses() != null ? stats.getLearningCourses() : 0);
         
-        // 这里completedCourses实际是完成的课时数（字段命名有些歧义）
-        report.setCompletedCourses(stats.getCompletedLessons() != null ? stats.getCompletedLessons() : 0);
+        // 学习时长：保持分钟
+        int totalMinutes = stats.getTotalLearningTime() != null ? stats.getTotalLearningTime() : 0;
+        report.setLearningTime(totalMinutes);
+        
+        // 完成的课程数（从user_course表统计）
+        report.setCompletedCourses(stats.getCompletedCourses() != null ? stats.getCompletedCourses() : 0);
+        
+        // 平均进度
+        report.setAverageProgress(stats.getAverageProgress() != null ? stats.getAverageProgress() : 0);
+        
         report.setContinuousDays(stats.getContinuousDays() != null ? stats.getContinuousDays() : 0);
 
         // 简单解析AI回答（按格式提取）
@@ -216,8 +225,10 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
     private LearningReport buildDefaultReport(Long userId) {
         LearningReport report = new LearningReport();
         report.setUserId(userId);
+        report.setLearningCourses(0);
         report.setLearningTime(0);
         report.setCompletedCourses(0);
+        report.setAverageProgress(0);
         report.setContinuousDays(0);
         report.setEvaluation("暂无学习数据");
         report.setStrengths("开始学习就是最大的优势");

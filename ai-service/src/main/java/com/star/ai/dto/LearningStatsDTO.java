@@ -36,4 +36,14 @@ public class LearningStatsDTO implements Serializable {
      * 正在学习的课程数
      */
     private Integer learningCourses;
+
+    /**
+     * 完成的课程数
+     */
+    private Integer completedCourses;
+
+    /**
+     * 平均学习进度(%)
+     */
+    private Integer averageProgress;
 }

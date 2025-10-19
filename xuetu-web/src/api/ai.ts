@@ -141,29 +141,23 @@ export function generateLearningReport(): Promise<LearningReport> {
     url: '/analysis/report',
     method: 'get'
   }).then((response: any) => {
+    console.log('🔍 AI后端返回的原始数据:', response)
     // 转换后端字段到前端期望的字段
-    return {
+    const result = {
       userId: response.userId,
-      totalCourses: response.learningCourses || 0,
-      totalStudyTime: response.learningTime || 0, // 后端返回小时，前端期望分钟
-      completedCourses: response.completedCourses || 0,
-      averageProgress: calculateAverageProgress(response),
+      totalCourses: response.learningCourses || 0, // 正在学习的课程数
+      totalStudyTime: response.learningTime || 0, // 学习时长（分钟）
+      completedCourses: response.completedCourses || 0, // 完成的课程数
+      averageProgress: response.averageProgress || 0, // 平均进度（后端已计算）
       strongPoints: response.strengths ? [response.strengths] : [],
       weakPoints: response.advices || [],
       suggestions: response.advices || [],
       weeklyTrend: [],
       categoryDistribution: []
     }
+    console.log('🔍 转换后的前端数据:', result)
+    return result
   })
-}
-
-// 辅助函数：计算平均进度
-function calculateAverageProgress(response: any): number {
-  // 这里可以根据实际业务逻辑计算平均进度
-  // 暂时返回一个默认值
-  return response.completedCourses && response.totalCourses 
-    ? Math.round((response.completedCourses / response.totalCourses) * 100)
-    : 0
 }
 
 // 获取学习建议

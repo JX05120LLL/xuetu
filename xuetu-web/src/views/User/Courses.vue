@@ -221,6 +221,23 @@ const fetchCourses = async () => {
           // 实时计算课程进度（根据学习记录和章节数据）
           const actualProgress = await calculateCourseProgress(uc.courseId, chapters || [])
           
+          // 获取课程的学习记录，计算总学习时长
+          let totalStudyMinutes = 0
+          try {
+            const records = await getCourseRecords(uc.courseId)
+            if (records && records.length > 0) {
+              // 注意：progress字段存储的是学习进度（秒），不是百分比
+              for (const record of records) {
+                // 直接将秒转换为分钟累加
+                if (record.progress) {
+                  totalStudyMinutes += record.progress / 60
+                }
+              }
+            }
+          } catch (error) {
+            console.error(`获取课程${uc.courseId}学习记录失败:`, error)
+          }
+          
           // 注意：不在这里同步进度，避免页面加载时发送大量请求
           // 进度同步会在视频播放时自动完成
           
@@ -236,7 +253,7 @@ const fetchCourses = async () => {
             teacherName: courseDetail.teacherName,
             totalDuration: courseDetail.duration || 0,
             progress: actualProgress, // 使用实时计算的进度
-            studyDuration: 0, // 后续可以从学习记录获取
+            studyDuration: Math.round(totalStudyMinutes), // 实际学习时长（分钟）
             lastStudyTime: uc.lastLearnTime || uc.purchaseTime,
             purchaseTime: uc.purchaseTime,
             status: uc.status

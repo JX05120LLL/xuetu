@@ -81,4 +81,9 @@ public class LearningStatsDTO {
      * 总用户数
      */
     private Integer totalUsers;
+
+    /**
+     * 平均学习进度(%)
+     */
+    private Integer averageProgress;
 }

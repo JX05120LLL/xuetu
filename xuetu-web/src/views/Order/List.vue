@@ -9,10 +9,10 @@
         <!-- 状态筛选标签 -->
         <el-tabs v-model="activeStatus" @tab-change="handleStatusChange">
           <el-tab-pane label="全部订单" name="all" />
-          <el-tab-pane label="待支付" :name="0" />
-          <el-tab-pane label="已支付" :name="1" />
-          <el-tab-pane label="已取消" :name="2" />
-          <el-tab-pane label="已完成" :name="4" />
+          <el-tab-pane label="待支付" name="0" />
+          <el-tab-pane label="已支付" name="1" />
+          <el-tab-pane label="已取消" name="2" />
+          <el-tab-pane label="已完成" name="4" />
         </el-tabs>
 
         <!-- 订单列表 -->
@@ -71,7 +71,7 @@ const route = useRoute()
 const router = useRouter()
 
 // 状态
-const activeStatus = ref<string | number>('all')
+const activeStatus = ref<string>('all')
 const loading = ref(false)
 const orders = ref<Order[]>([])
 
@@ -91,14 +91,18 @@ const loadOrders = async () => {
       size: pageSize.value
     }
 
-    // 如果不是"全部"，添加状态筛选
+    // 如果不是"全部"，添加状态筛选（转换为数字）
     if (activeStatus.value !== 'all') {
-      params.status = activeStatus.value
+      params.status = Number(activeStatus.value)
     }
 
+    console.log('🔍 加载订单列表，参数:', params)
+    
     const result = await getMyOrders(params)
     orders.value = result.records || []
     total.value = result.total || 0
+    
+    console.log('✅ 订单加载成功:', orders.value.length, '条')
   } catch (error: any) {
     console.error('加载订单列表失败:', error)
     ElMessage.error(error.message || '加载订单列表失败')
@@ -138,7 +142,7 @@ const handlePageChange = () => {
 const initStatusFromQuery = () => {
   const status = route.query.status
   if (status !== undefined && status !== '') {
-    activeStatus.value = status === 'all' ? 'all' : Number(status)
+    activeStatus.value = String(status)
   }
 }
 
@@ -151,7 +155,8 @@ onMounted(() => {
 // 监听路由查询参数变化
 watch(() => route.query.status, (newStatus) => {
   if (newStatus !== undefined) {
-    activeStatus.value = newStatus === 'all' ? 'all' : Number(newStatus)
+    activeStatus.value = String(newStatus)
+    currentPage.value = 1
     loadOrders()
   }
 })
