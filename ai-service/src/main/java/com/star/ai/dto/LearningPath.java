@@ -24,17 +24,14 @@ public class LearningPath implements Serializable {
     @Schema(description = "学习目标")
     private String goal;
 
-    @Schema(description = "预计完成时间(天)")
-    private Integer estimatedDays;
-
     @Schema(description = "预计学习时长(小时)")
-    private Integer estimatedHours;
+    private Integer totalDuration;
 
     @Schema(description = "学习阶段列表")
     private List<LearningStage> stages;
 
-    @Schema(description = "AI生成的完整路径说明")
-    private String pathDescription;
+    @Schema(description = "AI建议")
+    private String advice;
 
     /**
      * 学习阶段
@@ -51,11 +48,11 @@ public class LearningPath implements Serializable {
         @Schema(description = "阶段描述")
         private String description;
 
-        @Schema(description = "推荐课程列表")
-        private List<String> courses;
+        @Schema(description = "推荐课程列表（混合：真实课程带图片，虚拟课程纯文字）")
+        private List<CourseRecommendation> courses;
 
         @Schema(description = "预计时长(小时)")
-        private Integer hours;
+        private Integer duration;
 
         @Schema(description = "学习要点")
         private List<String> keyPoints;

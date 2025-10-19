@@ -33,34 +33,39 @@ public class LearningStatsDTO {
     private Integer learningCourses;
 
     /**
-     * 总学习时长(秒)
+     * 总学习时长(分钟)
      */
-    private Long totalLearningTime;
+    private Integer totalLearningTime;
 
     /**
-     * 今日学习时长(秒)
+     * 今日学习时长(分钟)
      */
-    private Long todayLearningTime;
+    private Integer todayLearningTime;
 
     /**
-     * 本周学习时长(秒)
+     * 本周学习时长(分钟)
      */
-    private Long weekLearningTime;
+    private Integer weekLearningTime;
 
     /**
-     * 本月学习时长(秒)
+     * 本月学习时长(分钟)
      */
-    private Long monthLearningTime;
+    private Integer monthLearningTime;
+
+    /**
+     * 完成的课时数
+     */
+    private Integer completedLessons;
+
+    /**
+     * 连续学习天数
+     */
+    private Integer continuousDays;
 
     /**
      * 总笔记数
      */
     private Integer totalNotes;
-
-    /**
-     * 连续学习天数
-     */
-    private Integer consecutiveDays;
 
     /**
      * 最后学习时间

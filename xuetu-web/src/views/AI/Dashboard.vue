@@ -84,7 +84,11 @@
                   >
                     <div class="recommend-card">
                       <div class="course-cover">
-                        <img :src="item.courseCover || 'https://via.placeholder.com/300x200'" :alt="item.courseTitle" />
+                        <img 
+                          :src="item.courseCover || '/images/default-course.jpg'" 
+                          :alt="item.courseTitle"
+                          @error="handleImageError"
+                        />
                         <div class="match-badge">
                           匹配度 {{ Math.round(item.matchScore * 100) }}%
                         </div>
@@ -291,39 +295,83 @@
                   <el-tag type="success">预计 {{ learningPath.totalDuration }} 小时</el-tag>
                 </div>
 
-                <div class="path-advice" v-if="learningPath.advice">
-                  <el-alert :title="learningPath.advice" type="info" :closable="false" />
+                <!-- AI完整回复 -->
+                <div v-if="learningPath.advice" class="ai-full-advice">
+                  <div class="advice-header">
+                    <el-icon><MagicStick /></el-icon>
+                    <span>AI学习规划建议</span>
+                  </div>
+                  <div class="advice-content" v-html="formatAdviceText(learningPath.advice)"></div>
                 </div>
 
                 <!-- 学习阶段 -->
+                <div class="stages-title">
+                  <el-icon><Guide /></el-icon>
+                  <span>详细学习路径</span>
+                </div>
                 <el-timeline class="path-timeline">
                   <el-timeline-item
                     v-for="(stage, index) in learningPath.stages"
                     :key="index"
-                    :timestamp="stage.stageName"
+                    :timestamp="`阶段 ${index + 1}`"
                     placement="top"
+                    :color="index === 0 ? '#409eff' : index === 1 ? '#67c23a' : '#e6a23c'"
                   >
-                    <el-card>
-                      <h5>{{ stage.stageName }}</h5>
+                    <el-card class="stage-card">
+                      <div class="stage-header">
+                        <h5>{{ stage.stageName }}</h5>
+                        <div class="stage-meta">
+                          <el-tag size="small" effect="plain">
+                            <el-icon><Clock /></el-icon>
+                            {{ stage.duration }} 小时
+                          </el-tag>
+                          <el-tag size="small" type="success" effect="plain">
+                            <el-icon><Reading /></el-icon>
+                            {{ stage.courses.length }} 门课程
+                          </el-tag>
+                        </div>
+                      </div>
+                      
                       <p class="stage-desc">{{ stage.description }}</p>
-                      <div class="stage-meta">
-                        <el-tag size="small">{{ stage.duration }} 小时</el-tag>
-                        <el-tag size="small" type="success">{{ stage.courses.length }} 门课程</el-tag>
+                      
+                      <!-- 学习要点 -->
+                      <div v-if="stage.keyPoints && stage.keyPoints.length > 0" class="key-points">
+                        <h6><el-icon><Star /></el-icon> 学习要点</h6>
+                        <ul>
+                          <li v-for="(point, pIndex) in stage.keyPoints" :key="pIndex">
+                            {{ point }}
+                          </li>
+                        </ul>
                       </div>
                       
                       <!-- 阶段课程 -->
-                      <div class="stage-courses">
+                      <div v-if="stage.courses && stage.courses.length > 0" class="courses-section">
+                        <h6><el-icon><Reading /></el-icon> 推荐课程</h6>
+                        <div class="stage-courses">
                         <div 
-                          v-for="course in stage.courses" 
-                          :key="course.courseId"
+                          v-for="(course, index) in stage.courses" 
+                          :key="course.courseId || index"
                           class="mini-course-card"
-                          @click="goToCourse(course.courseId)"
+                          :class="{ 'virtual-course': !course.courseCover }"
+                          @click="course.courseId ? goToCourse(course.courseId) : null"
                         >
-                          <img :src="course.courseCover" :alt="course.courseTitle" />
+                          <!-- 真实课程：显示图片 -->
+                          <img 
+                            v-if="course.courseCover"
+                            :src="course.courseCover" 
+                            :alt="course.courseTitle"
+                            @error="handleImageError"
+                          />
+                          <!-- 虚拟课程：显示图标 -->
+                          <div v-else class="course-icon">
+                            <el-icon :size="24"><Reading /></el-icon>
+                          </div>
                           <div class="mini-course-info">
                             <div class="course-title">{{ course.courseTitle }}</div>
-                            <el-tag size="small">{{ course.level }}</el-tag>
+                            <el-tag v-if="course.level" size="small">{{ course.level }}</el-tag>
+                            <el-tag v-else size="small" type="info">推荐学习</el-tag>
                           </div>
+                        </div>
                         </div>
                       </div>
                     </el-card>
@@ -357,7 +405,8 @@ import {
   CircleCheck,
   Clock,
   CircleCheckFilled,
-  Warning
+  Warning,
+  Star
 } from '@element-plus/icons-vue'
 import {
   getRecommendedCourses,
@@ -457,8 +506,34 @@ const openChat = () => {
 
 // 格式化小时数
 const formatHours = (minutes: number): string => {
+  if (!minutes || minutes === 0) return '0h'
   const hours = Math.floor(minutes / 60)
   return `${hours}h`
+}
+
+// 处理图片加载错误
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = '/images/default-course.jpg'
+}
+
+// 格式化AI建议文本，使其更易读
+const formatAdviceText = (text: string): string => {
+  if (!text) return ''
+  
+  return text
+    // 替换【】为加粗标题
+    .replace(/【([^】]+)】/g, '<div class="section-title">$1</div>')
+    // 识别并格式化列表项（以"- "或"• "开头）
+    .replace(/^[-•]\s+(.+)$/gm, '<div class="list-item">• $1</div>')
+    // 识别并格式化数字标题（如"第一阶段："）
+    .replace(/^(第[一二三四五六七八九十]+阶段[：:].+)$/gm, '<div class="stage-title">$1</div>')
+    // 识别键值对（如"阶段描述: xxx"）
+    .replace(/^([^：:]+[：:])(.+)$/gm, '<div class="key-value"><span class="key">$1</span><span class="value">$2</span></div>')
+    // 添加段落间距
+    .replace(/\n\n/g, '<div class="paragraph-break"></div>')
+    // 普通换行
+    .replace(/\n/g, '<br>')
 }
 
 // 页面加载
@@ -792,42 +867,224 @@ onMounted(() => {
     }
   }
   
-  .path-advice {
-    margin-bottom: 20px;
+  .ai-full-advice {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    
+    .advice-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #409eff;
+      font-size: 16px;
+      font-weight: 600;
+      color: #303133;
+      
+      .el-icon {
+        font-size: 20px;
+        color: #409eff;
+      }
+    }
+    
+    .advice-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 6px;
+      line-height: 1.8;
+      color: #303133;
+      font-size: 14px;
+      
+      :deep(.section-title) {
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        margin: 16px 0 10px 0;
+        padding: 8px 12px;
+        background: #409eff;
+        border-radius: 4px;
+        
+        &:first-child {
+          margin-top: 0;
+        }
+      }
+      
+      :deep(.stage-title) {
+        font-size: 14px;
+        font-weight: 600;
+        color: #409eff;
+        margin: 14px 0 8px 0;
+        padding-left: 10px;
+        border-left: 3px solid #409eff;
+      }
+      
+      :deep(.key-value) {
+        margin: 6px 0;
+        padding: 4px 0;
+        
+        .key {
+          font-weight: 600;
+          color: #303133;
+          margin-right: 6px;
+        }
+        
+        .value {
+          color: #606266;
+        }
+      }
+      
+      :deep(.list-item) {
+        margin: 5px 0;
+        padding-left: 20px;
+        color: #606266;
+        position: relative;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          left: 8px;
+          top: 10px;
+          width: 4px;
+          height: 4px;
+          background: #409eff;
+          border-radius: 50%;
+        }
+      }
+      
+      :deep(.paragraph-break) {
+        height: 10px;
+      }
+    }
+  }
+  
+  .stages-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 25px 0 15px 0;
+    padding: 10px 15px;
+    background: #409eff;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    
+    .el-icon {
+      font-size: 18px;
+    }
   }
   
   .path-timeline {
-    padding: 20px 0;
+    padding: 15px 0;
     
-    h5 {
-      margin: 0 0 10px;
-      font-size: 18px;
+    .stage-card {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s;
+      
+      &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+    }
+    
+    .stage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+      
+      h5 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #303133;
+      }
+      
+      .stage-meta {
+        display: flex;
+        gap: 6px;
+        
+        .el-tag {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+      }
     }
     
     .stage-desc {
-      margin: 10px 0;
+      margin: 0 0 15px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
       color: #606266;
       line-height: 1.6;
+      font-size: 14px;
     }
     
-    .stage-meta {
-      display: flex;
-      gap: 8px;
+    .key-points {
       margin: 15px 0;
+      padding: 12px;
+      background: #fff9e6;
+      border-left: 3px solid #e6a23c;
+      border-radius: 4px;
+      
+      h6 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: #e6a23c;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      
+      ul {
+        margin: 0;
+        padding-left: 20px;
+        
+        li {
+          margin-bottom: 6px;
+          line-height: 1.6;
+          color: #606266;
+          font-size: 14px;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+    
+    .courses-section {
+      margin-top: 15px;
+      
+      h6 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        color: #409eff;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
     }
     
     .stage-courses {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 15px;
+      gap: 8px;
       
       .mini-course-card {
         display: flex;
         gap: 10px;
-        padding: 10px;
-        border: 1px solid #ebeef5;
-        border-radius: 4px;
+        padding: 8px;
+        border: 1px solid #e4e7ed;
+        border-radius: 6px;
         cursor: pointer;
         transition: all 0.3s;
         
@@ -836,9 +1093,31 @@ onMounted(() => {
           background: #ecf5ff;
         }
         
+        // 虚拟课程样式（纯文字，不可点击）
+        &.virtual-course {
+          cursor: default;
+          background: #f5f7fa;
+          
+          &:hover {
+            border-color: #e4e7ed;
+            background: #f5f7fa;
+          }
+          
+          .course-icon {
+            width: 70px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e4e7ed;
+            border-radius: 4px;
+            color: #909399;
+          }
+        }
+        
         img {
-          width: 80px;
-          height: 60px;
+          width: 70px;
+          height: 50px;
           object-fit: cover;
           border-radius: 4px;
         }
@@ -850,10 +1129,12 @@ onMounted(() => {
           justify-content: space-between;
           
           .course-title {
-            font-size: 14px;
+            font-size: 13px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            color: #303133;
+            font-weight: 500;
           }
         }
       }

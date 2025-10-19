@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 /**
  * 学习分析服务实现
- * 
+ *
  * @author star
  */
 @Slf4j
@@ -44,11 +44,15 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
             }
 
             LearningStatsDTO stats = statsResult.getData();
+            
+            // 打印统计信息用于调试
+            log.info("用户{}学习统计数据: 总时长={}分钟, 完成课时={}, 连续天数={}, 本周时长={}分钟, 学习课程数={}", 
+                userId, stats.getTotalLearningTime(), stats.getCompletedLessons(), 
+                stats.getContinuousDays(), stats.getWeekLearningTime(), stats.getLearningCourses());
 
             // 2. 获取课程进度（暂不实现，learning-service还没有这个接口）
             List<UserCourseProgressDTO> courseProgress = new ArrayList<>();
-            // TODO: 等learning-service添加课程进度列表接口后再启用
-            /*
+            /* TODO: 等learning-service添加课程进度列表接口后再启用
             try {
                 R<List<UserCourseProgressDTO>> progressResult = learningServiceClient.getUserCourseProgress(userId);
                 if (progressResult.isSuccess() && progressResult.getData() != null) {
@@ -88,25 +92,31 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
             }
 
             LearningStatsDTO stats = statsResult.getData();
-
+            
+            // 修复null值问题
+            int totalHours = stats.getTotalLearningTime() != null ? stats.getTotalLearningTime() / 60 : 0;
+            int completedLessons = stats.getCompletedLessons() != null ? stats.getCompletedLessons() : 0;
+            int continuousDays = stats.getContinuousDays() != null ? stats.getContinuousDays() : 0;
+            int weekHours = stats.getWeekLearningTime() != null ? stats.getWeekLearningTime() / 60 : 0;
+            
             String prompt = String.format(
-                "作为学习顾问，请根据以下数据给出3-5条具体的学习建议：\n" +
+                "根据以下数据给出3-5条具体的学习建议：\n" +
                 "- 总学习时长: %d小时\n" +
                 "- 完成课时: %d个\n" +
                 "- 连续学习: %d天\n" +
                 "- 本周学习: %d小时\n\n" +
                 "要求：建议要具体、可操作，每条控制在30字以内",
-                stats.getTotalLearningTime() / 60,
-                stats.getCompletedLessons(),
-                stats.getContinuousDays(),
-                stats.getWeekLearningTime() / 60
+                totalHours,
+                completedLessons,
+                continuousDays,
+                weekHours
             );
 
             return qwenAIClient.chat(prompt, null);
 
         } catch (Exception e) {
             log.error("获取学习建议失败", e);
-            return "获取学习建议失败，请稍后重试";
+            return "制定每日学习计划；保持学习连续性；多做练习巩固知识";
         }
     }
 
@@ -115,26 +125,32 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
      */
     private String buildAnalysisPrompt(LearningStatsDTO stats, List<UserCourseProgressDTO> courseProgress) {
         StringBuilder prompt = new StringBuilder();
-        
+
         prompt.append("你是学途教育平台的AI学习顾问，请分析以下学习数据并生成专业的学习报告：\n\n");
-        
-        // 学习概况
         prompt.append("【学习概况】\n");
-        prompt.append(String.format("- 总学习时长: %d小时\n", stats.getTotalLearningTime() / 60));
-        prompt.append(String.format("- 完成课时数: %d个\n", stats.getCompletedLessons()));
-        prompt.append(String.format("- 连续学习天数: %d天\n", stats.getContinuousDays()));
-        prompt.append(String.format("- 本周学习时长: %d小时\n", stats.getWeekLearningTime() / 60));
-        prompt.append(String.format("- 正在学习课程: %d门\n\n", stats.getLearningCourses()));
         
+        // 修复null值问题
+        int totalHours = stats.getTotalLearningTime() != null ? stats.getTotalLearningTime() / 60 : 0;
+        int completedLessons = stats.getCompletedLessons() != null ? stats.getCompletedLessons() : 0;
+        int continuousDays = stats.getContinuousDays() != null ? stats.getContinuousDays() : 0;
+        int weekHours = stats.getWeekLearningTime() != null ? stats.getWeekLearningTime() / 60 : 0;
+        int learningCourses = stats.getLearningCourses() != null ? stats.getLearningCourses() : 0;
+        
+        prompt.append(String.format("- 总学习时长: %d小时\n", totalHours));
+        prompt.append(String.format("- 完成课时数: %d个\n", completedLessons));
+        prompt.append(String.format("- 连续学习天数: %d天\n", continuousDays));
+        prompt.append(String.format("- 本周学习时长: %d小时\n", weekHours));
+        prompt.append(String.format("- 正在学习课程: %d门\n\n", learningCourses));
+
         // 课程进度（如果有）
         if (!courseProgress.isEmpty()) {
-            prompt.append("【课程学习进度】\n");
+            prompt.append("【课程进度】\n");
             for (UserCourseProgressDTO progress : courseProgress) {
                 prompt.append(String.format("- %s: %d%%\n", progress.getCourseName(), progress.getProgress()));
             }
             prompt.append("\n");
         }
-        
+
         // 要求AI给出的分析内容
         prompt.append("请按以下格式输出分析报告：\n\n");
         prompt.append("【学习状态评价】\n");
@@ -148,7 +164,7 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
         prompt.append("【下周学习计划】\n");
         prompt.append("(给出具体的学习计划安排)\n\n");
         prompt.append("要求：语言友好、鼓励性强、建议具体可操作");
-        
+
         return prompt.toString();
     }
 
@@ -158,10 +174,15 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
     private LearningReport parseAIAnalysis(Long userId, LearningStatsDTO stats, String aiAnalysis) {
         LearningReport report = new LearningReport();
         report.setUserId(userId);
-        report.setLearningTime(stats.getTotalLearningTime() / 60);
-        report.setCompletedCourses(stats.getLearningCourses());
-        report.setContinuousDays(stats.getContinuousDays());
         report.setAiAnalysis(aiAnalysis);
+
+        // 设置基础学习数据（转换为小时）
+        int totalMinutes = stats.getTotalLearningTime() != null ? stats.getTotalLearningTime() : 0;
+        report.setLearningTime(totalMinutes / 60);
+        
+        // 这里completedCourses实际是完成的课时数（字段命名有些歧义）
+        report.setCompletedCourses(stats.getCompletedLessons() != null ? stats.getCompletedLessons() : 0);
+        report.setContinuousDays(stats.getContinuousDays() != null ? stats.getContinuousDays() : 0);
 
         // 简单解析AI回答（按格式提取）
         try {
@@ -190,6 +211,23 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
     }
 
     /**
+     * 构建默认报告
+     */
+    private LearningReport buildDefaultReport(Long userId) {
+        LearningReport report = new LearningReport();
+        report.setUserId(userId);
+        report.setLearningTime(0);
+        report.setCompletedCourses(0);
+        report.setContinuousDays(0);
+        report.setEvaluation("暂无学习数据");
+        report.setStrengths("开始学习就是最大的优势");
+        report.setAdvices(Arrays.asList("制定学习计划", "每天坚持学习", "多做练习巩固"));
+        report.setNextWeekPlan("开始第一门课程的学习");
+        report.setAiAnalysis("暂无学习数据，建议开始学习第一门课程");
+        return report;
+    }
+
+    /**
      * 提取章节内容
      */
     private String extractSection(String text, String startMarker, String endMarker) {
@@ -199,7 +237,6 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
         }
 
         startIndex += startMarker.length();
-
         int endIndex = endMarker != null ? text.indexOf(endMarker, startIndex) : text.length();
         if (endIndex == -1) {
             endIndex = text.length();
@@ -213,30 +250,14 @@ public class LearningAnalysisServiceImpl implements LearningAnalysisService {
      */
     private List<String> parseAdvices(String advicesText) {
         if (StrUtil.isBlank(advicesText)) {
-            return Arrays.asList("继续保持学习热情", "制定合理的学习计划", "定期复习巩固知识");
+            return Arrays.asList("制定学习计划", "保持学习连续性", "多做练习巩固知识");
         }
 
         return Arrays.stream(advicesText.split("\n"))
                 .map(String::trim)
                 .filter(line -> line.matches("^\\d+\\..*"))
                 .map(line -> line.replaceFirst("^\\d+\\.\\s*", ""))
+                .filter(StrUtil::isNotBlank)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * 构建默认报告（当数据获取失败时）
-     */
-    private LearningReport buildDefaultReport(Long userId) {
-        return LearningReport.builder()
-                .userId(userId)
-                .learningTime(0)
-                .completedCourses(0)
-                .continuousDays(0)
-                .evaluation("暂时无法获取学习数据")
-                .strengths("继续努力学习")
-                .advices(Arrays.asList("开始学习之旅", "选择感兴趣的课程", "制定学习计划"))
-                .nextWeekPlan("选择课程开始学习")
-                .aiAnalysis("暂时无法生成分析报告")
-                .build();
     }
 }

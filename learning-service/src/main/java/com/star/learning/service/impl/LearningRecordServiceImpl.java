@@ -86,28 +86,28 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
         LearningStatsDTO stats = new LearningStatsDTO();
         stats.setUserId(userId);
 
-        // 查询总学习时长
-        Long totalLearningTime = learningRecordMapper.selectTotalLearningTimeByUserId(userId);
-        stats.setTotalLearningTime(totalLearningTime != null ? totalLearningTime : 0L);
+        // 查询总学习时长（转换为分钟）
+        Long totalLearningTimeSeconds = learningRecordMapper.selectTotalLearningTimeByUserId(userId);
+        stats.setTotalLearningTime(totalLearningTimeSeconds != null ? totalLearningTimeSeconds.intValue() / 60 : 0);
 
-        // 查询今日学习时长
+        // 查询今日学习时长（转换为分钟）
         LocalDateTime todayStart = LocalDateTime.now().with(LocalTime.MIN);
         LocalDateTime todayEnd = LocalDateTime.now().with(LocalTime.MAX);
-        Long todayLearningTime = learningRecordMapper.selectLearningTimeByUserIdAndDateRange(
+        Long todayLearningTimeSeconds = learningRecordMapper.selectLearningTimeByUserIdAndDateRange(
                 userId, todayStart, todayEnd);
-        stats.setTodayLearningTime(todayLearningTime != null ? todayLearningTime : 0L);
+        stats.setTodayLearningTime(todayLearningTimeSeconds != null ? todayLearningTimeSeconds.intValue() / 60 : 0);
 
-        // 查询本周学习时长
+        // 查询本周学习时长（转换为分钟）
         LocalDateTime weekStart = LocalDateTime.now().minus(7, ChronoUnit.DAYS).with(LocalTime.MIN);
-        Long weekLearningTime = learningRecordMapper.selectLearningTimeByUserIdAndDateRange(
+        Long weekLearningTimeSeconds = learningRecordMapper.selectLearningTimeByUserIdAndDateRange(
                 userId, weekStart, LocalDateTime.now());
-        stats.setWeekLearningTime(weekLearningTime != null ? weekLearningTime : 0L);
+        stats.setWeekLearningTime(weekLearningTimeSeconds != null ? weekLearningTimeSeconds.intValue() / 60 : 0);
 
-        // 查询本月学习时长
+        // 查询本月学习时长（转换为分钟）
         LocalDateTime monthStart = LocalDateTime.now().minus(30, ChronoUnit.DAYS).with(LocalTime.MIN);
-        Long monthLearningTime = learningRecordMapper.selectLearningTimeByUserIdAndDateRange(
+        Long monthLearningTimeSeconds = learningRecordMapper.selectLearningTimeByUserIdAndDateRange(
                 userId, monthStart, LocalDateTime.now());
-        stats.setMonthLearningTime(monthLearningTime != null ? monthLearningTime : 0L);
+        stats.setMonthLearningTime(monthLearningTimeSeconds != null ? monthLearningTimeSeconds.intValue() / 60 : 0);
 
         // 查询课程统计
         Integer totalCourses = learningRecordMapper.countLearningCoursesByUserId(userId);
@@ -118,12 +118,16 @@ public class LearningRecordServiceImpl extends ServiceImpl<LearningRecordMapper,
 
         stats.setLearningCourses(stats.getTotalCourses() - stats.getCompletedCourses());
 
+        // 查询完成的课时数
+        Integer completedLessons = learningRecordMapper.countCompletedLessonsByUserId(userId);
+        stats.setCompletedLessons(completedLessons != null ? completedLessons : 0);
+
         // 查询笔记数
         Integer totalNotes = noteMapper.countByUserId(userId);
         stats.setTotalNotes(totalNotes != null ? totalNotes : 0);
 
         // 计算连续学习天数
-        stats.setConsecutiveDays(getConsecutiveLearningDays(userId));
+        stats.setContinuousDays(getConsecutiveLearningDays(userId));
 
         // 查询最后学习时间
         List<LearningRecord> recentRecords = learningRecordMapper.selectRecentLearningRecords(userId, 1);

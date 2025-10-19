@@ -1,6 +1,5 @@
 package com.star.ai.service.impl;
 
-import cn.hutool.core.util.StrUtil;
 import com.star.ai.client.QwenAIClient;
 import com.star.ai.dto.*;
 import com.star.ai.exception.AIServiceException;
@@ -13,9 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 课程推荐服务实现
@@ -39,15 +36,26 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
             // 1. 获取用户学习数据
             R<LearningStatsDTO> statsResult = learningServiceClient.getLearningStats(userId);
             LearningStatsDTO stats = statsResult.isSuccess() ? statsResult.getData() : null;
+            
+            // 打印学习统计信息用于调试
+            if (stats != null) {
+                log.info("用户{}学习统计: 总时长={}分钟, 完成课时={}, 连续天数={}, 本周时长={}分钟, 学习课程数={}", 
+                    userId, stats.getTotalLearningTime(), stats.getCompletedLessons(), 
+                    stats.getContinuousDays(), stats.getWeekLearningTime(), stats.getLearningCourses());
+            } else {
+                log.warn("用户{}学习统计数据为null", userId);
+            }
 
             // 2. 获取热门课程作为候选
             R<List<CourseDTO>> coursesResult = courseServiceClient.getHotCourses(20);
-            if (!coursesResult.isSuccess() || coursesResult.getData() == null) {
-                log.warn("获取课程列表失败");
+            if (!coursesResult.isSuccess() || coursesResult.getData() == null || coursesResult.getData().isEmpty()) {
+                log.warn("获取课程列表失败或列表为空: success={}, data={}", 
+                    coursesResult.isSuccess(), coursesResult.getData());
                 return new ArrayList<>();
             }
 
             List<CourseDTO> courses = coursesResult.getData();
+            log.info("成功获取{}门候选课程", courses.size());
 
             // 3. 为每门课程生成AI推荐理由
             List<CourseRecommendation> recommendations = new ArrayList<>();
@@ -101,13 +109,18 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
             R<LearningStatsDTO> statsResult = learningServiceClient.getLearningStats(userId);
             LearningStatsDTO stats = statsResult.isSuccess() ? statsResult.getData() : null;
 
-            // 2. 构造学习路径Prompt
-            String prompt = buildLearningPathPrompt(goal, stats);
+            // 2. 获取所有可用课程
+            R<List<CourseDTO>> coursesResult = courseServiceClient.getHotCourses(50);
+            List<CourseDTO> availableCourses = coursesResult.isSuccess() && coursesResult.getData() != null 
+                ? coursesResult.getData() : new ArrayList<>();
 
-            // 3. 调用AI生成学习路径
+            // 3. 构造学习路径Prompt（包含可用课程列表）
+            String prompt = buildLearningPathPrompt(goal, stats, availableCourses);
+
+            // 4. 调用AI生成学习路径
             String aiResponse = qwenAIClient.chat(prompt, null);
 
-            // 4. 解析AI响应，构建学习路径
+            // 5. 解析AI响应，构建学习路径
             LearningPath path = parseLearningPath(goal, aiResponse);
 
             log.info("学习路径生成成功: userId={}, goal={}", userId, goal);
@@ -125,23 +138,27 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
     private String generateRecommendReason(CourseDTO course, LearningStatsDTO stats) {
         String prompt;
         
-        if (stats != null && stats.getTotalLearningTime() > 0) {
+        if (stats != null && stats.getTotalLearningTime() != null && stats.getTotalLearningTime() > 0) {
+            int hours = stats.getTotalLearningTime() / 60;
+            int completedLessons = stats.getCompletedLessons() != null ? stats.getCompletedLessons() : 0;
+            
             prompt = String.format(
                 "用户已学习%d小时，完成%d个课时。" +
                 "课程《%s》是%s难度。" +
                 "请用一句话（30字内）说明为什么推荐这门课程给该用户。",
-                stats.getTotalLearningTime() / 60,
-                stats.getCompletedLessons(),
+                hours,
+                completedLessons,
                 course.getTitle(),
                 getLevelName(course.getLevel())
             );
         } else {
+            int studentCount = course.getStudentCount() != null ? course.getStudentCount() : 0;
             prompt = String.format(
                 "课程《%s》是%s难度，有%d人学习。" +
                 "请用一句话（30字内）说明为什么推荐这门课程给新用户。",
                 course.getTitle(),
                 getLevelName(course.getLevel()),
-                course.getStudentCount()
+                studentCount
             );
         }
 
@@ -149,8 +166,9 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
             return qwenAIClient.chat(prompt, null);
         } catch (Exception e) {
             // 如果AI调用失败，返回默认推荐理由
+            int studentCount = course.getStudentCount() != null ? course.getStudentCount() : 0;
             return String.format("热门%s课程，%d人已学习，适合提升技能",
-                    getLevelName(course.getLevel()), course.getStudentCount());
+                    getLevelName(course.getLevel()), studentCount);
         }
     }
 
@@ -161,16 +179,18 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
         int score = 60; // 基础分
 
         // 根据学习人数加分
-        if (course.getStudentCount() > 1000) {
+        Integer studentCount = course.getStudentCount() != null ? course.getStudentCount() : 0;
+        if (studentCount > 1000) {
             score += 20;
-        } else if (course.getStudentCount() > 500) {
+        } else if (studentCount > 500) {
             score += 10;
         }
 
         // 根据难度和用户水平匹配度加分
-        if (stats != null) {
+        if (stats != null && stats.getTotalLearningTime() != null) {
             int userLevel = getUserLevel(stats);
-            if (course.getLevel().equals(userLevel)) {
+            Integer courseLevel = course.getLevel() != null ? course.getLevel() : 0;
+            if (courseLevel.equals(userLevel)) {
                 score += 20; // 难度匹配
             }
         }
@@ -182,28 +202,40 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
      * 判断是否适合
      */
     private Boolean isSuitable(CourseDTO course, LearningStatsDTO stats) {
-        if (stats == null || stats.getTotalLearningTime() == 0) {
-            return course.getLevel() == 0; // 新手适合初级
+        Integer courseLevel = course.getLevel() != null ? course.getLevel() : 0;
+        
+        if (stats == null || stats.getTotalLearningTime() == null || stats.getTotalLearningTime() == 0) {
+            return courseLevel == 0; // 新手适合初级
         }
 
         int userLevel = getUserLevel(stats);
-        return Math.abs(course.getLevel() - userLevel) <= 1;
+        return Math.abs(courseLevel - userLevel) <= 1;
     }
 
     /**
      * 构建学习路径Prompt
      */
-    private String buildLearningPathPrompt(String goal, LearningStatsDTO stats) {
+    private String buildLearningPathPrompt(String goal, LearningStatsDTO stats, List<CourseDTO> availableCourses) {
         StringBuilder prompt = new StringBuilder();
         
         prompt.append("你是专业的学习规划师，请为用户制定详细的学习路径。\n\n");
         prompt.append("学习目标: ").append(goal).append("\n");
         
-        if (stats != null && stats.getTotalLearningTime() > 0) {
-            prompt.append(String.format("用户基础: 已学习%d小时，完成%d个课时\n", 
-                    stats.getTotalLearningTime() / 60, stats.getCompletedLessons()));
+        if (stats != null && stats.getTotalLearningTime() != null && stats.getTotalLearningTime() > 0) {
+            int hours = stats.getTotalLearningTime() / 60;
+            int completedLessons = stats.getCompletedLessons() != null ? stats.getCompletedLessons() : 0;
+            prompt.append(String.format("用户基础: 已学习%d小时，完成%d个课时\n", hours, completedLessons));
         } else {
             prompt.append("用户基础: 零基础\n");
+        }
+        
+        // 添加平台可用课程列表
+        if (availableCourses != null && !availableCourses.isEmpty()) {
+            prompt.append("\n平台可用课程：\n");
+            for (CourseDTO course : availableCourses) {
+                prompt.append("- ").append(course.getTitle()).append("\n");
+            }
+            prompt.append("\n注意：推荐课程时，优先从以上课程中选择。如果以上课程不够，可以补充其他课程。\n");
         }
         
         prompt.append("\n请按以下格式输出学习路径：\n\n");
@@ -230,14 +262,16 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
     private LearningPath parseLearningPath(String goal, String aiResponse) {
         LearningPath path = new LearningPath();
         path.setGoal(goal);
-        path.setPathDescription(aiResponse);
+        path.setAdvice(aiResponse);
 
         try {
             // 提取预计时间
             String timeSection = extractSection(aiResponse, "【预计时间】", "【第一阶段");
             if (timeSection != null) {
-                path.setEstimatedDays(extractNumber(timeSection, "完成天数"));
-                path.setEstimatedHours(extractNumber(timeSection, "学习时长"));
+                Integer totalHours = extractNumber(timeSection, "学习时长");
+                path.setTotalDuration(totalHours != null ? totalHours : 200);
+            } else {
+                path.setTotalDuration(200); // 默认200小时
             }
 
             // 提取各个阶段
@@ -263,8 +297,7 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
 
         } catch (Exception e) {
             log.warn("解析学习路径失败，使用默认值", e);
-            path.setEstimatedDays(90);
-            path.setEstimatedHours(200);
+            path.setTotalDuration(200);
             path.setStages(new ArrayList<>());
         }
 
@@ -279,19 +312,40 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
             String stageName = extractAfterMarker(stageMarker, ":");
             String description = extractValue(content, "阶段描述");
             String coursesStr = extractValue(content, "推荐课程");
-            Integer hours = extractNumber(content, "预计时长");
+            Integer duration = extractNumber(content, "预计时长");
             String keyPointsStr = extractValue(content, "学习要点");
 
-            List<String> courses = coursesStr != null ? 
-                    Arrays.asList(coursesStr.split("[,，]")) : new ArrayList<>();
-            List<String> keyPoints = keyPointsStr != null ? 
-                    Arrays.asList(keyPointsStr.split("[;；]")) : new ArrayList<>();
+            // 解析课程列表（混合：真实课程+虚拟课程）
+            List<CourseRecommendation> courses = new ArrayList<>();
+            if (coursesStr != null) {
+                String[] courseNames = coursesStr.split("[,，]");
+                for (String courseName : courseNames) {
+                    courseName = courseName.trim();
+                    if (!courseName.isEmpty()) {
+                        // 尝试从数据库查找真实课程
+                        CourseRecommendation course = findCourseByNameSafe(courseName);
+                        courses.add(course);
+                    }
+                }
+            }
+
+            // 解析学习要点
+            List<String> keyPoints = new ArrayList<>();
+            if (keyPointsStr != null) {
+                String[] points = keyPointsStr.split("[;；]");
+                for (String point : points) {
+                    point = point.trim();
+                    if (!point.isEmpty()) {
+                        keyPoints.add(point);
+                    }
+                }
+            }
 
             return LearningPath.LearningStage.builder()
                     .stageName(stageName)
                     .description(description)
                     .courses(courses)
-                    .hours(hours)
+                    .duration(duration)
                     .keyPoints(keyPoints)
                     .build();
         } catch (Exception e) {
@@ -299,8 +353,58 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
         }
     }
 
+    /**
+     * 根据课程名称安全查找课程（找不到返回虚拟课程，不抛异常）
+     */
+    private CourseRecommendation findCourseByNameSafe(String courseName) {
+        try {
+            // 调用课程服务查找课程（使用模糊搜索）
+            R<List<CourseDTO>> coursesResult = courseServiceClient.getHotCourses(50);
+            if (coursesResult.isSuccess() && coursesResult.getData() != null) {
+                // 从所有课程中查找匹配的课程（模糊匹配）
+                for (CourseDTO courseDTO : coursesResult.getData()) {
+                    if (courseDTO.getTitle().contains(courseName) || courseName.contains(courseDTO.getTitle())) {
+                        log.info("找到真实课程: {} -> {}", courseName, courseDTO.getTitle());
+                        return CourseRecommendation.builder()
+                                .courseId(courseDTO.getId())
+                                .title(courseDTO.getTitle())
+                                .description(courseDTO.getDescription())
+                                .coverImage(courseDTO.getCoverImage())
+                                .price(courseDTO.getPrice())
+                                .level(courseDTO.getLevel())
+                                .studentCount(courseDTO.getStudentCount())
+                                .reason("学习路径推荐")
+                                .score(85)
+                                .suitable(true)
+                                .build();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("查找课程失败，使用虚拟课程: {}", courseName);
+        }
+        
+        // 如果找不到实际课程，返回一个虚拟的课程对象（没有图片）
+        log.info("数据库中没有课程: {}，使用虚拟课程（纯文字）", courseName);
+        return CourseRecommendation.builder()
+                .courseId(null)  // courseId为null表示虚拟课程
+                .title(courseName)
+                .description("建议学习的课程")
+                .coverImage(null)  // 没有图片
+                .price(java.math.BigDecimal.ZERO)
+                .level(0)
+                .studentCount(0)
+                .reason("学习路径推荐")
+                .score(80)
+                .suitable(true)
+                .build();
+    }
+
     // 辅助方法
     private String getLevelName(Integer level) {
+        if (level == null) {
+            return "初级";
+        }
         switch (level) {
             case 0: return "初级";
             case 1: return "中级";
@@ -310,6 +414,9 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
     }
 
     private int getUserLevel(LearningStatsDTO stats) {
+        if (stats == null || stats.getTotalLearningTime() == null) {
+            return 0; // 默认初级
+        }
         int hours = stats.getTotalLearningTime() / 60;
         if (hours < 20) return 0; // 初级
         if (hours < 100) return 1; // 中级

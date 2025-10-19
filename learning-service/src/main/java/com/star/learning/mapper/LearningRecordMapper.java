@@ -170,6 +170,15 @@ public interface LearningRecordMapper extends BaseMapper<LearningRecord> {
     Integer sumStudyDuration(@Param("userId") Long userId, @Param("courseId") Long courseId);
     
     /**
+     * 统计用户已完成的课时数量
+     *
+     * @param userId 用户ID
+     * @return 已完成课时数量
+     */
+    @Select("SELECT COUNT(*) FROM learning_record WHERE user_id = #{userId} AND is_completed = 1")
+    Integer countCompletedLessonsByUserId(@Param("userId") Long userId);
+
+    /**
      * 计算课程进度（只要有学习记录就算已学，支持快进、跳看等场景）
      * 计算公式：已学课时数 / 总课时数 * 100
      *

@@ -28,9 +28,9 @@ export interface ChatHistory {
 
 // 课程推荐
 export interface CourseRecommendation {
-  courseId: number
+  courseId?: number | null
   courseTitle: string
-  courseCover: string
+  courseCover?: string | null
   reason: string
   matchScore: number
   category: string
@@ -51,6 +51,7 @@ export interface LearningStage {
   duration: number
   courses: CourseRecommendation[]
   description: string
+  keyPoints?: string[]
 }
 
 // 学习报告

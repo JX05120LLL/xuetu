@@ -30,4 +30,10 @@ public interface CourseServiceClient {
             @RequestParam(value = "categoryId", required = false) Long categoryId,
             @RequestParam(value = "level", required = false) Integer level
     );
+
+    /**
+     * 根据课程标题搜索课程
+     */
+    @GetMapping("/search")
+    R<List<CourseDTO>> getCoursesByTitle(@RequestParam("title") String title);
 }

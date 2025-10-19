@@ -1,7 +1,11 @@
 <template>
   <div class="course-card" @click="goToCourseDetail">
     <div class="course-cover">
-      <img :src="course.coverImage || 'https://via.placeholder.com/300x180'" :alt="course.title" />
+      <img 
+        :src="course.coverImage || '/images/default-course.jpg'" 
+        :alt="course.title"
+        @error="handleImageError"
+      />
       <div class="course-level">{{ course.levelName }}</div>
     </div>
 
@@ -50,6 +54,11 @@ const goToCourseDetail = () => {
 
 const handleAddToCart = () => {
   cartStore.addToCart(props.course)
+}
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = '/images/default-course.jpg'
 }
 </script>
 

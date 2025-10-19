@@ -8,6 +8,16 @@ import type {
   LearningReport
 } from '@/types/ai'
 
+// 辅助函数：转换难度级别
+function getLevelName(level: number): string {
+  switch (level) {
+    case 0: return '初级'
+    case 1: return '中级'
+    case 2: return '高级'
+    default: return '未知'
+  }
+}
+
 /**
  * AI聊天接口
  */
@@ -68,6 +78,17 @@ export function getRecommendedCourses(limit: number = 5): Promise<CourseRecommen
     url: '/recommend/courses',
     method: 'get',
     params: { limit }
+  }).then((response: any) => {
+    // 转换后端字段到前端期望的字段
+    return response.map((item: any) => ({
+      courseId: item.courseId,
+      courseTitle: item.title,
+      courseCover: item.coverImage,
+      reason: item.reason,
+      matchScore: item.score ? item.score / 100 : 0, // 后端返回0-100，前端期望0-1
+      category: item.categoryName || '未分类',
+      level: getLevelName(item.level)
+    }))
   })
 }
 
@@ -77,6 +98,28 @@ export function generateLearningPath(goal: string): Promise<LearningPath> {
     url: '/recommend/path',
     method: 'post',
     params: { goal }
+  }).then((response: any) => {
+    // 转换后端字段到前端期望的字段
+    return {
+      goal: response.goal || goal,
+      totalDuration: response.totalDuration || 0,
+      stages: response.stages ? response.stages.map((stage: any) => ({
+        stageName: stage.stageName,
+        duration: stage.duration || 0,
+        description: stage.description || '',
+        keyPoints: stage.keyPoints || [],
+        courses: stage.courses ? stage.courses.map((course: any) => ({
+          courseId: course.courseId,
+          courseTitle: course.title,
+          courseCover: course.coverImage,
+          reason: course.reason || '',
+          matchScore: course.score ? course.score / 100 : 0,
+          category: course.categoryName || '未分类',
+          level: getLevelName(course.level)
+        })) : []
+      })) : [],
+      advice: response.advice || ''
+    }
   })
 }
 
@@ -97,7 +140,30 @@ export function generateLearningReport(): Promise<LearningReport> {
   return request({
     url: '/analysis/report',
     method: 'get'
+  }).then((response: any) => {
+    // 转换后端字段到前端期望的字段
+    return {
+      userId: response.userId,
+      totalCourses: response.learningCourses || 0,
+      totalStudyTime: response.learningTime || 0, // 后端返回小时，前端期望分钟
+      completedCourses: response.completedCourses || 0,
+      averageProgress: calculateAverageProgress(response),
+      strongPoints: response.strengths ? [response.strengths] : [],
+      weakPoints: response.advices || [],
+      suggestions: response.advices || [],
+      weeklyTrend: [],
+      categoryDistribution: []
+    }
   })
+}
+
+// 辅助函数：计算平均进度
+function calculateAverageProgress(response: any): number {
+  // 这里可以根据实际业务逻辑计算平均进度
+  // 暂时返回一个默认值
+  return response.completedCourses && response.totalCourses 
+    ? Math.round((response.completedCourses / response.totalCourses) * 100)
+    : 0
 }
 
 // 获取学习建议
