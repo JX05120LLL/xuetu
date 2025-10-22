@@ -60,7 +60,7 @@
                   class="note-item"
                 >
                   <div class="note-header">
-                    <span class="note-time">{{ formatTime(note.timestamp) }}</span>
+                    <span class="note-title">{{ note.title }}</span>
                     <div class="note-actions">
                       <el-button link type="primary" size="small" @click="editNote(note)">编辑</el-button>
                       <el-button link type="danger" size="small" @click="deleteNote(note.id)">删除</el-button>
@@ -68,7 +68,7 @@
                   </div>
                   <div class="note-content">{{ note.content }}</div>
                   <div class="note-footer">
-                    <span>{{ note.lessonTitle }}</span>
+                    <span>{{ formatDate(note.createTime) }}</span>
                   </div>
                 </div>
               </div>
@@ -76,12 +76,20 @@
               <!-- 新建/编辑笔记 -->
               <div class="note-editor">
                 <el-input
+                  v-model="noteForm.title"
+                  placeholder="笔记标题..."
+                  maxlength="100"
+                  show-word-limit
+                  class="title-input"
+                ></el-input>
+                <el-input
                   v-model="noteForm.content"
                   type="textarea"
                   :rows="4"
                   placeholder="记录学习心得..."
-                  maxlength="500"
+                  maxlength="5000"
                   show-word-limit
+                  class="content-input"
                 ></el-input>
                 <div class="editor-actions">
                   <el-button v-if="noteForm.id" @click="cancelEdit">取消</el-button>
@@ -127,10 +135,12 @@ const hasAccess = ref(false)
 const activeTab = ref('catalog')
 const notesLoading = ref(false)
 const notes = ref<NoteDTO[]>([])
-const noteForm = ref<CreateNoteRequest | UpdateNoteRequest>({
-  content: '',
+const noteForm = ref({
+  id: undefined as number | undefined,
+  courseId: courseId,
   lessonId: 0,
-  timestamp: 0
+  title: '',
+  content: ''
 })
 const noteSaving = ref(false)
 
@@ -328,6 +338,11 @@ const loadNotes = async () => {
 
 // 保存笔记
 const saveNote = async () => {
+  if (!noteForm.value.title.trim()) {
+    ElMessage.warning('请输入笔记标题')
+    return
+  }
+  
   if (!noteForm.value.content.trim()) {
     ElMessage.warning('请输入笔记内容')
     return
@@ -340,30 +355,33 @@ const saveNote = async () => {
   
   noteSaving.value = true
   try {
-    const currentTime = dp ? Math.floor(dp.video.currentTime) : 0
-    
-    if ('id' in noteForm.value && noteForm.value.id) {
+    if (noteForm.value.id) {
       // 更新笔记
       await updateNote(noteForm.value.id, {
-        content: noteForm.value.content,
-        timestamp: currentTime
+        courseId: courseId,
+        lessonId: currentLesson.value.id,
+        title: noteForm.value.title,
+        content: noteForm.value.content
       })
       ElMessage.success('笔记更新成功')
     } else {
       // 创建笔记
       await createNote({
+        courseId: courseId,
         lessonId: currentLesson.value.id,
-        content: noteForm.value.content,
-        timestamp: currentTime
+        title: noteForm.value.title,
+        content: noteForm.value.content
       })
       ElMessage.success('笔记保存成功')
     }
     
     // 重置表单
     noteForm.value = {
-      content: '',
+      id: undefined,
+      courseId: courseId,
       lessonId: 0,
-      timestamp: 0
+      title: '',
+      content: ''
     }
     
     // 重新加载笔记列表
@@ -379,8 +397,10 @@ const saveNote = async () => {
 const editNote = (note: NoteDTO) => {
   noteForm.value = {
     id: note.id,
-    content: note.content,
-    timestamp: note.timestamp
+    courseId: note.courseId,
+    lessonId: note.lessonId,
+    title: note.title,
+    content: note.content
   }
   activeTab.value = 'notes'
 }
@@ -388,9 +408,11 @@ const editNote = (note: NoteDTO) => {
 // 取消编辑
 const cancelEdit = () => {
   noteForm.value = {
-    content: '',
+    id: undefined,
+    courseId: courseId,
     lessonId: 0,
-    timestamp: 0
+    title: '',
+    content: ''
   }
 }
 
@@ -604,7 +626,7 @@ watch(activeTab, (newTab) => {
         align-items: center;
         margin-bottom: 10px;
 
-        .note-time {
+        .note-title {
           color: #409eff;
           font-weight: 600;
           font-size: 14px;
@@ -636,6 +658,14 @@ watch(activeTab, (newTab) => {
   .note-editor {
     border-top: 1px solid #e4e7ed;
     padding-top: 15px;
+
+    .title-input {
+      margin-bottom: 10px;
+    }
+
+    .content-input {
+      margin-bottom: 10px;
+    }
 
     .editor-actions {
       margin-top: 10px;

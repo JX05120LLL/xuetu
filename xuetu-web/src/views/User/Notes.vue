@@ -61,8 +61,33 @@
           </div>
 
           <!-- 笔记列表 -->
-          <div class="notes-list" v-loading="loading">
-            <div v-if="notes.length > 0">
+          <div class="notes-list">
+            <!-- 骨架屏 -->
+            <template v-if="loading">
+              <el-row :gutter="20">
+                <el-col :xs="24" :sm="12" :md="8" v-for="i in 6" :key="'skeleton-' + i">
+                  <div class="note-skeleton-card">
+                    <el-skeleton animated>
+                      <template #template>
+                        <div style="padding: 20px">
+                          <div style="display: flex; justify-content: space-between">
+                            <el-skeleton-item variant="text" style="width: 40%" />
+                            <el-skeleton-item variant="circle" style="width: 30px; height: 30px" />
+                          </div>
+                          <el-skeleton-item variant="h3" style="margin-top: 16px; width: 70%" />
+                          <el-skeleton-item variant="text" style="margin-top: 12px" />
+                          <el-skeleton-item variant="text" style="margin-top: 8px" />
+                          <el-skeleton-item variant="text" style="margin-top: 8px; width: 60%" />
+                        </div>
+                      </template>
+                    </el-skeleton>
+                  </div>
+                </el-col>
+              </el-row>
+            </template>
+            
+            <!-- 实际笔记列表 -->
+            <div v-else-if="notes.length > 0">
               <el-checkbox 
                 v-model="selectAll"
                 @change="handleSelectAllChange"
@@ -84,7 +109,7 @@
                     <div class="note-header">
                       <el-checkbox 
                         v-model="selectedNotes"
-                        :label="note.id"
+                        :value="note.id"
                       />
                       <div class="course-info">
                         <el-tag size="small" type="success">{{ getCourseNameById(note.courseId) }}</el-tag>
@@ -107,6 +132,10 @@
                       </div>
                     </div>
                     
+                    <div class="note-title-display" @click="handleViewNote(note)">
+                      <h4>{{ note.title }}</h4>
+                    </div>
+                    
                     <div class="note-content" @click="handleViewNote(note)">
                       <div class="content-text">{{ note.content }}</div>
                     </div>
@@ -114,11 +143,7 @@
                     <div class="note-footer">
                       <div class="time-info">
                         <el-icon><Clock /></el-icon>
-                        <span>{{ formatDate(note.createdTime) }}</span>
-                      </div>
-                      <div class="video-time-info" v-if="note.videoTime">
-                        <el-icon><VideoPlay /></el-icon>
-                        <span>{{ formatTime(note.videoTime) }}</span>
+                        <span>{{ formatDate(note.createdTime || note.createTime) }}</span>
                       </div>
                     </div>
                   </div>
@@ -142,13 +167,30 @@
             <!-- 空状态 -->
             <el-empty 
               v-else 
-              description="暂无笔记" 
+              description="" 
               :image-size="200"
+              class="custom-empty"
             >
-              <template #description>
-                <p>{{ isFiltered ? '没有符合条件的笔记' : '还没有创建任何笔记' }}</p>
+              <template #image>
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="200">
+                  <rect x="40" y="40" width="120" height="120" rx="8" fill="#F3F4F6"/>
+                  <line x1="60" y1="70" x2="140" y2="70" stroke="#D1D5DB" stroke-width="4"/>
+                  <line x1="60" y1="90" x2="130" y2="90" stroke="#D1D5DB" stroke-width="4"/>
+                  <line x1="60" y1="110" x2="120" y2="110" stroke="#D1D5DB" stroke-width="4"/>
+                  <circle cx="100" cy="140" r="15" fill="#FEF3C7"/>
+                  <path d="M 90 140 L 95 145 L 110 130" stroke="#F59E0B" stroke-width="3" fill="none"/>
+                </svg>
               </template>
-              <el-button type="primary" @click="goToCourses">去学习并记笔记</el-button>
+              <template #description>
+                <h3 style="color: #606266; font-size: 18px; margin-bottom: 8px;">
+                  {{ isFiltered ? '没有符合条件的笔记' : '还没有创建笔记' }}
+                </h3>
+                <p style="color: #909399; font-size: 14px;">学习时记录笔记，方便日后复习</p>
+              </template>
+              <el-button type="primary" size="large" @click="goToCourses">
+                <el-icon style="margin-right: 5px"><Reading /></el-icon>
+                去学习并记笔记
+              </el-button>
             </el-empty>
           </div>
         </div>
@@ -168,22 +210,30 @@
               {{ getCourseNameById(currentNote.courseId) }}
             </el-descriptions-item>
             <el-descriptions-item label="创建时间">
-              {{ formatDate(currentNote.createdTime) }}
-            </el-descriptions-item>
-            <el-descriptions-item v-if="currentNote.videoTime" label="视频时间点">
-              {{ formatTime(currentNote.videoTime) }}
+              {{ formatDate(currentNote.createdTime || currentNote.createTime) }}
             </el-descriptions-item>
           </el-descriptions>
         </div>
 
         <div class="note-edit-area">
           <el-form :model="noteForm" label-width="80px">
+            <el-form-item label="笔记标题">
+              <el-input
+                v-model="noteForm.title"
+                placeholder="请输入笔记标题"
+                maxlength="100"
+                show-word-limit
+                :disabled="dialogMode === 'view'"
+              />
+            </el-form-item>
             <el-form-item label="笔记内容">
               <el-input
                 v-model="noteForm.content"
                 type="textarea"
                 :rows="8"
                 placeholder="请输入笔记内容"
+                maxlength="5000"
+                show-word-limit
                 :disabled="dialogMode === 'view'"
               />
             </el-form-item>
@@ -231,7 +281,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
-import { Search, Clock, VideoPlay } from '@element-plus/icons-vue'
+import { Search, Clock, Reading } from '@element-plus/icons-vue'
 import { getMyNotes, updateNote, deleteNote } from '@/api/learning'
 import { getCourseList } from '@/api/course'
 import { formatDate } from '@/utils/format'
@@ -264,6 +314,7 @@ const noteDialogVisible = ref(false)
 const dialogMode = ref<'view' | 'edit' | 'create'>('view')
 const currentNote = ref<Note | null>(null)
 const noteForm = reactive({
+  title: '',
   content: ''
 })
 
@@ -274,13 +325,6 @@ const noteToDelete = ref<number | number[]>(0)
 
 // 课程列表缓存
 const coursesCache = ref<Record<number, string>>({})
-
-// 格式化视频时间点
-const formatTime = (seconds: number) => {
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-}
 
 // 获取课程名称
 const getCourseNameById = (courseId: number) => {
@@ -355,6 +399,7 @@ const handleCurrentChange = (page: number) => {
 // 查看笔记详情
 const handleViewNote = (note: Note) => {
   currentNote.value = note
+  noteForm.title = note.title
   noteForm.content = note.content
   dialogMode.value = 'view'
   noteDialogVisible.value = true
@@ -363,6 +408,7 @@ const handleViewNote = (note: Note) => {
 // 编辑笔记
 const handleEditNote = (note: Note) => {
   currentNote.value = note
+  noteForm.title = note.title
   noteForm.content = note.content
   dialogMode.value = 'edit'
   noteDialogVisible.value = true
@@ -372,13 +418,29 @@ const handleEditNote = (note: Note) => {
 const submitEditNote = async () => {
   if (!currentNote.value) return
   
+  if (!noteForm.title.trim()) {
+    ElMessage.warning('请输入笔记标题')
+    return
+  }
+  
+  if (!noteForm.content.trim()) {
+    ElMessage.warning('请输入笔记内容')
+    return
+  }
+  
   submitting.value = true
   try {
-    await updateNote(currentNote.value.id, { content: noteForm.content })
+    await updateNote(currentNote.value.id, {
+      courseId: currentNote.value.courseId,
+      lessonId: currentNote.value.lessonId,
+      title: noteForm.title,
+      content: noteForm.content
+    })
     
     // 更新本地数据
     const noteIndex = notes.value.findIndex(item => item.id === currentNote.value?.id)
     if (noteIndex !== -1) {
+      notes.value[noteIndex].title = noteForm.title
       notes.value[noteIndex].content = noteForm.content
     }
     
@@ -459,6 +521,18 @@ onMounted(() => {
 .notes-page {
   min-height: 100vh;
   background-color: #f5f7fa;
+}
+
+.custom-empty {
+  padding: 60px 0;
+  
+  :deep(.el-empty__image) {
+    margin-bottom: 24px;
+  }
+  
+  :deep(.el-empty__description) {
+    margin-top: 16px;
+  }
 }
 
 .page-content {
@@ -555,9 +629,24 @@ onMounted(() => {
     }
   }
   
+  .note-title-display {
+    padding: 12px 15px 0;
+    cursor: pointer;
+    
+    h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #303133;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  
   .note-content {
     padding: 15px;
-    min-height: 100px;
+    min-height: 80px;
     cursor: pointer;
     
     .content-text {

@@ -137,9 +137,10 @@ export function getMyNotes(params: PageParam & { courseId?: number }): Promise<P
  * 创建笔记
  */
 export function createNote(data: {
+  courseId: number
   lessonId: number
+  title: string
   content: string
-  timestamp: number
 }): Promise<number> {
   return request({
     url: '/learning/note',
@@ -151,7 +152,12 @@ export function createNote(data: {
 /**
  * 更新笔记
  */
-export function updateNote(noteId: number, data: { content: string; timestamp?: number }): Promise<boolean> {
+export function updateNote(noteId: number, data: { 
+  courseId: number
+  lessonId: number
+  title: string
+  content: string
+}): Promise<boolean> {
   return request({
     url: `/learning/note/${noteId}`,
     method: 'put',
@@ -172,16 +178,6 @@ export function deleteNote(noteId: number): Promise<boolean> {
 /**
  * 获取课时笔记列表
  */
-export interface NoteDTO {
-  id: number
-  lessonId: number
-  lessonTitle?: string
-  content: string
-  timestamp: number
-  createdTime: string
-  updatedTime: string
-}
-
 export function getNotesByLesson(lessonId: number): Promise<NoteDTO[]> {
   return request({
     url: `/learning/note/lesson/${lessonId}`,

@@ -16,9 +16,37 @@
         </el-tabs>
 
         <!-- 订单列表 -->
-        <div class="order-list" v-loading="loading">
+        <div class="order-list">
+          <!-- 骨架屏 -->
+          <template v-if="loading">
+            <div v-for="i in 3" :key="'skeleton-' + i" class="order-skeleton">
+              <el-skeleton animated>
+                <template #template>
+                  <div style="padding: 20px">
+                    <div style="display: flex; justify-content: space-between; align-items: center">
+                      <el-skeleton-item variant="text" style="width: 200px" />
+                      <el-skeleton-item variant="text" style="width: 100px" />
+                    </div>
+                    <el-divider />
+                    <div style="display: flex; gap: 20px">
+                      <el-skeleton-item variant="image" style="width: 120px; height: 80px" />
+                      <div style="flex: 1">
+                        <el-skeleton-item variant="h3" style="width: 60%" />
+                        <el-skeleton-item variant="text" style="margin-top: 12px; width: 40%" />
+                      </div>
+                      <div style="text-align: right">
+                        <el-skeleton-item variant="text" style="width: 100px" />
+                        <el-skeleton-item variant="button" style="margin-top: 12px; width: 80px" />
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </el-skeleton>
+            </div>
+          </template>
+          
           <!-- 有订单数据 -->
-          <template v-if="orders.length > 0">
+          <template v-else-if="orders.length > 0">
             <OrderItem
               v-for="order in orders"
               :key="order.id"
@@ -43,9 +71,24 @@
           <!-- 空状态 -->
           <el-empty
             v-else-if="!loading"
-            description="暂无订单"
+            description=""
+            class="custom-empty"
           >
-            <el-button type="primary" @click="$router.push('/course/list')">
+            <template #image>
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="200">
+                <rect x="30" y="60" width="140" height="100" rx="8" fill="#F3F4F6"/>
+                <rect x="50" y="80" width="80" height="50" rx="4" fill="#E5E7EB"/>
+                <circle cx="90" cy="105" r="8" fill="#9CA3AF"/>
+                <circle cx="150" cy="140" r="20" fill="#DBEAFE"/>
+                <text x="150" y="148" text-anchor="middle" font-size="24" fill="#3B82F6">¥</text>
+              </svg>
+            </template>
+            <template #description>
+              <h3 style="color: #606266; font-size: 18px; margin-bottom: 8px;">{{ getEmptyText() }}</h3>
+              <p style="color: #909399; font-size: 14px;">发现心仪的课程就下单吧！</p>
+            </template>
+            <el-button type="primary" size="large" @click="$router.push('/course/list')">
+              <el-icon style="margin-right: 5px"><ShoppingBag /></el-icon>
               去选课
             </el-button>
           </el-empty>
@@ -58,8 +101,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { ShoppingBag } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
@@ -160,12 +204,44 @@ watch(() => route.query.status, (newStatus) => {
     loadOrders()
   }
 })
+
+// 获取空状态文案
+const getEmptyText = () => {
+  const statusTexts: Record<string, string> = {
+    all: '还没有订单',
+    '0': '没有待支付的订单',
+    '1': '没有已支付的订单',
+    '2': '没有已取消的订单',
+    '4': '没有已完成的订单'
+  }
+  return statusTexts[activeStatus.value] || '还没有订单'
+}
 </script>
 
 <style scoped lang="scss">
 .order-list-page {
   min-height: 100vh;
   background: #f5f7fa;
+}
+
+.custom-empty {
+  padding: 60px 0;
+  
+  :deep(.el-empty__image) {
+    margin-bottom: 24px;
+  }
+  
+  :deep(.el-empty__description) {
+    margin-top: 16px;
+  }
+  
+  :deep(.el-button) {
+    margin-top: 24px;
+  }
+  
+  svg {
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  }
 }
 
 .page-content {

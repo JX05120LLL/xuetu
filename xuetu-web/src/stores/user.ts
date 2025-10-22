@@ -7,7 +7,7 @@ import {
   logout as logoutApi, 
   getUserInfo as getUserInfoApi,
   updateProfile as updateProfileApi,
-  updateAvatar as updateAvatarApi
+  uploadAvatar as uploadAvatarApi
 } from '@/api/user'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
@@ -108,17 +108,18 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // 更新用户头像
-  async function updateUserAvatar(avatarUrl: string) {
+  async function updateUserAvatar(file: File) {
     if (!userId.value) return false
     
     try {
-      const updatedUser = await updateAvatarApi(userId.value, avatarUrl)
+      const updatedUser = await uploadAvatarApi(userId.value, file)
       userInfo.value = updatedUser
       localStorage.setItem('userInfo', JSON.stringify(updatedUser))
       ElMessage.success('头像已更新')
       return true
     } catch (error) {
       console.error('更新头像失败:', error)
+      ElMessage.error('头像上传失败')
       return false
     }
   }

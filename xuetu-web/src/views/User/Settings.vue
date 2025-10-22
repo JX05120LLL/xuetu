@@ -17,6 +17,53 @@
                   :rules="profileRules"
                   label-width="100px"
                 >
+                  <!-- 头像上传 -->
+                  <el-form-item label="头像">
+                    <div class="avatar-upload">
+                      <div class="avatar-wrapper">
+                        <el-avatar 
+                          :size="100" 
+                          :src="userStore.userInfo?.avatar || '/images/default-avatar.svg'"
+                          class="avatar-preview"
+                        >
+                          {{ userStore.userInfo?.nickname?.[0] || 'U' }}
+                        </el-avatar>
+                        <div class="avatar-overlay" v-if="!submitting.profile">
+                          <el-upload
+                            :auto-upload="false"
+                            :show-file-list="false"
+                            :on-change="handleAvatarChange"
+                            accept="image/jpeg,image/jpg,image/png,image/gif"
+                            class="upload-trigger"
+                          >
+                            <el-icon :size="24" color="#fff"><Camera /></el-icon>
+                          </el-upload>
+                        </div>
+                        <el-progress 
+                          v-if="submitting.profile"
+                          type="circle"
+                          :percentage="100"
+                          :width="100"
+                          status="success"
+                          class="upload-progress"
+                        />
+                      </div>
+                      <div class="upload-actions">
+                        <el-upload
+                          :auto-upload="false"
+                          :show-file-list="false"
+                          :on-change="handleAvatarChange"
+                          accept="image/jpeg,image/jpg,image/png,image/gif"
+                        >
+                          <el-button type="primary" size="small" :loading="submitting.profile">
+                            {{ submitting.profile ? '上传中...' : '选择图片' }}
+                          </el-button>
+                        </el-upload>
+                        <div class="form-tip">支持jpg、png、gif格式，大小不超过2MB</div>
+                      </div>
+                    </div>
+                  </el-form-item>
+
                   <el-form-item label="用户名">
                     <el-input v-model="userStore.userInfo.username" disabled />
                     <div class="form-tip">用户名不可修改</div>
@@ -205,8 +252,9 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import type { FormInstance } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Camera } from '@element-plus/icons-vue'
+import type { FormInstance, UploadFile } from 'element-plus'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import { useUserStore } from '@/stores/user'
@@ -417,7 +465,8 @@ const updatePassword = async () => {
       try {
         const passwordData: ChangePasswordRequest = {
           oldPassword: passwordForm.oldPassword,
-          newPassword: passwordForm.newPassword
+          newPassword: passwordForm.newPassword,
+          confirmPassword: passwordForm.confirmPassword
         }
 
         // 调用API修改密码
@@ -487,6 +536,45 @@ const resetNotification = () => {
   notificationForm.systemNotify = true
   notificationForm.emailNotify = false
   notificationForm.messageNotify = true
+}
+
+// 头像上传处理
+const handleAvatarChange = async (file: UploadFile) => {
+  // 验证文件类型
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+  if (!allowedTypes.includes(file.raw?.type || '')) {
+    ElMessage.error('只支持 jpg、png、gif 格式的图片')
+    return
+  }
+
+  // 验证文件大小（2MB）
+  const maxSize = 2 * 1024 * 1024
+  if ((file.raw?.size || 0) > maxSize) {
+    ElMessage.error('图片大小不能超过 2MB')
+    return
+  }
+
+  // 确认上传
+  try {
+    await ElMessageBox.confirm('确定要上传这张图片作为头像吗？', '确认上传', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'info'
+    })
+
+    // 上传头像
+    submitting.profile = true
+    const success = await userStore.updateAvatar(file.raw as File)
+    if (success) {
+      ElMessage.success('头像上传成功')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('头像上传失败:', error)
+    }
+  } finally {
+    submitting.profile = false
+  }
 }
 </script>
 
@@ -593,6 +681,75 @@ const resetNotification = () => {
   }
 }
 
+// 头像上传样式
+.avatar-upload {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  
+  .avatar-wrapper {
+    position: relative;
+    
+    .avatar-preview {
+      border: 2px solid #ebeef5;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+    }
+    
+    .avatar-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+      cursor: pointer;
+      
+      .upload-trigger {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        :deep(.el-upload) {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+    }
+    
+    &:hover .avatar-overlay {
+      opacity: 1;
+    }
+    
+    .upload-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+  
+  .upload-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    .el-button {
+      width: 120px;
+    }
+  }
+}
+
 // 响应式调整
 @media (max-width: 768px) {
   .settings-tabs {
@@ -603,6 +760,11 @@ const resetNotification = () => {
   
   .el-form {
     max-width: 100%;
+  }
+  
+  .avatar-upload {
+    flex-direction: column;
+    align-items: center;
   }
 }
 </style>

@@ -133,12 +133,33 @@
             </div>
 
             <!-- 课程网格 -->
-            <div class="course-grid" v-loading="loading">
-              <CourseCard
-                v-for="course in courseList"
-                :key="course.id"
-                :course="course"
-              />
+            <div class="course-grid">
+              <!-- 骨架屏 -->
+              <template v-if="loading">
+                <div v-for="i in 12" :key="'skeleton-' + i" class="course-skeleton">
+                  <el-skeleton :rows="5" animated>
+                    <template #template>
+                      <el-skeleton-item variant="image" style="width: 100%; height: 200px" />
+                      <div style="padding: 14px">
+                        <el-skeleton-item variant="h3" style="width: 80%" />
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px">
+                          <el-skeleton-item variant="text" style="width: 30%" />
+                          <el-skeleton-item variant="text" style="width: 30%" />
+                        </div>
+                      </div>
+                    </template>
+                  </el-skeleton>
+                </div>
+              </template>
+              
+              <!-- 实际课程列表 -->
+              <template v-else>
+                <CourseCard
+                  v-for="course in courseList"
+                  :key="course.id"
+                  :course="course"
+                />
+              </template>
             </div>
 
             <!-- 分页 -->

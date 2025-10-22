@@ -333,6 +333,91 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return user;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public User updateProfile(Long userId, com.star.user.dto.UpdateProfileRequest request) {
+        log.info("更新用户资料: userId={}", userId);
+        
+        // 1. 检查用户是否存在
+        User user = getById(userId);
+        if (user == null) {
+            throw new UserAuthException("用户不存在");
+        }
+        
+        // 2. 检查邮箱是否被其他用户使用
+        if (StringUtils.hasText(request.getEmail()) && !request.getEmail().equals(user.getEmail())) {
+            User existUser = findByEmail(request.getEmail());
+            if (existUser != null && !existUser.getId().equals(userId)) {
+                throw new UserAuthException("邮箱已被使用");
+            }
+            user.setEmail(request.getEmail());
+        }
+        
+        // 3. 检查手机号是否被其他用户使用
+        if (StringUtils.hasText(request.getPhone()) && !request.getPhone().equals(user.getPhone())) {
+            User existUser = findByPhone(request.getPhone());
+            if (existUser != null && !existUser.getId().equals(userId)) {
+                throw new UserAuthException("手机号已被使用");
+            }
+            user.setPhone(request.getPhone());
+        }
+        
+        // 4. 更新其他字段
+        if (StringUtils.hasText(request.getNickname())) {
+            user.setNickname(request.getNickname());
+        }
+        if (request.getGender() != null) {
+            user.setGender(request.getGender());
+        }
+        if (StringUtils.hasText(request.getBirthday())) {
+            user.setBirthday(request.getBirthday());
+        }
+        if (StringUtils.hasText(request.getBio())) {
+            user.setBio(request.getBio());
+        }
+        
+        user.setUpdatedTime(LocalDateTime.now());
+        
+        // 5. 保存更新
+        boolean result = updateById(user);
+        if (!result) {
+            throw new UserAuthException("更新用户资料失败");
+        }
+        
+        log.info("用户资料更新成功: userId={}, username={}", userId, user.getUsername());
+        
+        // 清除敏感信息
+        user.setPassword(null);
+        return user;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public User updateAvatar(Long userId, String avatarUrl) {
+        log.info("更新用户头像: userId={}, avatarUrl={}", userId, avatarUrl);
+        
+        // 1. 检查用户是否存在
+        User user = getById(userId);
+        if (user == null) {
+            throw new UserAuthException("用户不存在");
+        }
+        
+        // 2. 更新头像
+        user.setAvatar(avatarUrl);
+        user.setUpdatedTime(LocalDateTime.now());
+        
+        boolean result = updateById(user);
+        if (!result) {
+            throw new UserAuthException("更新头像失败");
+        }
+        
+        log.info("用户头像更新成功: userId={}, username={}", userId, user.getUsername());
+        
+        // 清除敏感信息
+        user.setPassword(null);
+        return user;
+    }
+
     /**
      * 校验注册请求参数
      */

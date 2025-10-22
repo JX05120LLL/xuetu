@@ -25,7 +25,7 @@
               <el-checkbox v-model="selectedCourses" :label="course.id" />
               
               <img
-                :src="course.coverImage || 'https://via.placeholder.com/150x100'"
+                :src="course.coverImage || '/images/default-course.jpg'"
                 :alt="course.title"
                 class="course-cover"
               />

@@ -26,14 +26,38 @@
           </div>
         </div>
 
-        <div class="user-courses" v-loading="loading">
-          <div v-if="courses.length > 0">
+        <div class="user-courses">
+          <!-- 骨架屏 -->
+          <template v-if="loading">
+            <el-row :gutter="20">
+              <el-col :span="8" v-for="i in 6" :key="'skeleton-' + i">
+                <div class="course-skeleton-card">
+                  <el-skeleton animated>
+                    <template #template>
+                      <el-skeleton-item variant="image" style="width: 100%; height: 200px" />
+                      <div style="padding: 20px">
+                        <el-skeleton-item variant="h3" style="width: 60%" />
+                        <el-skeleton-item variant="text" style="margin-top: 16px; width: 100%" />
+                        <div style="display: flex; gap: 10px; margin-top: 16px">
+                          <el-skeleton-item variant="button" style="width: 100px" />
+                          <el-skeleton-item variant="button" style="width: 100px" />
+                        </div>
+                      </div>
+                    </template>
+                  </el-skeleton>
+                </div>
+              </el-col>
+            </el-row>
+          </template>
+          
+          <!-- 实际课程列表 -->
+          <div v-else-if="courses.length > 0">
             <el-row :gutter="20">
               <el-col :span="8" v-for="course in courses" :key="course.id">
                 <div class="course-card">
                   <div class="course-cover" @click="goToPlay(course)">
                     <img 
-                      :src="course.coverImage || 'https://via.placeholder.com/400x250'" 
+                      :src="course.coverImage || '/images/default-course.jpg'" 
                       :alt="course.courseName"
                       @error="handleImageError"
                     />
@@ -62,10 +86,6 @@
                     </div>
                     
                     <div class="course-meta">
-                      <div class="meta-item">
-                        <el-icon><Clock /></el-icon>
-                        <span>学习时长: {{ formatDuration(course.studyDuration) }}</span>
-                      </div>
                       <div class="meta-item">
                         <el-icon><Calendar /></el-icon>
                         <span>{{ formatDate(course.lastStudyTime) }}</span>
@@ -98,8 +118,23 @@
             </div>
           </div>
           
-          <el-empty v-else description="暂无课程">
-            <el-button type="primary" @click="router.push('/course/list')">
+          <el-empty v-else description="" class="custom-empty">
+            <template #image>
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="200">
+                <rect x="50" y="30" width="100" height="80" rx="5" fill="#E0E7FF"/>
+                <rect x="65" y="45" width="70" height="10" rx="3" fill="#6366F1"/>
+                <rect x="65" y="65" width="50" height="8" rx="2" fill="#A5B4FC"/>
+                <rect x="65" y="80" width="60" height="8" rx="2" fill="#A5B4FC"/>
+                <circle cx="100" cy="150" r="30" fill="#FEF3C7"/>
+                <path d="M 85 150 Q 100 165 115 150" stroke="#F59E0B" stroke-width="3" fill="none"/>
+              </svg>
+            </template>
+            <template #description>
+              <h3 style="color: #606266; font-size: 18px; margin-bottom: 8px;">还没有购买课程</h3>
+              <p style="color: #909399; font-size: 14px;">快去挑选感兴趣的课程开始学习吧！</p>
+            </template>
+            <el-button type="primary" size="large" @click="router.push('/course/list')">
+              <el-icon style="margin-right: 5px"><Shopping /></el-icon>
               去选课
             </el-button>
           </el-empty>
@@ -116,7 +151,7 @@ import { ref, onMounted, onActivated, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
-import { VideoPlay, Clock, Calendar, Check, Refresh } from '@element-plus/icons-vue'
+import { VideoPlay, Calendar, Check, Refresh } from '@element-plus/icons-vue'
 import { getMyCourses, getCourseRecords } from '@/api/learning'
 import { getCourseDetail, getChaptersByCourseId } from '@/api/course'
 import { ElMessage } from 'element-plus'
@@ -221,23 +256,6 @@ const fetchCourses = async () => {
           // 实时计算课程进度（根据学习记录和章节数据）
           const actualProgress = await calculateCourseProgress(uc.courseId, chapters || [])
           
-          // 获取课程的学习记录，计算总学习时长
-          let totalStudyMinutes = 0
-          try {
-            const records = await getCourseRecords(uc.courseId)
-            if (records && records.length > 0) {
-              // 注意：progress字段存储的是学习进度（秒），不是百分比
-              for (const record of records) {
-                // 直接将秒转换为分钟累加
-                if (record.progress) {
-                  totalStudyMinutes += record.progress / 60
-                }
-              }
-            }
-          } catch (error) {
-            console.error(`获取课程${uc.courseId}学习记录失败:`, error)
-          }
-          
           // 注意：不在这里同步进度，避免页面加载时发送大量请求
           // 进度同步会在视频播放时自动完成
           
@@ -253,7 +271,6 @@ const fetchCourses = async () => {
             teacherName: courseDetail.teacherName,
             totalDuration: courseDetail.duration || 0,
             progress: actualProgress, // 使用实时计算的进度
-            studyDuration: Math.round(totalStudyMinutes), // 实际学习时长（分钟）
             lastStudyTime: uc.lastLearnTime || uc.purchaseTime,
             purchaseTime: uc.purchaseTime,
             status: uc.status
@@ -355,7 +372,7 @@ const handleCurrentChange = (val: number) => {
 // 图片加载错误处理
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
-  img.src = 'https://via.placeholder.com/400x250?text=课程封面'
+  img.src = '/images/default-course.jpg'
 }
 
 // 跳转到播放页
@@ -394,16 +411,6 @@ const progressColor = (percentage: number) => {
   if (percentage < 30) return '#f56c6c'
   if (percentage < 70) return '#e6a23c'
   return '#67c23a'
-}
-
-// 格式化时长
-const formatDuration = (seconds: number) => {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  if (hours > 0) {
-    return `${hours}小时${minutes}分钟`
-  }
-  return `${minutes}分钟`
 }
 
 // 格式化日期
@@ -452,6 +459,26 @@ const handleVisibilityChange = () => {
 .user-courses-page {
   min-height: 100vh;
   background: #f5f7fa;
+}
+
+.custom-empty {
+  padding: 60px 0;
+  
+  :deep(.el-empty__image) {
+    margin-bottom: 24px;
+  }
+  
+  :deep(.el-empty__description) {
+    margin-top: 16px;
+  }
+  
+  :deep(.el-button) {
+    margin-top: 24px;
+  }
+  
+  svg {
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  }
 }
 
 .page-header {

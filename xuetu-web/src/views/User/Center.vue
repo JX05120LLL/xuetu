@@ -8,7 +8,12 @@
           <!-- 用户信息卡片 -->
           <div class="user-info-card" v-loading="loading">
             <div class="user-avatar">
-              <el-avatar :size="100" :src="userStore.userInfo?.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"></el-avatar>
+              <el-avatar 
+                :size="100" 
+                :src="userStore.userInfo?.avatar || '/images/default-avatar.svg'"
+              >
+                {{ userStore.userInfo?.nickname?.[0] || 'U' }}
+              </el-avatar>
             </div>
             <div class="user-details">
               <h2>{{ userStore.userInfo?.username || '游客' }}</h2>
@@ -23,8 +28,8 @@
                   <div class="stat-label">已完成</div>
                 </div>
                 <div class="stat-item">
-                  <div class="stat-value">{{ formatDuration(stats.totalDuration) }}</div>
-                  <div class="stat-label">学习时长</div>
+                  <div class="stat-value">{{ stats.totalCourses - stats.completedCourses }}</div>
+                  <div class="stat-label">学习中</div>
                 </div>
               </div>
             </div>
@@ -107,11 +112,9 @@
                 <div class="stats-card">
                   <h4>本周学习时长</h4>
                   <div class="weekly-duration">
-                    <div class="duration-chart">
-                      <div v-for="(duration, index) in stats.weeklyDuration" :key="index" class="duration-bar">
-                        <div class="bar" :style="{ height: (duration / Math.max(...stats.weeklyDuration, 1)) * 100 + '%' }"></div>
-                        <span class="day">{{ ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][index] }}</span>
-                      </div>
+                    <div class="duration-summary">
+                      <div class="duration-value">{{ formatDuration(stats.weekLearningTime * 60) }}</div>
+                      <p class="duration-desc">本周累计学习时长</p>
                     </div>
                   </div>
                 </div>
@@ -131,7 +134,7 @@
               <el-row :gutter="20">
                 <el-col :span="6" v-for="course in recentCourses" :key="course.id">
                   <div class="course-card" @click="router.push(`/course/${course.courseId}`)">
-                    <img :src="course.coverImage || 'https://via.placeholder.com/300x200'" :alt="course.courseName" />
+                    <img :src="course.coverImage || '/images/default-course.jpg'" :alt="course.courseName" />
                     <div class="course-info">
                       <h4>{{ course.courseName }}</h4>
                       <el-progress :percentage="course.progress" />
@@ -159,7 +162,8 @@ import Footer from '@/components/Footer.vue'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { Reading, ShoppingBag, Edit, ShoppingCart } from '@element-plus/icons-vue'
-import { getMyCourses, getLearningStats } from '@/api/learning'
+import { getMyCourses, getLearningStats, getCourseRecords } from '@/api/learning'
+import { getCourseDetail, getChaptersByCourseId } from '@/api/course'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -173,14 +177,49 @@ const loadingCourses = ref(false)
 const stats = ref({
   totalCourses: 0,
   completedCourses: 0,
-  totalDuration: 0,
   totalLessons: 0,
   completedLessons: 0,
-  weeklyDuration: [0, 0, 0, 0, 0, 0, 0]
+  weekLearningTime: 0 // 本周总学习时长（分钟）
 })
 
 // 最近学习的课程
 const recentCourses = ref<any[]>([])
+
+// 计算课程进度（复用Courses.vue的逻辑）
+const calculateCourseProgress = async (courseId: number, chapters: any[]): Promise<number> => {
+  try {
+    const records = await getCourseRecords(courseId)
+    if (!records || records.length === 0) {
+      return 0
+    }
+    
+    let totalLessons = 0
+    let studiedLessons = 0
+    
+    if (chapters && chapters.length > 0) {
+      chapters.forEach(chapter => {
+        if (chapter.lessons && chapter.lessons.length > 0) {
+          chapter.lessons.forEach((lesson: any) => {
+            totalLessons++
+            const record = records.find((r: any) => r.lessonId === lesson.id)
+            if (record) {
+              studiedLessons++
+            }
+          })
+        }
+      })
+    }
+    
+    if (totalLessons === 0) {
+      return 0
+    }
+    
+    return Math.floor((studiedLessons / totalLessons) * 100)
+  } catch (error) {
+    console.error(`计算课程${courseId}进度失败:`, error)
+    return 0
+  }
+}
 
 // 获取学习统计
 const fetchStats = async () => {
@@ -190,10 +229,9 @@ const fetchStats = async () => {
     stats.value = {
       totalCourses: data.totalCourses || 0,
       completedCourses: data.completedCourses || 0,
-      totalDuration: data.totalDuration || 0,
-      totalLessons: data.totalLessons || 0,
+      totalLessons: data.completedLessons || 0,
       completedLessons: data.completedLessons || 0,
-      weeklyDuration: data.weeklyDuration || [0, 0, 0, 0, 0, 0, 0]
+      weekLearningTime: data.weekLearningTime || 0 // 本周学习时长（分钟）
     }
   } catch (error) {
     console.error('获取学习统计失败:', error)
@@ -202,14 +240,67 @@ const fetchStats = async () => {
   }
 }
 
-// 获取最近学习的课程
+// 延迟函数
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+// 获取最近学习的课程（控制并发，避免触发限流）
 const fetchRecentCourses = async () => {
   loadingCourses.value = true
   try {
     const res = await getMyCourses({ current: 1, size: 4 })
-    recentCourses.value = res.records || []
+    const userCourses = res.records || []
+    
+    // 获取每个课程的详细信息（串行处理，避免并发过多）
+    if (userCourses.length > 0) {
+      const courseDetails = []
+      
+      for (let i = 0; i < userCourses.length; i++) {
+        const uc = userCourses[i]
+        
+        try {
+          // 添加延迟，避免请求过快（每个课程间隔200ms）
+          if (i > 0) {
+            await delay(200)
+          }
+          
+          // 获取课程基本信息
+          const courseDetail = await getCourseDetail(uc.courseId)
+          
+          // 获取课程章节信息（用于计算进度）
+          const chapters = await getChaptersByCourseId(uc.courseId)
+          
+          // 实时计算课程进度
+          const actualProgress = await calculateCourseProgress(uc.courseId, chapters || [])
+          
+          courseDetails.push({
+            ...uc,
+            id: uc.id,
+            courseId: uc.courseId,
+            courseName: courseDetail.title,
+            coverImage: courseDetail.coverImage,
+            progress: actualProgress,
+            lastStudyTime: uc.lastLearnTime || uc.purchaseTime
+          })
+        } catch (error) {
+          console.error(`获取课程${uc.courseId}详情失败:`, error)
+          courseDetails.push({
+            ...uc,
+            id: uc.id,
+            courseId: uc.courseId,
+            courseName: '课程加载失败',
+            coverImage: '',
+            progress: 0
+          })
+        }
+      }
+      
+      recentCourses.value = courseDetails
+    } else {
+      recentCourses.value = []
+    }
   } catch (error) {
     console.error('获取最近学习课程失败:', error)
+    recentCourses.value = []
   } finally {
     loadingCourses.value = false
   }
@@ -370,38 +461,26 @@ onMounted(() => {
     }
 
     .weekly-duration {
-      .duration-chart {
+      .duration-summary {
         display: flex;
-        align-items: flex-end;
-        justify-content: space-around;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         height: 150px;
-        padding: 10px 0;
-
-        .duration-bar {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-end;
-
-          .bar {
-            width: 100%;
-            max-width: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 4px 4px 0 0;
-            min-height: 5px;
-            transition: all 0.3s;
-
-            &:hover {
-              opacity: 0.8;
-            }
-          }
-
-          .day {
-            font-size: 12px;
-            color: #909399;
-            margin-top: 8px;
-          }
+        
+        .duration-value {
+          font-size: 48px;
+          font-weight: bold;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 10px;
+        }
+        
+        .duration-desc {
+          font-size: 14px;
+          color: #909399;
         }
       }
     }

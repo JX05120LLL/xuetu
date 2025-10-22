@@ -14,6 +14,7 @@
           <router-link to="/" class="nav-item">首页</router-link>
           <router-link to="/course/list" class="nav-item">课程</router-link>
           <router-link v-if="userStore.isLogin" to="/user/courses" class="nav-item">我的学习</router-link>
+          <router-link to="/about" class="nav-item">关于我们</router-link>
         </nav>
 
         <!-- 搜索框 -->
@@ -39,7 +40,10 @@
           <div v-if="userStore.isLogin" class="user-info">
             <el-dropdown @command="handleCommand">
               <div class="user-avatar">
-                <el-avatar :src="userStore.userInfo?.avatar || ''" :size="32">
+                <el-avatar 
+                  :src="userStore.userInfo?.avatar || '/images/default-avatar.svg'" 
+                  :size="32"
+                >
                   {{ userStore.userInfo?.nickname?.[0] || 'U' }}
                 </el-avatar>
               </div>

@@ -98,6 +98,22 @@ public class NoteController {
     }
 
     /**
+     * 获取我的笔记（分页）
+     * 前端兼容接口
+     */
+    @GetMapping("/my")
+    @Operation(summary = "获取我的笔记", description = "分页查询用户的所有笔记")
+    public R<IPage<NoteDTO>> getMyNotes(
+            @Valid PageParam pageParam,
+            @Parameter(description = "课程ID") @RequestParam(required = false) Long courseId,
+            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword,
+            HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromRequest(httpRequest);
+        IPage<NoteDTO> result = noteService.getUserNotesPage(userId, pageParam, keyword);
+        return R.ok(result);
+    }
+
+    /**
      * 获取课程笔记
      */
     @GetMapping("/course/{courseId}")

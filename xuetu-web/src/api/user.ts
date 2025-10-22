@@ -87,15 +87,21 @@ export function updateProfile(userId: number, data: UpdateProfileRequest): Promi
 }
 
 /**
- * 更新用户头像
- * 注意: 暂无后端接口，仅做前端演示
+ * 上传用户头像
+ * @param userId 用户ID
+ * @param file 头像文件
  */
-export function updateAvatar(userId: number, avatarUrl: string): Promise<User> {
-  // 实际项目中这里应该是调用上传接口
+export function uploadAvatar(userId: number, file: File): Promise<User> {
+  const formData = new FormData()
+  formData.append('file', file)
+  
   return request({
     url: `/user/${userId}/avatar`,
     method: 'post',
-    data: { avatarUrl }
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
   })
 }
 

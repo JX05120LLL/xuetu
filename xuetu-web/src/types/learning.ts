@@ -56,31 +56,33 @@ export interface Note {
  */
 export interface NoteDTO {
   id: number
+  userId: number
+  courseId: number
   lessonId: number
-  lessonTitle?: string
+  title: string
   content: string
-  timestamp: number
-  createdTime: string
-  updatedTime: string
+  createTime: string
+  updateTime: string
 }
 
 /**
  * 创建笔记请求
  */
 export interface CreateNoteRequest {
+  courseId: number
   lessonId: number
+  title: string
   content: string
-  timestamp: number
 }
 
 /**
  * 更新笔记请求
  */
 export interface UpdateNoteRequest {
-  id?: number
+  courseId: number
+  lessonId: number
+  title: string
   content: string
-  timestamp?: number
-  lessonId?: number
 }
 
 /**

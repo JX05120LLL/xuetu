@@ -51,6 +51,7 @@ public class UserCourseController {
             return R.error("未购买该课程或课程已过期");
         }
         return R.ok(course);
+
     }
 
     @GetMapping("/check/{courseId}")

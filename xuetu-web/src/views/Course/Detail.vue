@@ -173,9 +173,11 @@
                     <div class="comment-main">
                       <el-avatar 
                         :size="45" 
-                        :src="comment.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"
+                        :src="comment.avatar || '/images/default-avatar.svg'"
                         class="user-avatar"
-                      />
+                      >
+                        {{ comment.username?.[0] || 'U' }}
+                      </el-avatar>
                       <div class="comment-body">
                         <div class="comment-header">
                           <div class="user-info">
@@ -241,8 +243,10 @@
                           <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
                             <el-avatar 
                               :size="32" 
-                              :src="reply.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"
-                            />
+                              :src="reply.avatar || '/images/default-avatar.svg'"
+                            >
+                              {{ reply.username?.[0] || 'U' }}
+                            </el-avatar>
                             <div class="reply-content">
                               <span class="reply-user">{{ reply.username || `用户${reply.userId}` }}</span>
                               <span v-if="reply.replyToUsername" class="reply-to">

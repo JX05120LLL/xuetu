@@ -1,7 +1,9 @@
 package com.star.user.controller;
 
 import com.star.common.result.R;
+import com.star.common.utils.FileUploadUtil;
 import com.star.user.dto.ChangePasswordRequest;
+import com.star.user.dto.UpdateProfileRequest;
 import com.star.user.entity.User;
 import com.star.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,8 +11,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 /**
@@ -26,6 +31,15 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+
+    @Value("${file.upload.path:/opt/xuetu/uploads/avatars}")
+    private String uploadPath;
+
+    @Value("${file.upload.base-url:http://localhost:8088/uploads/avatars}")
+    private String baseUrl;
+
+    @Value("${file.upload.max-size:2097152}")
+    private long maxSize;
 
     /**
      * 获取用户详情
@@ -80,6 +94,47 @@ public class UserController {
             @Valid @RequestBody ChangePasswordRequest request) {
         Boolean result = userService.changePassword(userId, request);
         return R.ok(result, "密码修改成功");
+    }
+
+    /**
+     * 更新用户资料
+     */
+    @PutMapping("/{userId}/profile")
+    @Operation(summary = "更新用户资料", description = "更新用户的基本信息，如昵称、邮箱、手机号、性别、生日、个人简介等")
+    public R<User> updateProfile(
+            @Parameter(description = "用户ID") @PathVariable Long userId,
+            @Valid @RequestBody UpdateProfileRequest request) {
+        User user = userService.updateProfile(userId, request);
+        return R.ok(user, "用户资料更新成功");
+    }
+
+    /**
+     * 上传用户头像
+     */
+    @PostMapping("/{userId}/avatar")
+    @Operation(summary = "上传用户头像", description = "上传用户头像文件，支持jpg、png、jpeg、gif格式，大小不超过2MB")
+    public R<User> uploadAvatar(
+            @Parameter(description = "用户ID") @PathVariable Long userId,
+            @Parameter(description = "头像文件") @RequestParam("file") MultipartFile file) {
+        try {
+            log.info("开始上传用户头像: userId={}, fileName={}, fileSize={}", 
+                    userId, file.getOriginalFilename(), FileUploadUtil.formatFileSize(file.getSize()));
+            
+            // 上传图片到服务器本地目录
+            String avatarUrl = FileUploadUtil.uploadImage(file, uploadPath, baseUrl);
+            
+            // 更新用户头像URL
+            User user = userService.updateAvatar(userId, avatarUrl);
+            
+            log.info("用户头像上传成功: userId={}, avatarUrl={}", userId, avatarUrl);
+            return R.ok(user, "头像上传成功");
+        } catch (IllegalArgumentException e) {
+            log.warn("头像上传失败-参数错误: userId={}, error={}", userId, e.getMessage());
+            return R.error(e.getMessage());
+        } catch (Exception e) {
+            log.error("头像上传失败: userId={}", userId, e);
+            return R.error("头像上传失败: " + e.getMessage());
+        }
     }
 
     /**

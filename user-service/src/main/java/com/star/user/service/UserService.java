@@ -136,4 +136,22 @@ public interface UserService extends IService<User> {
      * @return 用户信息
      */
     User getUserInfo(Long userId);
+
+    /**
+     * 更新用户资料
+     * 
+     * @param userId 用户ID
+     * @param request 更新资料请求
+     * @return 更新后的用户信息
+     */
+    User updateProfile(Long userId, com.star.user.dto.UpdateProfileRequest request);
+
+    /**
+     * 更新用户头像
+     * 
+     * @param userId 用户ID
+     * @param avatarUrl 头像URL
+     * @return 更新后的用户信息
+     */
+    User updateAvatar(Long userId, String avatarUrl);
 }
