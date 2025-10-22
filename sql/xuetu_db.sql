@@ -11,7 +11,7 @@
  Target Server Version : 80039 (8.0.39)
  File Encoding         : 65001
 
- Date: 22/10/2025 19:09:40
+ Date: 22/10/2025 21:23:26
 */
 
 SET NAMES utf8mb4;
@@ -1112,7 +1112,7 @@ INSERT INTO `user` VALUES (1, 'testuser', '123456', 'test@example.com', '1388888
 INSERT INTO `user` VALUES (100, 'admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lLy6fFz2JVHfHDcXm', 'admin@xuetu.com', NULL, '系统管理员', NULL, 0, NULL, NULL, 1, '2025-10-02 17:36:59', '2025-10-02 17:36:59');
 INSERT INTO `user` VALUES (101, 'teacher', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lLy6fFz2JVHfHDcXm', 'teacher@xuetu.com', NULL, '测试讲师', NULL, 0, NULL, NULL, 1, '2025-10-02 17:36:59', '2025-10-02 17:36:59');
 INSERT INTO `user` VALUES (102, 'vip', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lLy6fFz2JVHfHDcXm', 'vip@xuetu.com', NULL, 'VIP会员', NULL, 0, NULL, NULL, 1, '2025-10-02 17:36:59', '2025-10-02 17:36:59');
-INSERT INTO `user` VALUES (103, 'testuser1', '$2a$10$nf/QrxolN.LhC6Ij/S.hm.fBDuKJg0AfRaf0g.36TQ7dI0BPpjXHy', 'test@example11.com', '13888888878', '测试用户x', 'http://8.141.106.92/media/UserAvatar/user1.jpg', 1, '2025-10-22', '大家好', 1, '2025-10-03 16:56:03', '2025-10-22 19:07:53');
+INSERT INTO `user` VALUES (103, 'testuser1', '$2a$10$ZjD45knFafU2YvaLA.y2JuyYv3wK3cKu53kv/NJfRrQur4HNED9y2', 'test@example11.com', '13888888873', '测试用户x', 'http://8.141.106.92/media/UserAvatar/user1.jpg', 1, '2025-10-22', '大家好', 1, '2025-10-03 16:56:03', '2025-10-22 19:15:26');
 INSERT INTO `user` VALUES (104, 'test555', '$2a$10$TvLdN49GnedsJyto8NAukOGggtycLlHXNpx1gi7X6k.m/43Wgwhhe', '2052619274@qq.com', '19391629120', 'test555', NULL, 0, NULL, NULL, 1, '2025-10-13 19:47:26', '2025-10-13 19:47:26');
 
 -- ----------------------------

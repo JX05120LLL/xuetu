@@ -8,9 +8,7 @@ spring:
   
   # 配置数据导入（Spring Boot 2.4+ 必需）
   config:
-    import:
-      - optional:nacos:user-service.yml  # 从Nacos导入用户服务配置
-      - optional:nacos:common-config.yml  # 从Nacos导入公共配置
+    import: []
     
   # 数据源配置
   datasource:

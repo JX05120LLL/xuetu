@@ -1,0 +1,35 @@
+# AI服务 - 生产环境配置
+spring:
+  # 禁用 Nacos 配置导入（必须在最前面）
+  config:
+    import: []
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/xuetu_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: root123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  # Redis配置
+  redis:
+    host: 8.141.106.92
+    port: 6379
+    password: 
+    database: 0
+    
+  # 禁用 Nacos
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+
+# 日志配置
+logging:
+  level:
+    com.star.ai: INFO
+    root: INFO
+  file:
+    path: /var/log/xuetu/ai-service
+    name: /var/log/xuetu/ai-service/ai-service.log

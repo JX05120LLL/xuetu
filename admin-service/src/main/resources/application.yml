@@ -5,9 +5,9 @@ spring:
   application:
     name: admin-service
   
-  # Nacos配置导入（Spring Cloud 2021.x必需）
+  # Nacos配置导入（Spring Cloud 2.021.x必需）
   config:
-    import: optional:nacos:admin-service.yml
+    import: []
   
   # 数据源配置
   datasource:

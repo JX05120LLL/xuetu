@@ -9,8 +9,7 @@ spring:
     
   # 配置导入 - Spring Cloud 2021.x 必需
   config:
-    import:
-      - optional:nacos:learning-service-dev.yml  # 从Nacos导入配置（可选）
+    import: []
 
   # 数据源配置
   datasource:

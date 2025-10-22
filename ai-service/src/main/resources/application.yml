@@ -8,9 +8,7 @@ spring:
   
   # 配置数据导入
   config:
-    import:
-      - optional:nacos:ai-service.yml
-      - optional:nacos:common-config.yml
+    import: []
     
   # 数据源配置
   datasource:

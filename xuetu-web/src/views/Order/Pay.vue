@@ -39,7 +39,13 @@
               <div class="qrcode-wrapper">
                 <!-- 这里可以集成实际的二维码库，现在显示模拟 -->
                 <div class="qrcode-placeholder">
-                  <el-icon :size="100"><QrCode /></el-icon>
+                  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" fill="#E5E7EB"/>
+                    <rect x="10" y="10" width="15" height="15" fill="#303133"/>
+                    <rect x="75" y="10" width="15" height="15" fill="#303133"/>
+                    <rect x="10" y="75" width="15" height="15" fill="#303133"/>
+                    <rect x="30" y="30" width="40" height="40" fill="#909399"/>
+                  </svg>
                   <p>二维码展示区域</p>
                 </div>
               </div>
@@ -76,7 +82,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Loading, QrCode } from '@element-plus/icons-vue'
+import { Loading } from '@element-plus/icons-vue'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import { getOrderByOrderNo } from '@/api/order'

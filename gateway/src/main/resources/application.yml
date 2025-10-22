@@ -11,11 +11,9 @@ spring:
     active: local
   
   # 配置数据导入（Spring Boot 2.4+ 必需）
-  # 本地开发模式下禁用Nacos配置导入
+  # 生产环境禁用Nacos配置导入
   config:
-    import:
-      - optional:nacos:gateway.yml  # 从Nacos导入主配置（仅生产环境）
-      - optional:nacos:common-config.yml  # 从Nacos导入公共配置（仅生产环境）
+    import: []
     
   # Spring Cloud Gateway 配置
   cloud:
