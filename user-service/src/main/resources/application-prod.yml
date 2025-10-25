@@ -1,29 +1,32 @@
 # 用户服务 - 生产环境配置
 spring:
-  # 禁用 Nacos 配置导入（必须在最前面）
-  config:
-    import: []
-  # 数据源配置（使用服务器MySQL）
+  application:
+    name: user-service  # 服务名称，用于Nacos注册
+    
+  # 数据源配置（使用服务器1的MySQL）
   datasource:
-    url: jdbc:mysql://localhost:3306/xuetu_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://8.141.106.92:3306/xuetu_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: root123456  # 服务器MySQL密码
+    password: root123456
     driver-class-name: com.mysql.cj.jdbc.Driver
     
-  # Redis配置（使用服务器Redis）
+  # Redis配置（使用服务器1的Redis）
   redis:
     host: 8.141.106.92
     port: 6379
     password: 
     database: 0
     
-  # 禁用 Nacos（生产环境不使用）
+  # 启用 Nacos 服务注册与发现
   cloud:
     nacos:
       discovery:
-        enabled: false
+        enabled: true
+        server-addr: 8.141.106.92:8848
+        namespace: xuetu-prod
+        group: DEFAULT_GROUP
       config:
-        enabled: false
+        enabled: false  # 配置中心暂不启用
 
 # 日志配置（生产环境只输出INFO级别）
 logging:

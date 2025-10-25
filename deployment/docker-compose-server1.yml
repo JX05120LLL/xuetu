@@ -1,0 +1,123 @@
+# 服务器1 - 基础设施 + Gateway
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: xuetu-mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: xuetu_db
+      TZ: Asia/Shanghai
+    volumes:
+      - /data/mysql:/var/lib/mysql
+    command: 
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+      - --max-connections=50
+      - --key-buffer-size=8M
+      - --innodb-buffer-pool-size=256M
+    networks:
+      - xuetu-network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: xuetu-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - /data/redis:/data
+    networks:
+      - xuetu-network
+
+  # Nacos服务注册中心
+  nacos:
+    image: nacos/nacos-server:v2.2.0
+    container_name: xuetu-nacos
+    restart: always
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    environment:
+      MODE: standalone
+      PREFER_HOST_MODE: hostname
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: root123456
+      JVM_XMS: 96m
+      JVM_XMX: 192m
+      TZ: Asia/Shanghai
+    depends_on:
+      - mysql
+    networks:
+      - xuetu-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Gateway网关
+  gateway:
+    image: openjdk:17-slim
+    container_name: xuetu-gateway
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      JAVA_OPTS: "-Xms96m -Xmx192m -Dspring.profiles.active=prod"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./jars/gateway.jar:/app/gateway.jar
+      - ./logs:/var/log/xuetu
+    command: java -jar ${JAVA_OPTS} /app/gateway.jar
+    depends_on:
+      nacos:
+        condition: service_healthy
+    networks:
+      - xuetu-network
+
+  # Nginx前端
+  nginx:
+    image: nginx:latest
+    container_name: xuetu-web
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - /www/wwwroot/xuetu-web/dist:/usr/share/nginx/html
+      - /www/wwwroot/xuetu-web/nginx.conf:/etc/nginx/conf.d/default.conf
+      - /www/wwwroot/media:/usr/share/nginx/media
+    networks:
+      - xuetu-network
+
+  # Portainer - Docker可视化管理
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - xuetu-network
+
+networks:
+  xuetu-network:
+    driver: bridge
+
+volumes:
+  portainer_data:

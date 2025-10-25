@@ -1,11 +1,11 @@
 # 课程服务 - 生产环境配置
 spring:
-  # 禁用 Nacos 配置导入（必须在最前面）
-  config:
-    import: []
+  application:
+    name: course-service
+    
   # 数据源配置
   datasource:
-    url: jdbc:mysql://localhost:3306/xuetu_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://8.141.106.92:3306/xuetu_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: root123456
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -17,11 +17,14 @@ spring:
     password: 
     database: 0
     
-  # 禁用 Nacos
+  # 启用 Nacos
   cloud:
     nacos:
       discovery:
-        enabled: false
+        enabled: true
+        server-addr: 8.141.106.92:8848
+        namespace: xuetu-prod
+        group: DEFAULT_GROUP
       config:
         enabled: false
 

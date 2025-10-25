@@ -1,0 +1,80 @@
+# 服务器3 - Order + AI + Admin服务
+version: '3.8'
+
+services:
+  # 订单服务
+  order-service:
+    image: openjdk:17-slim
+    container_name: xuetu-order-service
+    restart: always
+    ports:
+      - "8033:8033"
+    environment:
+      JAVA_OPTS: "-Xms96m -Xmx256m -Dspring.profiles.active=prod"
+      NACOS_SERVER: "8.141.106.92:8848"
+      MYSQL_HOST: "8.141.106.92"
+      REDIS_HOST: "8.141.106.92"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./jars/order-service.jar:/app/order-service.jar
+      - ./logs:/var/log/xuetu
+    command: java ${JAVA_OPTS} -jar /app/order-service.jar
+    networks:
+      - xuetu-network
+
+  # AI服务
+  ai-service:
+    image: openjdk:17-slim
+    container_name: xuetu-ai-service
+    restart: always
+    ports:
+      - "8066:8066"
+    environment:
+      JAVA_OPTS: "-Xms96m -Xmx256m -Dspring.profiles.active=prod"
+      NACOS_SERVER: "8.141.106.92:8848"
+      MYSQL_HOST: "8.141.106.92"
+      REDIS_HOST: "8.141.106.92"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./jars/ai-service.jar:/app/ai-service.jar
+      - ./logs:/var/log/xuetu
+    command: java ${JAVA_OPTS} -jar /app/ai-service.jar
+    networks:
+      - xuetu-network
+
+  # 管理服务
+  admin-service:
+    image: openjdk:17-slim
+    container_name: xuetu-admin-service
+    restart: always
+    ports:
+      - "8055:8055"
+    environment:
+      JAVA_OPTS: "-Xms96m -Xmx256m -Dspring.profiles.active=prod"
+      NACOS_SERVER: "8.141.106.92:8848"
+      MYSQL_HOST: "8.141.106.92"
+      REDIS_HOST: "8.141.106.92"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./jars/admin-service.jar:/app/admin-service.jar
+      - ./logs:/var/log/xuetu
+    command: java ${JAVA_OPTS} -jar /app/admin-service.jar
+    networks:
+      - xuetu-network
+
+  # Portainer Agent
+  portainer-agent:
+    image: portainer/agent:latest
+    container_name: portainer-agent
+    restart: always
+    ports:
+      - "9001:9001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - xuetu-network
+
+networks:
+  xuetu-network:
+    driver: bridge
