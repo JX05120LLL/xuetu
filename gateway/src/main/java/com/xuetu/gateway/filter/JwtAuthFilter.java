@@ -48,6 +48,13 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/auth/check-email",        // 检查邮箱
             "/auth/health",             // 认证服务健康检查
             
+            // ========== API前缀的认证路径（公开） ==========
+            "/api/auth/register",       // 用户注册（带API前缀）
+            "/api/auth/login",          // 用户登录（带API前缀）
+            "/api/auth/check-username", // 检查用户名（带API前缀）
+            "/api/auth/check-email",    // 检查邮箱（带API前缀）
+            "/api/auth/health",         // 认证服务健康检查（带API前缀）
+            
             // ========== 课程服务（游客可浏览） ==========
             "/course/list",             // 课程列表
             "/course/search",           // 搜索课程
@@ -69,6 +76,12 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             // ========== 评论（游客可查看） ==========
             "/comment/list",            // 评论列表
             "/comment/course",          // 课程评论
+            
+            // ========== AI服务（部分公开） ==========
+            "/chat/health",             // AI聊天服务健康检查
+            "/recommend/health",        // AI推荐服务健康检查
+            "/analysis/health",         // AI分析服务健康检查
+            "/recommend/courses",       // 推荐课程（游客可查看）
             
             // ========== API文档和健康检查 ==========
             "/doc.html",                // API文档首页

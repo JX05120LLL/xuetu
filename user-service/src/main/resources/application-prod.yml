@@ -25,8 +25,13 @@ spring:
         server-addr: 8.141.106.92:8848
         namespace: xuetu-prod
         group: DEFAULT_GROUP
+        # 不指定ip，让Nacos自动检测容器IP
+        # 在Docker网络中，服务之间通过容器名访问
+        port: 8088
       config:
         enabled: false  # 配置中心暂不启用
+        import-check:
+          enabled: false  # 禁用强制导入检查
 
 # 日志配置（生产环境只输出INFO级别）
 logging:

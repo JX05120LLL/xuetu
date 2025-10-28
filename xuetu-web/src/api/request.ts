@@ -5,13 +5,14 @@ import { useUserStore } from '@/stores/user'
 import router from '@/router'
 
 // 获取环境变量中的API基础URL
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+// 生产环境使用 /api，开发环境使用 http://localhost:8080
+const baseURL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:8080')
 
 // 创建axios实例
 const service: AxiosInstance = axios.create({
   // 所有请求直接发送到后端网关
   baseURL,
-  timeout: 10000,
+  timeout: 30000,  // 增加超时时间到30秒
   withCredentials: false,
   headers: {
     'Content-Type': 'application/json'

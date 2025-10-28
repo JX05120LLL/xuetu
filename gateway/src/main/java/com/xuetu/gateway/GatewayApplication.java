@@ -29,12 +29,23 @@ public class GatewayApplication {
         System.out.println("   网关准备启动...");
         System.out.println("========================================");
         
-        ConfigurableApplicationContext context = SpringApplication.run(GatewayApplication.class, args);
+        // 如果没有指定profile，默认使用local配置（本地开发模式）
+        String[] defaultProfiles = System.getProperty("spring.profiles.active") != null 
+            ? new String[0] 
+            : new String[]{"local"};
+        
+        SpringApplication app = new SpringApplication(GatewayApplication.class);
+        if (defaultProfiles.length > 0) {
+            app.setAdditionalProfiles(defaultProfiles);
+            System.out.println("   自动激活 local 配置（本地开发模式）");
+        }
+        
+        ConfigurableApplicationContext context = app.run(args);
         
         // 打印活动的配置文件
-        String[] profiles = context.getEnvironment().getActiveProfiles();
+        String[] activeProfiles = context.getEnvironment().getActiveProfiles();
         System.out.println("========================================");
-        System.out.println("   活动配置: " + (profiles.length > 0 ? Arrays.toString(profiles) : "default"));
+        System.out.println("   活动配置: " + (activeProfiles.length > 0 ? Arrays.toString(activeProfiles) : "default"));
         System.out.println("========================================");
         
         // 检查Bean是否被加载

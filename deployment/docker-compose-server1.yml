@@ -15,6 +15,7 @@ services:
       TZ: Asia/Shanghai
     volumes:
       - /data/mysql:/var/lib/mysql
+      - ./init-nacos-db.sql:/docker-entrypoint-initdb.d/init-nacos-db.sql
     command: 
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
@@ -24,6 +25,11 @@ services:
       - --innodb-buffer-pool-size=256M
     networks:
       - xuetu-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   # Redis缓存
   redis:
@@ -54,11 +60,12 @@ services:
       MYSQL_SERVICE_DB_NAME: nacos_config
       MYSQL_SERVICE_USER: root
       MYSQL_SERVICE_PASSWORD: root123456
-      JVM_XMS: 96m
-      JVM_XMX: 192m
+      JVM_XMS: 64m
+      JVM_XMX: 128m
       TZ: Asia/Shanghai
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - xuetu-network
     healthcheck:
@@ -66,26 +73,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-
-  # Gateway网关
-  gateway:
-    image: openjdk:17-slim
-    container_name: xuetu-gateway
-    restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      JAVA_OPTS: "-Xms96m -Xmx192m -Dspring.profiles.active=prod"
-      TZ: Asia/Shanghai
-    volumes:
-      - ./jars/gateway.jar:/app/gateway.jar
-      - ./logs:/var/log/xuetu
-    command: java -jar ${JAVA_OPTS} /app/gateway.jar
-    depends_on:
-      nacos:
-        condition: service_healthy
-    networks:
-      - xuetu-network
 
   # Nginx前端
   nginx:

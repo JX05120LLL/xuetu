@@ -213,45 +213,67 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
     }
 
     /**
-     * 构建学习路径Prompt
+     * 构建学习路径Prompt（简洁版）
      */
     private String buildLearningPathPrompt(String goal, LearningStatsDTO stats, List<CourseDTO> availableCourses) {
         StringBuilder prompt = new StringBuilder();
         
-        prompt.append("你是专业的学习规划师，请为用户制定详细的学习路径。\n\n");
+        prompt.append("你是专业的IT学习顾问，请为用户制定简洁实用的学习路径。\n\n");
+        
         prompt.append("学习目标: ").append(goal).append("\n");
         
         if (stats != null && stats.getTotalLearningTime() != null && stats.getTotalLearningTime() > 0) {
             int hours = stats.getTotalLearningTime() / 60;
-            int completedLessons = stats.getCompletedLessons() != null ? stats.getCompletedLessons() : 0;
-            prompt.append(String.format("用户基础: 已学习%d小时，完成%d个课时\n", hours, completedLessons));
+            prompt.append(String.format("当前水平: 已学习%d小时\n", hours));
         } else {
-            prompt.append("用户基础: 零基础\n");
+            prompt.append("当前水平: 零基础\n");
         }
         
         // 添加平台可用课程列表
         if (availableCourses != null && !availableCourses.isEmpty()) {
-            prompt.append("\n平台可用课程：\n");
+            prompt.append("\n平台课程: ");
+            int count = 0;
             for (CourseDTO course : availableCourses) {
-                prompt.append("- ").append(course.getTitle()).append("\n");
+                if (count++ < 10) {
+                    prompt.append(course.getTitle());
+                    if (count < 10 && count < availableCourses.size()) {
+                        prompt.append("、");
+                    }
+                }
             }
-            prompt.append("\n注意：推荐课程时，优先从以上课程中选择。如果以上课程不够，可以补充其他课程。\n");
+            prompt.append("\n");
         }
         
-        prompt.append("\n请按以下格式输出学习路径：\n\n");
+        prompt.append("\n请按以下格式输出学习路径（简洁明了）：\n\n");
+        
         prompt.append("【预计时间】\n");
-        prompt.append("完成天数: X天\n");
         prompt.append("学习时长: X小时\n\n");
-        prompt.append("【第一阶段: 阶段名称】\n");
-        prompt.append("阶段描述: (描述)\n");
-        prompt.append("推荐课程: 课程1, 课程2, 课程3\n");
-        prompt.append("预计时长: X小时\n");
-        prompt.append("学习要点: 要点1; 要点2; 要点3\n\n");
-        prompt.append("【第二阶段: 阶段名称】\n");
-        prompt.append("...(同上格式)\n\n");
-        prompt.append("【第三阶段: 阶段名称】\n");
-        prompt.append("...(同上格式)\n\n");
-        prompt.append("要求: 至少3个阶段，循序渐进，具体可操作");
+        
+        prompt.append("【第一阶段: 基础入门】\n");
+        prompt.append("阶段目标: (一句话说明目标)\n");
+        prompt.append("推荐课程: 课程1, 课程2\n");
+        prompt.append("实战项目: 项目名称\n");
+        prompt.append("预计时长: X小时\n\n");
+        
+        prompt.append("【第二阶段: 核心技能】\n");
+        prompt.append("阶段目标: (一句话)\n");
+        prompt.append("推荐课程: 课程3, 课程4\n");
+        prompt.append("实战项目: 项目名称\n");
+        prompt.append("预计时长: X小时\n\n");
+        
+        prompt.append("【第三阶段: 进阶提升】\n");
+        prompt.append("(同上格式)\n\n");
+        
+        prompt.append("【学习建议】\n");
+        prompt.append("1. (建议1 - 15字内)\n");
+        prompt.append("2. (建议2 - 15字内)\n");
+        prompt.append("3. (建议3 - 15字内)\n\n");
+        
+        prompt.append("要求：\n");
+        prompt.append("1. 3-4个阶段即可，不要太多\n");
+        prompt.append("2. 推荐课程优先从平台课程中选择\n");
+        prompt.append("3. 每个描述控制在20字内，简洁明了\n");
+        prompt.append("4. 不要输出过多额外内容，保持简洁\n");
         
         return prompt.toString();
     }

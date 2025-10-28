@@ -132,9 +132,15 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/ai',
-    name: 'AIDashboard',
-    component: () => import('@/views/AI/Dashboard.vue'),
-    meta: { title: 'AI助手', requiresAuth: true }
+    name: 'AIHome',
+    component: () => import('@/views/AI/Index.vue'),
+    meta: { title: 'AI智能助手', requiresAuth: true }
+  },
+  {
+    path: '/ai/analytics',
+    name: 'AIAnalytics',
+    component: () => import('@/views/AI/Analytics.vue'),
+    meta: { title: 'AI学习分析', requiresAuth: true }
   }
 ]
 

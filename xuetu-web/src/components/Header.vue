@@ -14,6 +14,10 @@
           <router-link to="/" class="nav-item">首页</router-link>
           <router-link to="/course/list" class="nav-item">课程</router-link>
           <router-link v-if="userStore.isLogin" to="/user/courses" class="nav-item">我的学习</router-link>
+          <router-link v-if="userStore.isLogin" to="/ai/analytics" class="nav-item ai-nav">
+            <el-icon><TrendCharts /></el-icon>
+            <span>学习分析</span>
+          </router-link>
           <router-link to="/about" class="nav-item">关于我们</router-link>
         </nav>
 
@@ -73,7 +77,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, ShoppingCart } from '@element-plus/icons-vue'
+import { Search, ShoppingCart, TrendCharts } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 
@@ -195,6 +199,21 @@ const handleCommand = (command: string) => {
 
         &::after {
           transform: translateX(-50%) scaleX(1);
+        }
+      }
+
+      &.ai-nav {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        
+        &:hover {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        }
+
+        &.router-link-active {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
         }
       }
     }

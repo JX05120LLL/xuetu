@@ -6,10 +6,6 @@ spring:
     name: learning-service
   profiles:
     active: dev
-    
-  # 配置导入 - Spring Cloud 2021.x 必需
-  config:
-    import: []
 
   # 数据源配置
   datasource:
@@ -55,6 +51,8 @@ spring:
         group: DEFAULT_GROUP
         file-extension: yml
         enabled: true  # 启用配置中心
+        import-check:
+          enabled: false  # 禁用强制导入检查
 
 # MyBatis Plus配置
 mybatis-plus:

@@ -154,7 +154,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   ChatDotRound, 
@@ -626,6 +626,17 @@ const checkHealth = async () => {
 // 组件挂载时检查健康状态
 onMounted(() => {
   checkHealth()
+  
+  // 监听全局打开AI助手的事件
+  window.addEventListener('open-ai-assistant', () => {
+    isExpanded.value = true
+    nextTick(() => scrollToBottom())
+  })
+})
+
+// 组件卸载时移除事件监听
+onBeforeUnmount(() => {
+  window.removeEventListener('open-ai-assistant', () => {})
 })
 
 // 暴露方法供外部调用

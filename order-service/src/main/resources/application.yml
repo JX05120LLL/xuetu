@@ -6,10 +6,6 @@ spring:
   application:
     name: order-service  # 服务名称
   
-  # 配置数据导入（Spring Boot 2.4+ 必需）
-  config:
-    import: []
-    
   # 数据源配置
   datasource:
     url: jdbc:mysql://localhost:3306/xuetu_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
@@ -46,6 +42,8 @@ spring:
         group: DEFAULT_GROUP
         file-extension: yml
         enabled: false  # 暂时禁用，避免连接问题
+        import-check:
+          enabled: false  # 禁用强制导入检查
 
 # MyBatis Plus配置
 mybatis-plus:

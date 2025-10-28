@@ -2,6 +2,26 @@
 version: '3.8'
 
 services:
+  # Gateway网关
+  gateway:
+    image: openjdk:17-slim
+    container_name: xuetu-gateway
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      NACOS_SERVER: "8.141.106.92:8848"
+      NAMESPACE: "xuetu-prod"
+      MYSQL_HOST: "8.141.106.92"
+      REDIS_HOST: "8.141.106.92"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./jars/gateway.jar:/app/gateway.jar
+      - ./logs:/var/log/xuetu
+    command: java -Xms64m -Xmx128m -Dspring.profiles.active=prod -jar /app/gateway.jar
+    networks:
+      - xuetu-network
+
   # 用户服务
   user-service:
     image: openjdk:17-slim
@@ -10,8 +30,8 @@ services:
     ports:
       - "8088:8088"
     environment:
-      JAVA_OPTS: "-Xms96m -Xmx256m -Dspring.profiles.active=prod"
       NACOS_SERVER: "8.141.106.92:8848"
+      NAMESPACE: "xuetu-prod"
       MYSQL_HOST: "8.141.106.92"
       REDIS_HOST: "8.141.106.92"
       TZ: Asia/Shanghai
@@ -19,7 +39,7 @@ services:
       - ./jars/user-service.jar:/app/user-service.jar
       - ./logs:/var/log/xuetu
       - /www/wwwroot/media:/www/wwwroot/media
-    command: java ${JAVA_OPTS} -jar /app/user-service.jar
+    command: java -Xms96m -Xmx256m -Dspring.profiles.active=prod -jar /app/user-service.jar
     networks:
       - xuetu-network
 
@@ -31,15 +51,15 @@ services:
     ports:
       - "8077:8077"
     environment:
-      JAVA_OPTS: "-Xms96m -Xmx256m -Dspring.profiles.active=prod"
       NACOS_SERVER: "8.141.106.92:8848"
+      NAMESPACE: "xuetu-prod"
       MYSQL_HOST: "8.141.106.92"
       REDIS_HOST: "8.141.106.92"
       TZ: Asia/Shanghai
     volumes:
       - ./jars/course-service.jar:/app/course-service.jar
       - ./logs:/var/log/xuetu
-    command: java ${JAVA_OPTS} -jar /app/course-service.jar
+    command: java -Xms96m -Xmx256m -Dspring.profiles.active=prod -jar /app/course-service.jar
     networks:
       - xuetu-network
 
@@ -51,15 +71,15 @@ services:
     ports:
       - "8044:8044"
     environment:
-      JAVA_OPTS: "-Xms96m -Xmx256m -Dspring.profiles.active=prod"
       NACOS_SERVER: "8.141.106.92:8848"
+      NAMESPACE: "xuetu-prod"
       MYSQL_HOST: "8.141.106.92"
       REDIS_HOST: "8.141.106.92"
       TZ: Asia/Shanghai
     volumes:
       - ./jars/learning-service.jar:/app/learning-service.jar
       - ./logs:/var/log/xuetu
-    command: java ${JAVA_OPTS} -jar /app/learning-service.jar
+    command: java -Xms96m -Xmx256m -Dspring.profiles.active=prod -jar /app/learning-service.jar
     networks:
       - xuetu-network
 

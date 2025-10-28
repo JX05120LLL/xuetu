@@ -6,15 +6,6 @@ spring:
   application:
     name: gateway  # 服务名称
   
-  # 默认使用local配置（本地开发模式）
-  profiles:
-    active: local
-  
-  # 配置数据导入（Spring Boot 2.4+ 必需）
-  # 生产环境禁用Nacos配置导入
-  config:
-    import: []
-    
   # Spring Cloud Gateway 配置
   cloud:
     # Nacos配置（本地开发模式下会被local配置覆盖）
@@ -33,6 +24,8 @@ spring:
         group: DEFAULT_GROUP
         file-extension: yml
         enabled: false  # 暂时禁用，避免连接问题
+        import-check:
+          enabled: false  # 禁用强制导入检查
     
     # 网关路由配置
     gateway:

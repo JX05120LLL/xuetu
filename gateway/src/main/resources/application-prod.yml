@@ -2,6 +2,19 @@
 spring:
   application:
     name: gateway
+  
+  # Redis配置（生产环境）
+  redis:
+    host: ${REDIS_HOST:8.141.106.92}
+    port: 6379
+    password: 
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
     
   # 启用 Nacos 服务发现
   cloud:
@@ -11,8 +24,12 @@ spring:
         server-addr: 8.141.106.92:8848
         namespace: xuetu-prod
         group: DEFAULT_GROUP
+        ip: 112.126.85.23  # 使用宿主机IP
+        port: 8080         # 使用宿主机端口
       config:
         enabled: false
+        import-check:
+          enabled: false  # 禁用强制导入检查
     
     # 网关路由配置（生产环境 - 使用Nacos服务发现）
     gateway:
@@ -28,12 +45,28 @@ spring:
           uri: lb://user-service  # 使用负载均衡，从Nacos获取服务地址
           predicates:
             - Path=/auth/**
+            
+        # 添加API前缀的认证服务路由
+        - id: api-auth-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
           
         # ========== 用户服务路由 ==========
         - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/user/**
+            
+        # 添加API前缀的用户服务路由
+        - id: api-user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=1
             
         # ========== 课程服务路由 ==========
         - id: course-service

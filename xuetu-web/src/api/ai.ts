@@ -22,12 +22,13 @@ function getLevelName(level: number): string {
  * AI聊天接口
  */
 
-// AI问答
+// AI问答（可能需要较长时间，设置30秒超时）
 export function askAI(data: ChatRequest): Promise<ChatResponse> {
   return request({
     url: '/chat/ask',
     method: 'post',
-    data
+    data,
+    timeout: 30000  // 30秒超时
   })
 }
 
@@ -92,12 +93,13 @@ export function getRecommendedCourses(limit: number = 5): Promise<CourseRecommen
   })
 }
 
-// 生成学习路径
+// 生成学习路径（需要较长时间，设置60秒超时）
 export function generateLearningPath(goal: string): Promise<LearningPath> {
   return request({
     url: '/recommend/path',
     method: 'post',
-    params: { goal }
+    params: { goal },
+    timeout: 60000  // 60秒超时，AI生成需要较长时间
   }).then((response: any) => {
     // 转换后端字段到前端期望的字段
     return {

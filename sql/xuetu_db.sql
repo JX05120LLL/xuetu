@@ -11,7 +11,7 @@
  Target Server Version : 80039 (8.0.39)
  File Encoding         : 65001
 
- Date: 22/10/2025 21:23:26
+ Date: 26/10/2025 18:48:12
 */
 
 SET NAMES utf8mb4;
@@ -36,7 +36,7 @@ CREATE TABLE `ai_analysis_report`  (
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_report_type`(`report_type` ASC) USING BTREE,
   INDEX `idx_created_time`(`created_time` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI分析报告表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI分析报告表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_analysis_report
@@ -87,7 +87,7 @@ CREATE TABLE `ai_recommendation`  (
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
   INDEX `idx_created_time`(`created_time` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI智能推荐记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI智能推荐记录表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_recommendation
@@ -110,7 +110,7 @@ CREATE TABLE `ai_usage_stats`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_date`(`user_id` ASC, `date` ASC) USING BTREE,
   INDEX `idx_date`(`date` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI使用统计表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI使用统计表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ai_usage_stats
@@ -242,7 +242,7 @@ CREATE TABLE `chat_history`  (
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_conversation_id`(`conversation_id` ASC) USING BTREE,
   INDEX `idx_created_time`(`created_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 39 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI对话历史表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 45 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'AI对话历史表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of chat_history
@@ -285,6 +285,12 @@ INSERT INTO `chat_history` VALUES (35, 103, '39295040-4521-46b7-bbb7-0976dcad95e
 INSERT INTO `chat_history` VALUES (36, 103, '39295040-4521-46b7-bbb7-0976dcad95e6', 'assistant', '你好呀！我是小途，学途教育的AI学习助手。很高兴你愿意来学习这个内容！\n\n是的，**使用 Kubernetes（简称 k8s）可以非常方便地将一个项目的多个服务部署到不同的服务器（节点）上**。Kubernetes 是一个容器编排平台，可以帮助你管理、调度和运行容器化的应用。\n\n---\n\n### 🧩 一、为什么用 Kubernetes 来部署多个服务？\n\n1. **自动化部署与扩展**：你可以把每个服务作为一个独立的容器，k8s 会帮你自动分配到合适的服务器上运行。\n2. **高可用性**：如果某个服务器宕机，k8s 会自动把服务迁移到其他健康的服务器上。\n3. **资源优化**：可以根据服务器的负载动态分配资源，避免资源浪费。\n4. **灵活管理**：你可以为每个服务设置不同的配置、网络策略、存储等。\n\n---\n\n### 🛠️ 二、如何在 Kubernetes 中部署多个服务到不同服务器？\n\n#### ✅ 步骤 1：准备你的项目\n- 每个服务需要打包成 Docker 镜像。\n- 把这些镜像推送到一个镜像仓库（如 Docker Hub、Harbor、阿里云 ACR 等）。\n\n#### ✅ 步骤 2：创建 Kubernetes 的 Deployment 或 Pod\n- 每个服务对应一个 `Deployment` 或 `Pod`。\n- 在 `Deployment` 的 YAML 文件中，可以通过 `nodeSelector` 或 `affinity` 来指定该服务运行在哪台服务器上。\n\n##### 示例：通过 `nodeSelector` 指定服务运行的节点\n\n```yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: service-a\nspec:\n  replicas: 1\n  selector:\n    matchLabels:\n      app: service-a\n  template:\n    metadata:\n      labels:\n        app: service-a\n    spec:\n      nodeSelector:\n        kubernetes.io/hostname: node1  # 指定运行在 node1 上\n      containers:\n      - name: service-a\n        image: your-registry/service-a:latest\n        ports:\n        - containerPort: 8080\n```\n\n> 这里 `kubernetes.io/hostname` 是 Kubernetes 中用来标识节点名称的标签。你可以通过 `kubectl get nodes` 查看所有节点的名称。\n\n---\n\n#### ✅ 步骤 3：部署到集群中\n使用 `kubectl apply -f deployment.yaml` 命令将服务部署到 Kubernetes 集群中。\n\n---\n\n### 🔄 三、进阶技巧：使用标签和选择器（Label & Selector）\n\n你可以给每台服务器打上标签（label），然后通过 `nodeSelector` 或 `affinity` 让服务运行在特定的服务器上。\n\n例如：\n\n```bash\nkubectl label nodes node1 server-type=backend\nkubectl label nodes node2 server-type=frontend\n```\n\n然后在 Deployment 中指定：\n\n```yaml\nnodeSelector:\n  server-type: backend\n```\n\n---\n\n### 📦 四、是否一定要用 Kubernetes？\n\n如果你只是想简单部署多个服务，也可以考虑以下方式：\n\n| 方式 | 适用场景 | 优点 | 缺点 |\n|------|----------|------|------|\n| 手动部署 | 小项目、单服务器 | 简单直接 | 不易维护、不支持扩展 |\n| Docker Compose | 多服务一起部署 | 快速搭建 | 无法跨多服务器 |\n| Kubernetes | 多服务、多服务器、高可用 | 强大、灵活、可扩展 | 学习成本较高 |\n\n---\n\n### 🎯 总结\n\n- **是的，可以用 Kubernetes 部署多个服务到不同服务器**。\n- 通过 `Deployment` + `nodeSelector` 或 `affinity` 可以控制服务运行在哪些服务器上。\n- 如果你刚开始接触，建议从简单的部署开始，慢慢熟悉后再使用高级功能。\n\n---\n\n如果你有具体的项目结构或者服务类型（比如前端、后端、数据库等），我可以帮你写一个更详细的部署方案哦！需要的话随时告诉我 😊', NULL, NULL, 0, 'qwen-turbo', '2025-10-19 18:00:28');
 INSERT INTO `chat_history` VALUES (37, 103, 'b780e28d-cc99-4a3f-a15b-2bcf4bf14c91', 'user', '如何高效学习编程', NULL, NULL, 0, 'qwen-turbo', '2025-10-19 18:05:18');
 INSERT INTO `chat_history` VALUES (38, 103, 'b780e28d-cc99-4a3f-a15b-2bcf4bf14c91', 'assistant', '你好呀！我是小途，学途教育的AI学习助手。很高兴你对编程感兴趣！高效学习编程其实并不难，只要掌握正确的方法和技巧，就能事半功倍。下面我给你一些实用的学习建议：\n\n---\n\n### 一、明确目标，选对语言\n\n1. **确定学习目的**  \n   比如：你想做网站开发、移动应用、数据分析、人工智能，还是只是想了解编程？\n\n2. **选择适合的编程语言**  \n   - 网站开发：HTML/CSS/JavaScript（前端），PHP/Python/Java（后端）\n   - 移动应用：Swift（iOS）、Kotlin（Android）\n   - 数据分析：Python\n   - 人工智能：Python + TensorFlow/PyTorch\n\n---\n\n### 二、系统学习，打好基础\n\n1. **从基础开始**  \n   不要一开始就看高深的算法或项目，先掌握语法、变量、循环、函数、数据结构等基本概念。\n\n2. **使用优质课程资源**  \n   - 学途教育平台有系统的编程课程，适合不同水平的同学。\n   - 其他推荐：Codecademy、LeetCode、Coursera、B站、YouTube（搜索“入门编程”）\n\n3. **边学边练**  \n   学习编程最怕“只看不写”。每学一个知识点，就动手写代码试试看。\n\n---\n\n### 三、多实践，做项目\n\n1. **从小项目开始**  \n   比如：做一个计算器、网页小游戏、个人博客等。\n\n2. **参与开源项目**  \n   GitHub 上有很多开源项目，你可以参与其中，提升实战能力。\n\n3. **参加编程竞赛**  \n   如：蓝桥杯、ACM、LeetCode周赛等，锻炼逻辑思维和编码能力。\n\n---\n\n### 四、善用工具和社区\n\n1. **使用好IDE**  \n   - VS Code（轻量、插件多）\n   - PyCharm（Python）\n   - Android Studio（安卓开发）\n\n2. **加入编程社区**  \n   - CSDN、知乎、掘金、Stack Overflow、GitHub、QQ群/微信群等\n\n3. **遇到问题多问**  \n   不要怕提问，很多问题别人也遇到过，可以快速解决。\n\n---\n\n### 五、坚持是关键\n\n- 每天花30分钟到1小时练习，比偶尔突击更有效。\n- 设定每日/每周目标，比如“今天学会函数”、“本周完成一个小项目”。\n\n---\n\n### 六、推荐学习路径（以Python为例）\n\n| 阶段 | 内容 |\n|------|------|\n| 第一阶段 | 基本语法、变量、循环、条件语句 |\n| 第二阶段 | 函数、列表、字典、文件操作 |\n| 第三阶段 | 面向对象编程（OOP） |\n| 第四阶段 | 项目实战（如爬虫、数据分析、Web开发） |\n\n---\n\n如果你告诉我你目前的编程水平和兴趣方向，我可以为你定制一份更详细的学习计划哦！需要的话随时找我～ 😊\n\n祝你编程之路越走越远，早日成为大神！🚀', NULL, NULL, 0, 'qwen-turbo', '2025-10-19 18:05:18');
+INSERT INTO `chat_history` VALUES (39, 103, '3b737165-fe5b-42b6-ade7-013df4e4e9e9', 'user', '推荐适合我的课程', NULL, NULL, 0, 'qwen-turbo', '2025-10-26 17:54:39');
+INSERT INTO `chat_history` VALUES (40, 103, '3b737165-fe5b-42b6-ade7-013df4e4e9e9', 'assistant', '你好呀！我是小途，学途教育的AI学习助手。为了给你推荐最适合的课程，我需要先了解一些你的信息哦：\n\n1. **你目前的年级或学习阶段**（比如小学、初中、高中、大学，或者准备考试）？\n2. **你想提升哪些科目或技能**？（比如数学、英语、编程、写作等）\n3. **你有什么特别的学习目标**？（比如提高成绩、准备升学、兴趣培养等）\n4. **你更喜欢哪种学习方式**？（比如视频课程、直播课、练习题、一对一辅导等）\n\n告诉我这些信息，我就能为你量身定制一份课程推荐啦！😊', NULL, NULL, 0, 'qwen-turbo', '2025-10-26 17:54:40');
+INSERT INTO `chat_history` VALUES (41, 103, '3b737165-fe5b-42b6-ade7-013df4e4e9e9', 'user', '视频课', NULL, NULL, 0, 'qwen-turbo', '2025-10-26 17:54:53');
+INSERT INTO `chat_history` VALUES (42, 103, '3b737165-fe5b-42b6-ade7-013df4e4e9e9', 'assistant', '太好了！视频课程是非常灵活、方便的学习方式，适合喜欢自主安排时间、喜欢反复观看和练习的同学。不过为了给你推荐更合适的视频课程，我还需要了解一些具体的信息：\n\n1. **你目前的年级或学习阶段**（比如小学、初中、高中、大学，或者准备考试）？\n2. **你想学习哪些科目或技能**？（比如语文、数学、英语、编程、绘画、音乐等）\n3. **你希望视频课程的内容是基础巩固、提升拔高，还是专项突破**？\n4. **有没有特别喜欢的老师风格或课程形式**？（比如讲解清晰、幽默风趣、逻辑严谨等）\n\n告诉我这些信息，我可以为你推荐最适合的视频课程哦！🌟', NULL, NULL, 0, 'qwen-turbo', '2025-10-26 17:54:53');
+INSERT INTO `chat_history` VALUES (43, 103, '680dbe0c-a5d1-4172-8661-55bbe280453f', 'user', '我想成为Java后端工程师，该怎么学习', NULL, NULL, 0, 'qwen-turbo', '2025-10-26 18:29:32');
+INSERT INTO `chat_history` VALUES (44, 103, '680dbe0c-a5d1-4172-8661-55bbe280453f', 'assistant', '你好呀！我是小途，很高兴你对Java后端工程师这个方向感兴趣。成为Java后端工程师是一个非常有前景的职业选择，而且Java在企业级开发中应用广泛，学习路径也比较清晰。下面我来为你梳理一下学习路线和建议：\n\n---\n\n### 一、基础阶段：掌握Java核心知识\n\n#### 1. **Java基础语法**\n- 数据类型、变量、运算符\n- 流程控制（if/else、for/while）\n- 数组、字符串处理\n- 面向对象编程（类、对象、继承、多态、封装、抽象类、接口）\n\n> 推荐学习方式：可以看《Java核心技术 卷I》或《Effective Java》，配合在线课程如B站、慕课网等。\n\n#### 2. **Java高级特性**\n- 集合框架（List、Set、Map等）\n- 异常处理（try/catch/finally、自定义异常）\n- 多线程与并发（Thread、Runnable、synchronized、Lock、线程池）\n- IO流（字节流、字符流、NIO）\n\n---\n\n### 二、进阶阶段：深入理解Java后端技术栈\n\n#### 1. **数据库相关**\n- SQL语言（增删改查、连接查询、事务等）\n- MySQL、PostgreSQL等常用数据库\n- JDBC（Java数据库连接）\n- ORM框架（如MyBatis、Hibernate）\n\n#### 2. **Web开发基础**\n- Servlet、JSP\n- HTTP协议、RESTful API\n- Spring框架（Spring MVC、Spring Boot）\n- Spring Data JPA / MyBatis\n\n#### 3. **中间件与工具**\n- Maven / Gradle（项目构建）\n- Git版本控制\n- Redis（缓存）\n- RabbitMQ / Kafka（消息队列）\n- Nginx（反向代理）\n\n---\n\n### 三、实战阶段：项目开发经验\n\n#### 1. **做几个真实项目**\n- 比如博客系统、电商系统、在线考试系统等\n- 尝试使用Spring Boot快速搭建项目\n- 学会部署（Docker、Linux服务器等）\n\n#### 2. **参与开源项目**\n- GitHub上找一些开源的Java项目参与\n- 提交PR、学习他人代码风格和设计思路\n\n#### 3. **准备面试**\n- 熟悉常见算法题（LeetCode、牛客网）\n- 掌握Java高频面试题（比如JVM、多线程、设计模式等）\n\n---\n\n### 四、推荐学习资源\n\n| 类型 | 推荐内容 |\n|------|----------|\n| 视频课程 | B站、慕课网、网易云课堂、极客时间 |\n| 书籍 | 《Java编程思想》、《Java并发编程实战》、《Spring实战》 |\n| 在线练习 | LeetCode、牛客网、PTA |\n| 社区 | CSDN、掘金、知乎、Stack Overflow |\n\n---\n\n### 五、学习建议\n\n- **循序渐进**：不要一开始就追求“全栈”，打好Java基础更重要。\n- **坚持实践**：学完一个知识点后，一定要动手写代码。\n- **多交流**：加入技术社区、论坛，遇到问题及时提问。\n- **持续学习**：技术更新快，保持学习热情很重要！\n\n---\n\n如果你告诉我你目前的学习水平（比如是零基础还是有一定编程基础），我可以为你量身定制一份学习计划哦！🌟\n\n需要我帮你推荐一些适合初学者的课程吗？', NULL, NULL, 0, 'qwen-turbo', '2025-10-26 18:29:32');
 
 -- ----------------------------
 -- Table structure for comment
@@ -453,13 +459,14 @@ INSERT INTO `learning_record` VALUES (2, 1, 10, 2100, 1, '2025-01-15 11:00:00', 
 INSERT INTO `learning_record` VALUES (2, 1, 11, 1500, 1, '2025-01-15 11:30:00', '2025-01-15 09:25:00', '2025-01-15 11:30:00');
 INSERT INTO `learning_record` VALUES (2, 1, 12, 2400, 1, '2025-01-15 12:00:00', '2025-01-15 09:25:00', '2025-01-15 12:00:00');
 INSERT INTO `learning_record` VALUES (2, 1, 13, 1800, 0, '2025-01-15 14:30:00', '2025-01-15 09:25:00', '2025-01-15 14:30:00');
-INSERT INTO `learning_record` VALUES (103, 1, 1, 100, 0, '2025-10-22 17:45:45', '2025-10-15 19:26:01', '2025-10-22 17:45:45');
+INSERT INTO `learning_record` VALUES (103, 1, 1, 36100, 0, '2025-10-26 18:27:08', '2025-10-15 19:26:01', '2025-10-26 18:27:08');
 INSERT INTO `learning_record` VALUES (103, 1, 2, 100, 0, '2025-10-18 19:25:54', '2025-10-15 19:21:19', '2025-10-18 19:25:54');
 INSERT INTO `learning_record` VALUES (103, 1, 3, 69, 0, '2025-10-18 19:20:01', '2025-10-18 18:37:22', '2025-10-18 19:20:01');
 INSERT INTO `learning_record` VALUES (103, 2, 20, 99, 0, '2025-10-19 18:42:59', '2025-10-18 19:15:36', '2025-10-19 18:42:59');
 INSERT INTO `learning_record` VALUES (103, 2, 21, 98, 0, '2025-10-19 18:43:12', '2025-10-19 18:43:00', '2025-10-19 18:43:12');
 INSERT INTO `learning_record` VALUES (103, 2, 22, 96, 0, '2025-10-19 18:43:25', '2025-10-19 18:43:14', '2025-10-19 18:43:25');
 INSERT INTO `learning_record` VALUES (103, 1, 23, 32, 0, '2025-10-18 19:14:31', '2025-10-18 16:00:24', '2025-10-18 19:14:31');
+INSERT INTO `learning_record` VALUES (103, 4, 41, 1, 0, '2025-10-26 18:43:06', '2025-10-26 18:43:06', '2025-10-26 18:43:06');
 INSERT INTO `learning_record` VALUES (103, 2, 150, 98, 0, '2025-10-19 18:43:36', '2025-10-19 18:43:27', '2025-10-19 18:43:36');
 
 -- ----------------------------
@@ -778,7 +785,7 @@ CREATE TABLE `payment`  (
   `updated_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_order_id`(`order_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '支付记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of payment
@@ -1149,7 +1156,7 @@ INSERT INTO `user_course` VALUES (2, 1, 2, 2, 299.00, '2025-01-16 11:16:00', 33,
 INSERT INTO `user_course` VALUES (3, 2, 1, NULL, 199.00, '2025-01-15 09:20:00', 80, NULL, 1, NULL, '2025-08-16 19:14:23', '2025-08-16 19:14:23');
 INSERT INTO `user_course` VALUES (4, 103, 1, 9, 99.00, '2025-10-14 19:18:36', 16, '2025-10-22 17:45:45', 1, NULL, '2025-10-14 19:18:36', '2025-10-22 17:45:45');
 INSERT INTO `user_course` VALUES (5, 103, 5, 9, 399.00, '2025-10-14 19:18:36', 0, '2025-10-18 19:18:25', 1, NULL, '2025-10-14 19:18:36', '2025-10-18 19:18:25');
-INSERT INTO `user_course` VALUES (6, 103, 4, 9, 149.00, '2025-10-14 19:18:36', 0, '2025-10-18 19:18:25', 1, NULL, '2025-10-14 19:18:36', '2025-10-18 19:18:25');
+INSERT INTO `user_course` VALUES (6, 103, 4, 9, 149.00, '2025-10-14 19:18:36', 8, '2025-10-26 18:43:06', 1, NULL, '2025-10-14 19:18:36', '2025-10-26 18:43:06');
 INSERT INTO `user_course` VALUES (7, 103, 2, 9, 199.00, '2025-10-14 19:18:36', 16, '2025-10-19 18:43:36', 1, NULL, '2025-10-14 19:18:36', '2025-10-19 18:43:36');
 
 -- ----------------------------
