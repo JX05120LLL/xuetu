@@ -116,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, h } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   ChatDotRound,
@@ -183,7 +183,7 @@ const showRecommendations = async () => {
     const cacheKey = 'recommended_courses'
     
     // 检查缓存（5分钟有效）
-    let courses = storage.getCache(cacheKey)
+    let courses: any[] | null = storage.getCache(cacheKey)
     let fromCache = false
     
     if (!courses) {
@@ -213,7 +213,7 @@ const showRecommendations = async () => {
     
     if (courses && courses.length > 0) {
       const cacheIndicator = fromCache ? '💾 [缓存数据] ' : ''
-      const courseList = courses.map((c, i) => 
+      const courseList = courses.map((c: any, i: number) => 
         `${i + 1}. ${c.courseTitle} (推荐度: ${Math.round(c.matchScore * 100)}%)<br/>   ${c.reason}`
       ).join('<br/><br/>')
       
@@ -327,33 +327,92 @@ const showLearningPath = async () => {
   }
 }
 
-// 显示学习路径（统一的显示函数）
+// 显示学习路径（统一的显示函数 - 极简优化版本）
 const displayLearningPath = (path: any, fromCache: boolean) => {
-  // 限制内容长度，避免过长导致渲染问题
-  let content = path.advice
-  if (content.length > 1500) {
-    content = content.substring(0, 1500) + '\n\n...(内容较长，已截断部分内容)'
+  const cacheIndicator = fromCache ? '💾 [缓存数据] ' : ''
+  const content = path.advice || ''
+  
+  // 🔥 关键优化：严格限制字符数，防止卡顿
+  const maxChars = 500  // 最多500字符
+  let summary = ''
+  
+  if (content.length > maxChars) {
+    // 内容过长，只显示前500字符
+    summary = content.substring(0, maxChars) + '...'
+  } else {
+    summary = content
   }
   
-  // 使用纯文本方式显示，更安全稳定
-  const cacheIndicator = fromCache ? '💾 [来自缓存] ' : ''
-  const displayContent = `
-${cacheIndicator}🎯 学习目标: ${path.goal}
-⏱ 预计时长: ${path.totalDuration || 120}小时
+  // 构建极简显示内容
+  const displayContent = `${cacheIndicator}
+🎯 学习目标：${path.goal}
+⏱ 预计时长：${path.totalDuration || 120}小时
 
-${content}
+📋 路径规划：
+${summary}
 
-💡 建议每天学习2-3小时，循序渐进完成各阶段目标
+${content.length > maxChars ? '\n💡 提示：完整内容较长，已为您精简显示核心部分' : ''}
+📚 每天坚持2-3小时，稳步前进！
   `.trim()
   
-  ElMessageBox.alert(displayContent, '🎓 AI专属学习路径', {
-    confirmButtonText: '开始学习',
-    dangerouslyUseHTMLString: false,
-    customClass: 'learning-path-text-dialog'
-  }).then(() => {
-    ElMessage.success('加油学习！')
-  }).catch(() => {
-    // 用户点击关闭
+  // 使用更轻量的显示方式
+  try {
+    ElMessageBox({
+      title: '🎓 AI学习路径',
+      message: displayContent,
+      confirmButtonText: '好的，开始学习',
+      cancelButtonText: '查看完整路径',
+      showCancelButton: true,
+      dangerouslyUseHTMLString: false,
+      customClass: 'learning-path-simple-dialog',
+      showClose: true,
+      closeOnClickModal: true,
+      distinguishCancelAndClose: true
+    }).then(() => {
+      ElMessage.success('💪 加油学习！')
+    }).catch((action) => {
+      if (action === 'cancel') {
+        // 用户点击"查看完整路径"，显示完整内容
+        showFullLearningPath(path, fromCache)
+      }
+    })
+  } catch (error) {
+    console.error('显示学习路径失败:', error)
+    ElMessage.error('显示失败，请重试')
+  }
+}
+
+// 显示完整学习路径（使用Dialog代替MessageBox，性能更好）
+const showFullLearningPath = (path: any, fromCache: boolean) => {
+  const cacheIndicator = fromCache ? '💾 [缓存数据] ' : ''
+  const content = path.advice || '暂无详细内容'
+  
+  // 使用 h 函数创建虚拟节点，分段渲染，避免一次性渲染大量文本
+  ElMessageBox({
+    title: `${cacheIndicator}🎓 完整学习路径`,
+    message: h('div', {
+      style: {
+        maxHeight: '500px',
+        overflowY: 'auto',
+        padding: '10px',
+        fontSize: '13px',
+        lineHeight: '1.8',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word'
+      }
+    }, [
+      h('div', { style: { fontWeight: 'bold', marginBottom: '10px', color: '#333' } }, 
+        `🎯 ${path.goal}`
+      ),
+      h('div', { style: { color: '#666', marginBottom: '15px', fontSize: '12px' } }, 
+        `⏱ 预计时长：${path.totalDuration || 120}小时`
+      ),
+      h('div', { style: { color: '#333' } }, content)
+    ]),
+    confirmButtonText: '关闭',
+    customClass: 'learning-path-full-dialog',
+    showClose: true,
+    closeOnClickModal: true
   })
 }
 
@@ -613,14 +672,61 @@ const showSuggestions = async () => {
   }
 }
 
-// 学习路径对话框样式（纯文本模式）
-:global(.learning-path-text-dialog) {
+// 学习路径对话框样式（精简优化版）
+:global(.learning-path-simple-dialog) {
+  max-width: 600px;
+
+  .el-message-box__header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .el-message-box__title {
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .el-message-box__content {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 16px 20px;
+  }
+
+  .el-message-box__message {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: left;
+  }
+
+  // 轻量滚动条
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f5f7fa;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 3px;
+  }
+}
+
+// 完整学习路径对话框样式
+:global(.learning-path-full-dialog) {
   max-width: 700px;
 
   .el-message-box__header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 20px;
+    padding: 18px 24px;
     border-radius: 8px 8px 0 0;
   }
 
@@ -631,21 +737,14 @@ const showSuggestions = async () => {
   }
 
   .el-message-box__content {
-    max-height: 500px;
-    overflow-y: auto;
-    padding: 20px;
+    padding: 0;
   }
 
   .el-message-box__message {
-    font-size: 14px;
-    line-height: 1.8;
-    color: #333;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    text-align: left;
+    margin: 0;
   }
 
-  // 自定义滚动条
+  // 优化滚动条
   ::-webkit-scrollbar {
     width: 6px;
   }
@@ -658,9 +757,9 @@ const showSuggestions = async () => {
   ::-webkit-scrollbar-thumb {
     background: #667eea;
     border-radius: 3px;
-
+    
     &:hover {
-      background: #764ba2;
+      background: #5568d3;
     }
   }
 }
