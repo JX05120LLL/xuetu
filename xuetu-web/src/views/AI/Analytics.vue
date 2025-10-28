@@ -107,6 +107,7 @@ import * as echarts from 'echarts'
 import type { ECharts } from 'echarts'
 import { ElMessage } from 'element-plus'
 import { generateLearningReport } from '@/api/ai'
+import type { LearningReport } from '@/types/ai'
 import {
   TrendCharts,
   Odometer,
@@ -150,10 +151,24 @@ const statsData = ref([
   }
 ])
 
-// 加载真实数据
+// 加载真实数据（带缓存）
 const loadLearningData = async () => {
   try {
-    const report = await generateLearningReport()
+    const { storage } = await import('@/utils/storage')
+    const cacheKey = 'learning_report'
+    
+    // 检查缓存（10分钟有效）
+    let report: LearningReport | null = storage.getCache<LearningReport>(cacheKey)
+    let fromCache = false
+    
+    if (!report) {
+      // 无缓存，从服务器获取
+      report = await generateLearningReport()
+      // 存入缓存（10分钟有效）
+      storage.setCache(cacheKey, report, 10 * 60 * 1000)
+    } else {
+      fromCache = true
+    }
     
     // 更新统计数据
     statsData.value[0].value = `${Math.round(report.totalStudyTime / 60)}h`
@@ -172,7 +187,11 @@ const loadLearningData = async () => {
       aiInsights.value[3].description = report.suggestions[0]
     }
     
-    ElMessage.success('学习数据加载成功')
+    if (fromCache) {
+      ElMessage.success('💾 学习数据加载成功（来自缓存）')
+    } else {
+      ElMessage.success('✅ 学习数据加载成功')
+    }
   } catch (error) {
     console.error('加载学习数据失败:', error)
     ElMessage.warning('部分数据加载失败，显示为默认值')

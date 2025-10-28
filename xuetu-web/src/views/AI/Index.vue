@@ -179,15 +179,45 @@ const goToAnalytics = () => {
 // 显示推荐课程
 const showRecommendations = async () => {
   try {
-    const { getRecommendedCourses } = await import('@/api/ai')
-    const courses = await getRecommendedCourses(10)
+    const { storage } = await import('@/utils/storage')
+    const cacheKey = 'recommended_courses'
+    
+    // 检查缓存（5分钟有效）
+    let courses = storage.getCache(cacheKey)
+    let fromCache = false
+    
+    if (!courses) {
+      // 无缓存，显示加载提示
+      const loading = ElMessage({
+        message: '正在获取推荐课程...',
+        type: 'info',
+        duration: 0,
+        icon: 'Loading'
+      })
+      
+      try {
+        const { getRecommendedCourses } = await import('@/api/ai')
+        courses = await getRecommendedCourses(10)
+        loading.close()
+        
+        // 存入缓存（5分钟有效）
+        storage.setCache(cacheKey, courses, 5 * 60 * 1000)
+      } catch (err) {
+        loading.close()
+        throw err
+      }
+    } else {
+      fromCache = true
+      ElMessage.success('💾 使用缓存数据，加载更快！')
+    }
     
     if (courses && courses.length > 0) {
+      const cacheIndicator = fromCache ? '💾 [缓存数据] ' : ''
       const courseList = courses.map((c, i) => 
         `${i + 1}. ${c.courseTitle} (推荐度: ${Math.round(c.matchScore * 100)}%)<br/>   ${c.reason}`
       ).join('<br/><br/>')
       
-      ElMessageBox.alert(courseList, 'AI智能推荐课程', {
+      ElMessageBox.alert(cacheIndicator + courseList, 'AI智能推荐课程', {
         dangerouslyUseHTMLString: true,
         confirmButtonText: '查看全部课程',
         callback: () => {
@@ -201,6 +231,21 @@ const showRecommendations = async () => {
   }
 }
 
+// 生成学习路径的缓存键
+const getLearningPathCacheKey = (goal: string) => {
+  return `learning_path_${goal.trim().toLowerCase().replace(/\s+/g, '_')}`
+}
+
+// 格式化剩余时间
+const formatRemainingTime = (ms: number): string => {
+  const hours = Math.floor(ms / (1000 * 60 * 60))
+  if (hours >= 24) {
+    const days = Math.floor(hours / 24)
+    return `${days}天`
+  }
+  return `${hours}小时`
+}
+
 // 显示学习路径
 const showLearningPath = async () => {
   try {
@@ -212,6 +257,39 @@ const showLearningPath = async () => {
     })
     
     if (value && value.trim()) {
+      const goal = value.trim()
+      const { storage } = await import('@/utils/storage')
+      const cacheKey = getLearningPathCacheKey(goal)
+      
+      // 检查缓存
+      const cachedPath = storage.getCache(cacheKey)
+      
+      if (cachedPath) {
+        // 有缓存，询问用户是否使用
+        const remainingTime = storage.getCacheRemainingTime(cacheKey)
+        const timeStr = formatRemainingTime(remainingTime)
+        
+        try {
+          await ElMessageBox.confirm(
+            `检测到您之前生成过类似的学习路径（缓存有效期：还剩${timeStr}）\n\n是否直接使用缓存的结果？`,
+            '💾 发现缓存',
+            {
+              confirmButtonText: '使用缓存（快速）',
+              cancelButtonText: '重新生成',
+              type: 'info'
+            }
+          )
+          
+          // 用户选择使用缓存
+          displayLearningPath(cachedPath, true)
+          return
+        } catch {
+          // 用户选择重新生成，继续执行下面的代码
+          console.log('用户选择重新生成学习路径')
+        }
+      }
+      
+      // 没有缓存或用户选择重新生成
       // 显示加载提示
       const loading = ElMessage({
         message: 'AI正在为您量身定制学习路径，请稍候...',
@@ -222,36 +300,17 @@ const showLearningPath = async () => {
       
       try {
         const { generateLearningPath } = await import('@/api/ai')
-        const path = await generateLearningPath(value)
+        const path = await generateLearningPath(goal)
         
         loading.close()
         
         if (path && path.advice) {
-          // 限制内容长度，避免过长导致渲染问题
-          let content = path.advice
-          if (content.length > 1500) {
-            content = content.substring(0, 1500) + '\n\n...(内容较长，已截断部分内容)'
-          }
+          // 存入缓存（24小时有效）
+          storage.setCache(cacheKey, path, 24 * 60 * 60 * 1000)
+          ElMessage.success('✅ 学习路径已生成并缓存')
           
-          // 使用纯文本方式显示，更安全稳定
-          const displayContent = `
-🎯 学习目标: ${path.goal}
-⏱ 预计时长: ${path.totalDuration || 120}小时
-
-${content}
-
-💡 建议每天学习2-3小时，循序渐进完成各阶段目标
-          `.trim()
-          
-          ElMessageBox.alert(displayContent, '🎓 AI专属学习路径', {
-            confirmButtonText: '开始学习',
-            dangerouslyUseHTMLString: false,
-            customClass: 'learning-path-text-dialog'
-          }).then(() => {
-            ElMessage.success('加油学习！')
-          }).catch(() => {
-            // 用户点击关闭
-          })
+          // 显示学习路径
+          displayLearningPath(path, false)
         } else {
           ElMessage.warning('AI返回的内容格式不正确')
         }
@@ -266,6 +325,36 @@ ${content}
       console.error('输入失败:', error)
     }
   }
+}
+
+// 显示学习路径（统一的显示函数）
+const displayLearningPath = (path: any, fromCache: boolean) => {
+  // 限制内容长度，避免过长导致渲染问题
+  let content = path.advice
+  if (content.length > 1500) {
+    content = content.substring(0, 1500) + '\n\n...(内容较长，已截断部分内容)'
+  }
+  
+  // 使用纯文本方式显示，更安全稳定
+  const cacheIndicator = fromCache ? '💾 [来自缓存] ' : ''
+  const displayContent = `
+${cacheIndicator}🎯 学习目标: ${path.goal}
+⏱ 预计时长: ${path.totalDuration || 120}小时
+
+${content}
+
+💡 建议每天学习2-3小时，循序渐进完成各阶段目标
+  `.trim()
+  
+  ElMessageBox.alert(displayContent, '🎓 AI专属学习路径', {
+    confirmButtonText: '开始学习',
+    dangerouslyUseHTMLString: false,
+    customClass: 'learning-path-text-dialog'
+  }).then(() => {
+    ElMessage.success('加油学习！')
+  }).catch(() => {
+    // 用户点击关闭
+  })
 }
 
 // 显示智能笔记

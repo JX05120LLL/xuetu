@@ -276,7 +276,7 @@ const handleQuickQuestion = async (question: string) => {
   }
 }
 
-// 处理学习分析问题
+// 处理学习分析问题（带缓存）
 const handleAnalysisQuestion = async () => {
   // 添加用户消息
   messages.value.push({
@@ -291,13 +291,25 @@ const handleAnalysisQuestion = async () => {
   nextTick(() => scrollToBottom())
   
   try {
-    // 获取学习分析报告
-    const report = await generateLearningReport()
+    const { storage } = await import('@/utils/storage')
+    const cacheKey = 'learning_report'
+    
+    // 检查缓存（10分钟有效）
+    let report = storage.getCache(cacheKey)
+    let fromCache = false
+    
+    if (!report) {
+      // 无缓存，从服务器获取
+      report = await generateLearningReport()
+      // 存入缓存（10分钟有效）
+      storage.setCache(cacheKey, report, 10 * 60 * 1000)
+    } else {
+      fromCache = true
+    }
     
     // 构建AI回复内容
-    const analysisText = `您好！我已为您分析了学习情况：
-
-📚 **学习概况**
+    const cacheIndicator = fromCache ? '\n💾 *使用缓存数据，响应更快*\n\n' : '\n'
+    const analysisText = `您好！我已为您分析了学习情况：${cacheIndicator}📚 **学习概况**
 • 学习课程：${report.totalCourses || 0} 门
 • 已完成：${report.completedCourses || 0} 门
 • 学习时长：${Math.floor((report.totalStudyTime || 0) / 60)} 小时
