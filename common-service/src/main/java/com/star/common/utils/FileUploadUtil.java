@@ -5,7 +5,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -88,7 +87,7 @@ public class FileUploadUtil {
     }
 
     /**
-     * 上传图片文件
+     * 上传图片文件（使用默认大小限制）
      *
      * @param file 上传的图片文件
      * @param uploadPath 上传目录
@@ -97,13 +96,27 @@ public class FileUploadUtil {
      * @throws IOException 文件上传失败
      */
     public static String uploadImage(MultipartFile file, String uploadPath, String baseUrl) throws IOException {
+        return uploadImage(file, uploadPath, baseUrl, DEFAULT_MAX_SIZE);
+    }
+
+    /**
+     * 上传图片文件（支持自定义大小限制）
+     *
+     * @param file 上传的图片文件
+     * @param uploadPath 上传目录
+     * @param baseUrl 基础访问URL
+     * @param maxSize 最大文件大小（字节）
+     * @return 图片访问URL
+     * @throws IOException 文件上传失败
+     */
+    public static String uploadImage(MultipartFile file, String uploadPath, String baseUrl, long maxSize) throws IOException {
         // 校验图片格式
         String extension = getFileExtension(file.getOriginalFilename());
         if (!isAllowedImageExtension(extension)) {
             throw new IllegalArgumentException("不支持的图片格式，只允许上传: " + String.join(", ", ALLOWED_IMAGE_EXTENSIONS));
         }
 
-        return uploadFile(file, uploadPath, baseUrl, DEFAULT_MAX_SIZE);
+        return uploadFile(file, uploadPath, baseUrl, maxSize);
     }
 
     /**

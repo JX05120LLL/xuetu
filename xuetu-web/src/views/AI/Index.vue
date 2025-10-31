@@ -248,6 +248,7 @@ const formatRemainingTime = (ms: number): string => {
 
 // 显示学习路径
 const showLearningPath = async () => {
+  let loading: any = null
   try {
     const { value } = await ElMessageBox.prompt('请输入您的学习目标', 'AI学习路径规划', {
       confirmButtonText: '生成路径',
@@ -281,6 +282,7 @@ const showLearningPath = async () => {
           )
           
           // 用户选择使用缓存
+          console.log('🎯 使用缓存的学习路径:', cachedPath)
           displayLearningPath(cachedPath, true)
           return
         } catch {
@@ -291,93 +293,121 @@ const showLearningPath = async () => {
       
       // 没有缓存或用户选择重新生成
       // 显示加载提示
-      const loading = ElMessage({
-        message: 'AI正在为您量身定制学习路径，请稍候...',
+      loading = ElMessage({
+        message: 'AI正在为您量身定制学习路径，请稍候...（预计需要30-60秒）',
         type: 'info',
         duration: 0,
         icon: 'Loading'
       })
       
+      console.log('🚀 开始调用AI生成学习路径:', goal)
+      
       try {
         const { generateLearningPath } = await import('@/api/ai')
         const path = await generateLearningPath(goal)
         
-        loading.close()
+        // 关闭loading
+        if (loading) {
+          loading.close()
+          loading = null
+        }
+        
+        console.log('✅ 学习路径生成成功:', path)
         
         if (path && path.advice) {
           // 存入缓存（24小时有效）
           storage.setCache(cacheKey, path, 24 * 60 * 60 * 1000)
           ElMessage.success('✅ 学习路径已生成并缓存')
           
-          // 显示学习路径
-          displayLearningPath(path, false)
+          // 延迟一下再显示，确保loading已关闭
+          setTimeout(() => {
+            displayLearningPath(path, false)
+          }, 100)
         } else {
-          ElMessage.warning('AI返回的内容格式不正确')
+          console.warn('⚠️ AI返回的数据格式不正确:', path)
+          ElMessage.warning('AI返回的内容格式不正确，请重试')
         }
-      } catch (error) {
-        loading.close()
-        console.error('生成学习路径失败:', error)
-        ElMessage.error('生成学习路径失败，请检查网络连接或稍后再试')
+      } catch (error: any) {
+        // 确保关闭loading
+        if (loading) {
+          loading.close()
+          loading = null
+        }
+        
+        console.error('❌ 生成学习路径失败:', error)
+        
+        // 更友好的错误提示
+        let errorMsg = '生成学习路径失败'
+        if (error.message?.includes('timeout')) {
+          errorMsg = 'AI生成超时，请稍后重试'
+        } else if (error.message?.includes('Network')) {
+          errorMsg = '网络连接失败，请检查后端服务是否启动'
+        } else if (error.response?.status === 500) {
+          errorMsg = '后端服务错误，请检查MySQL和Redis是否启动'
+        }
+        
+        ElMessage.error(errorMsg)
       }
     }
   } catch (error) {
+    // 确保loading被关闭
+    if (loading) {
+      loading.close()
+      loading = null
+    }
+    
     if (error !== 'cancel' && error !== 'close') {
       console.error('输入失败:', error)
     }
   }
 }
 
-// 显示学习路径（统一的显示函数 - 极简优化版本）
+// 显示学习路径（直接显示完整内容）
 const displayLearningPath = (path: any, fromCache: boolean) => {
-  const cacheIndicator = fromCache ? '💾 [缓存数据] ' : ''
-  const content = path.advice || ''
+  console.log('📖 准备显示学习路径:', path)
   
-  // 🔥 关键优化：严格限制字符数，防止卡顿
-  const maxChars = 500  // 最多500字符
-  let summary = ''
-  
-  if (content.length > maxChars) {
-    // 内容过长，只显示前500字符
-    summary = content.substring(0, maxChars) + '...'
-  } else {
-    summary = content
-  }
-  
-  // 构建极简显示内容
-  const displayContent = `${cacheIndicator}
-🎯 学习目标：${path.goal}
+  try {
+    const cacheIndicator = fromCache ? '💾 [缓存数据] ' : ''
+    const content = path.advice || ''
+    
+    // 数据验证
+    if (!content || content.trim() === '') {
+      console.error('❌ 学习路径内容为空')
+      ElMessage.error('学习路径内容为空，请重新生成')
+      return
+    }
+    
+    // 构建显示内容 - 直接显示完整内容
+    const displayContent = `${cacheIndicator}
+🎯 学习目标：${path.goal || '未指定'}
 ⏱ 预计时长：${path.totalDuration || 120}小时
 
-📋 路径规划：
-${summary}
+📋 完整学习路径：
+${content}
 
-${content.length > maxChars ? '\n💡 提示：完整内容较长，已为您精简显示核心部分' : ''}
-📚 每天坚持2-3小时，稳步前进！
-  `.trim()
-  
-  // 使用更轻量的显示方式
-  try {
+📚 温馨提示：每天坚持2-3小时学习，循序渐进！
+    `.trim()
+    
+    console.log('✅ 准备显示对话框，内容长度:', content.length)
+    
+    // 使用MessageBox显示完整内容
     ElMessageBox({
       title: '🎓 AI学习路径',
       message: displayContent,
       confirmButtonText: '好的，开始学习',
-      cancelButtonText: '查看完整路径',
-      showCancelButton: true,
+      showCancelButton: false,
       dangerouslyUseHTMLString: false,
       customClass: 'learning-path-simple-dialog',
       showClose: true,
-      closeOnClickModal: true,
-      distinguishCancelAndClose: true
+      closeOnClickModal: true
     }).then(() => {
+      console.log('✅ 用户确认开始学习')
       ElMessage.success('💪 加油学习！')
-    }).catch((action) => {
-      if (action === 'cancel') {
-        // 用户点击"查看完整路径"，显示完整内容
-        showFullLearningPath(path, fromCache)
-      }
+    }).catch(() => {
+      // 用户关闭对话框
     })
   } catch (error) {
-    console.error('显示学习路径失败:', error)
+    console.error('❌ 显示学习路径失败:', error)
     ElMessage.error('显示失败，请重试')
   }
 }
@@ -672,56 +702,78 @@ const showSuggestions = async () => {
   }
 }
 
-// 学习路径对话框样式（精简优化版）
+// 学习路径对话框样式（完整内容版 - 优化配色）
 :global(.learning-path-simple-dialog) {
-  max-width: 600px;
+  width: 90vw !important;
+  max-width: 800px !important;
+  min-width: 500px !important;
 
   .el-message-box__header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
     color: white;
-    padding: 16px 20px;
-    border-radius: 8px 8px 0 0;
+    padding: 20px 28px;
+    border-radius: 12px 12px 0 0;
   }
 
   .el-message-box__title {
     color: white;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
   }
 
   .el-message-box__content {
-    max-height: 400px;
+    max-height: 70vh !important;
     overflow-y: auto;
-    padding: 16px 20px;
+    padding: 24px 28px;
+    background: #ffffff !important;
   }
 
   .el-message-box__message {
-    font-size: 13px;
-    line-height: 1.6;
-    color: #333;
+    font-size: 14px !important;
+    line-height: 2 !important;
+    color: #2c3e50 !important;
     white-space: pre-wrap;
     word-wrap: break-word;
     text-align: left;
+    background: #ffffff !important;
   }
 
-  // 轻量滚动条
+  .el-message-box__btns {
+    padding: 16px 28px 24px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    
+    button {
+      padding: 10px 24px;
+      font-size: 14px;
+    }
+  }
+
+  // 美化滚动条
   ::-webkit-scrollbar {
-    width: 5px;
+    width: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #f5f7fa;
+    background: #f1f3f5;
+    border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #667eea;
-    border-radius: 3px;
+    background: #4a90e2;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #357abd;
+    }
   }
 }
 
 // 完整学习路径对话框样式
 :global(.learning-path-full-dialog) {
-  max-width: 700px;
+  width: 90vw !important;
+  max-width: 750px !important;
+  min-width: 500px !important;
 
   .el-message-box__header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

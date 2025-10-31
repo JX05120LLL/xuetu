@@ -44,6 +44,13 @@ spring:
         enabled: false  # 暂时禁用，避免连接问题
         import-check:
           enabled: false  # 禁用强制导入检查
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 # MyBatis Plus配置
 mybatis-plus:
@@ -98,19 +105,16 @@ knife4j:
 # 文件上传配置
 file:
   upload:
-    # 上传文件保存路径（服务器本地路径，对应Nginx配置的media目录）
-    path: /www/wwwroot/media/UserAvatar
+    # 上传文件保存路径
+    # 生产环境: /www/wwwroot/media/UserAvatar
+    # 开发环境: D:/xuetu/uploads/avatars (Windows) 或 /tmp/xuetu/uploads/avatars (Linux/Mac)
+    path: ${FILE_UPLOAD_PATH:/www/wwwroot/media/UserAvatar}
     # 文件访问基础URL
-    base-url: http://8.141.106.92/media/UserAvatar
-    # 最大文件大小（2MB）
-    max-size: 2097152
-
-# Spring Boot 文件上传配置
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 10MB
-      max-request-size: 10MB
+    # 生产环境: http://8.141.106.92/media/UserAvatar
+    # 开发环境: http://localhost:8088/uploads/avatars
+    base-url: ${FILE_BASE_URL:http://8.141.106.92/media/UserAvatar}
+    # 最大文件大小（10MB = 10485760字节）
+    max-size: ${FILE_MAX_SIZE:10485760}
     
 # 管理端点配置
 management:

@@ -111,7 +111,7 @@ public class UserController {
      * 上传用户头像
      */
     @PostMapping("/{userId}/avatar")
-    @Operation(summary = "上传用户头像", description = "上传用户头像文件，支持jpg、png、jpeg、gif格式，大小不超过2MB")
+    @Operation(summary = "上传用户头像", description = "上传用户头像文件，支持jpg、png、jpeg、gif、bmp格式，大小不超过10MB")
     public R<User> uploadAvatar(
             @Parameter(description = "用户ID") @PathVariable Long userId,
             @Parameter(description = "头像文件") @RequestParam("file") MultipartFile file) {
@@ -119,8 +119,8 @@ public class UserController {
             log.info("开始上传用户头像: userId={}, fileName={}, fileSize={}", 
                     userId, file.getOriginalFilename(), FileUploadUtil.formatFileSize(file.getSize()));
             
-            // 上传图片到服务器本地目录
-            String avatarUrl = FileUploadUtil.uploadImage(file, uploadPath, baseUrl);
+            // 上传图片到服务器本地目录（使用配置的文件大小限制）
+            String avatarUrl = FileUploadUtil.uploadImage(file, uploadPath, baseUrl, maxSize);
             
             // 更新用户头像URL
             User user = userService.updateAvatar(userId, avatarUrl);

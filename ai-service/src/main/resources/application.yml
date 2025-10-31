@@ -66,11 +66,11 @@ aliyun:
     # 模型名称
     model: qwen-turbo  # 可选: qwen-turbo(快速), qwen-plus(均衡), qwen-max(最强)
     # 超时时间(秒)
-    timeout: 60
-    # 最大tokens
-    max-tokens: 2000
+    timeout: 90
+    # 最大tokens（增加到4000以支持更详细的学习路径）
+    max-tokens: 4000
     # 温度(创造性): 0-2, 越高越随机
-    temperature: 0.8
+    temperature: 0.85
 
 # 日志配置
 logging:

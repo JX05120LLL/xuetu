@@ -213,67 +213,82 @@ public class CourseRecommendServiceImpl implements CourseRecommendService {
     }
 
     /**
-     * 构建学习路径Prompt（简洁版）
+     * 构建学习路径Prompt（详细版）
      */
     private String buildLearningPathPrompt(String goal, LearningStatsDTO stats, List<CourseDTO> availableCourses) {
         StringBuilder prompt = new StringBuilder();
         
-        prompt.append("你是专业的IT学习顾问，请为用户制定简洁实用的学习路径。\n\n");
+        prompt.append("你是一位资深的IT学习规划专家，拥有10年以上的教学和实战经验。请为用户制定一份详细、专业、可落地的学习路径规划。\n\n");
         
+        prompt.append("【用户信息】\n");
         prompt.append("学习目标: ").append(goal).append("\n");
         
         if (stats != null && stats.getTotalLearningTime() != null && stats.getTotalLearningTime() > 0) {
             int hours = stats.getTotalLearningTime() / 60;
-            prompt.append(String.format("当前水平: 已学习%d小时\n", hours));
+            prompt.append(String.format("当前水平: 已累计学习%d小时，有一定基础\n", hours));
         } else {
-            prompt.append("当前水平: 零基础\n");
+            prompt.append("当前水平: 零基础初学者\n");
         }
         
         // 添加平台可用课程列表
         if (availableCourses != null && !availableCourses.isEmpty()) {
-            prompt.append("\n平台课程: ");
+            prompt.append("\n【平台可选课程】\n");
             int count = 0;
             for (CourseDTO course : availableCourses) {
-                if (count++ < 10) {
-                    prompt.append(course.getTitle());
-                    if (count < 10 && count < availableCourses.size()) {
-                        prompt.append("、");
+                if (count++ < 15) {
+                    prompt.append("- ").append(course.getTitle());
+                    if (course.getDescription() != null && course.getDescription().length() > 0) {
+                        String desc = course.getDescription();
+                        if (desc.length() > 30) {
+                            desc = desc.substring(0, 30) + "...";
+                        }
+                        prompt.append("（").append(desc).append("）");
                     }
+                    prompt.append("\n");
                 }
             }
-            prompt.append("\n");
         }
         
-        prompt.append("\n请按以下格式输出学习路径（简洁明了）：\n\n");
+        prompt.append("\n【输出要求】\n");
+        prompt.append("请按以下格式输出详细的学习路径规划：\n\n");
         
         prompt.append("【预计时间】\n");
-        prompt.append("学习时长: X小时\n\n");
+        prompt.append("总学习时长: XXX小时（建议每天学习2-3小时，预计X个月完成）\n\n");
         
         prompt.append("【第一阶段: 基础入门】\n");
-        prompt.append("阶段目标: (一句话说明目标)\n");
-        prompt.append("推荐课程: 课程1, 课程2\n");
-        prompt.append("实战项目: 项目名称\n");
-        prompt.append("预计时长: X小时\n\n");
+        prompt.append("阶段目标: 详细描述这个阶段要达到的学习目标和能力水平（50-100字）\n");
+        prompt.append("推荐课程: 列出2-4门具体课程（优先从平台课程中选择）\n");
+        prompt.append("核心知识点:\n");
+        prompt.append("  1. 知识点1（附带简短说明）\n");
+        prompt.append("  2. 知识点2（附带简短说明）\n");
+        prompt.append("  3. 知识点3（附带简短说明）\n");
+        prompt.append("实战项目: 具体项目名称及简要说明\n");
+        prompt.append("学习建议: 给出这个阶段的具体学习方法和注意事项（3-5条）\n");
+        prompt.append("预计时长: XX小时\n\n");
         
         prompt.append("【第二阶段: 核心技能】\n");
-        prompt.append("阶段目标: (一句话)\n");
-        prompt.append("推荐课程: 课程3, 课程4\n");
-        prompt.append("实战项目: 项目名称\n");
-        prompt.append("预计时长: X小时\n\n");
+        prompt.append("（同上格式，但内容更深入）\n\n");
         
         prompt.append("【第三阶段: 进阶提升】\n");
-        prompt.append("(同上格式)\n\n");
+        prompt.append("（同上格式，聚焦高级技能）\n\n");
         
-        prompt.append("【学习建议】\n");
-        prompt.append("1. (建议1 - 15字内)\n");
-        prompt.append("2. (建议2 - 15字内)\n");
-        prompt.append("3. (建议3 - 15字内)\n\n");
+        prompt.append("【第四阶段: 项目实战（可选）】\n");
+        prompt.append("（如果目标复杂，可以添加第四阶段）\n\n");
         
-        prompt.append("要求：\n");
-        prompt.append("1. 3-4个阶段即可，不要太多\n");
-        prompt.append("2. 推荐课程优先从平台课程中选择\n");
-        prompt.append("3. 每个描述控制在20字内，简洁明了\n");
-        prompt.append("4. 不要输出过多额外内容，保持简洁\n");
+        prompt.append("【整体学习建议】\n");
+        prompt.append("1. 学习方法建议（如何高效学习）\n");
+        prompt.append("2. 时间规划建议（如何安排学习时间）\n");
+        prompt.append("3. 常见误区提醒（避免走弯路）\n");
+        prompt.append("4. 进阶路线提示（后续发展方向）\n");
+        prompt.append("5. 资源推荐（书籍、网站、社区等）\n\n");
+        
+        prompt.append("【注意事项】\n");
+        prompt.append("1. 每个阶段都要详细说明，不要过于简略\n");
+        prompt.append("2. 推荐课程要具体，优先从上面的平台课程中选择\n");
+        prompt.append("3. 知识点要详细列出，让学习者清楚每个阶段要学什么\n");
+        prompt.append("4. 实战项目要具有代表性和实用价值\n");
+        prompt.append("5. 学习建议要具体可行，不要泛泛而谈\n");
+        prompt.append("6. 整体内容要专业、详实、有深度，帮助学习者少走弯路\n");
         
         return prompt.toString();
     }
