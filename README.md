@@ -7,7 +7,7 @@
 
 ## 📋 项目简介
 
-学途是一个功能完善的在线学习平台，采用前后端分离架构，集成了AI智能助手、学习路径规划、课程推荐等现代化功能。项目采用微服务架构，部署在3台云服务器上，实现了服务的分布式部署。
+学途是一个功能完善的在线学习平台，采用前后端分离架构，集成了AI智能助手、学习路径规划、课程推荐等现代化功能。项目采用微服务架构，部署在3台阿里云服务器上，实现了服务的分布式部署。
 
 **核心功能：**
 - 🎓 在线课程学习（视频、课时管理）
@@ -40,404 +40,728 @@
 - **路由**: Vue Router 4
 
 ### 基础设施
-- **容器化**: Docker
+- **容器化**: Docker + Docker Compose
 - **Web服务器**: Nginx
 - **服务器**: 阿里云 ECS x 3
 
 ---
 
-## 🎯 系统架构
+## 🎯 系统架构详解
 
-### 微服务架构图
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        用户/浏览器                            │
-└────────────────────┬────────────────────────────────────────┘
-                     │ HTTP
-                     ↓
-┌─────────────────────────────────────────────────────────────┐
-│  Nginx (8.141.106.92:80)  - 前端静态文件 + 反向代理          │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ↓
-┌─────────────────────────────────────────────────────────────┐
-│  Spring Cloud Gateway (112.126.85.23:8080)  - API网关        │
-└────────┬────────────────────────────────────────────────────┘
-         │
-         ├─────────────────────────────────────────────────────┐
-         │                                                     │
-    ┌────▼────┐  ┌────────┐  ┌────────┐  ┌────────┐  ┌───────▼──┐
-    │  User   │  │ Course │  │Learning│  │ Order  │  │   AI     │
-    │ Service │  │Service │  │Service │  │Service │  │ Service  │
-    └────┬────┘  └───┬────┘  └───┬────┘  └───┬────┘  └────┬─────┘
-         │           │            │           │            │
-         └───────────┴────────────┴───────────┴────────────┘
-                                  │
-                     ┌────────────┴────────────┐
-                     ↓                         ↓
-              ┌──────────┐              ┌──────────┐
-              │  MySQL   │              │  Redis   │
-              │   8.0    │              │   7.x    │
-              └──────────┘              └──────────┘
-```
-
-### 服务注册与发现
-
-所有微服务通过 **Nacos** 进行服务注册与发现，实现动态路由和负载均衡。
-
----
-
-## 🖥️ 服务器部署架构
-
-项目部署在 **3台阿里云服务器** 上，实现服务的分布式部署：
-
-### 🖥️ 服务器 1 - 基础设施 (8.141.106.92)
-
-| 容器名称 | 服务 | 端口 | 说明 |
-|---------|------|------|------|
-| `xuetu-web` | Nginx | 80 | 前端静态文件服务 |
-| `xuetu-nacos` | Nacos Server | 8848, 9848 | 服务注册与配置中心 |
-| `xuetu-mysql` | MySQL 8.0 | 3306 | 主数据库 |
-| `xuetu-redis` | Redis 7 | 6379 | 缓存服务 |
-
-**挂载目录：**
-- `/www/wwwroot/xuetu-web/dist` → 前端静态文件
-- `/www/wwwroot/xuetu-web/nginx.conf` → Nginx配置
-- `/www/wwwroot/media` → 媒体文件存储
-
----
-
-### 🖥️ 服务器 2 - 核心业务服务 (112.126.85.23)
-
-| 容器名称 | 服务 | 内部端口 | 说明 |
-|---------|------|---------|------|
-| `xuetu-gateway` | API网关 | 8080 | Spring Cloud Gateway，所有API的统一入口 |
-| `xuetu-user-service` | 用户服务 | 8066 | 用户管理、认证授权 |
-| `xuetu-course-service` | 课程服务 | 8055 | 课程、分类、课时管理 |
-| `xuetu-learning-service` | 学习服务 | 8033 | 学习记录、进度、笔记 |
-
-**服务职责：**
-- **Gateway**: 路由转发、鉴权、限流、跨域处理
-- **User Service**: 用户注册/登录、个人信息、权限管理
-- **Course Service**: 课程CRUD、分类管理、课时管理
-- **Learning Service**: 学习进度追踪、笔记管理、学习统计
-
----
-
-### 🖥️ 服务器 3 - 扩展服务 (8.140.224.117)
-
-| 容器名称 | 服务 | 内部端口 | 说明 |
-|---------|------|---------|------|
-| `xuetu-ai-service` | AI服务 | 8066 | AI助手、学习路径规划、智能推荐 |
-| `xuetu-admin-service` | 管理服务 | 8055 | 后台管理、数据统计 |
-| `xuetu-order-service` | 订单服务 | 8033 | 课程购买、订单管理 |
-
-**服务职责：**
-- **AI Service**: 集成通义千问AI，提供智能问答、学习路径生成、课程推荐
-- **Admin Service**: 平台管理功能、数据报表
-- **Order Service**: 订单处理、支付集成（预留）
-
----
-
-## 📁 项目结构
+### 三台服务器分布式架构
 
 ```
-xuetu/
-├── admin-service/           # 管理服务
-│   ├── src/
-│   └── pom.xml
-├── ai-service/              # AI智能服务 ⭐
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/com/star/ai/
-│   │       │   ├── controller/      # AI接口控制器
-│   │       │   ├── service/         # AI业务逻辑
-│   │       │   ├── client/          # 通义千问客户端
-│   │       │   └── dto/             # 数据传输对象
-│   │       └── resources/
-│   └── pom.xml
-├── common-service/          # 公共服务模块
-│   ├── src/
-│   └── pom.xml
-├── course-service/          # 课程服务 📚
-│   ├── src/
-│   └── pom.xml
-├── gateway/                 # API网关 🚪
-│   ├── src/
-│   └── pom.xml
-├── learning-service/        # 学习服务 📖
-│   ├── src/
-│   └── pom.xml
-├── order-service/           # 订单服务 🛒
-│   ├── src/
-│   └── pom.xml
-├── user-service/            # 用户服务 👤
-│   ├── src/
-│   └── pom.xml
-├── xuetu-web/               # 前端项目 💻
-│   ├── src/
-│   │   ├── api/            # API接口封装
-│   │   ├── components/     # Vue组件
-│   │   ├── views/          # 页面视图
-│   │   ├── router/         # 路由配置
-│   │   ├── stores/         # 状态管理
-│   │   └── utils/          # 工具函数
-│   ├── dist/               # 构建输出
-│   ├── package.json
-│   └── vite.config.ts
-├── deployment/              # 部署相关 🚀
-│   ├── docker-compose-server1.yml
-│   ├── docker-compose-server2.yml
-│   ├── docker-compose-server3.yml
-│   ├── jars/               # 服务JAR包
-│   └── DEPLOYMENT-GUIDE.md
-├── sql/                     # 数据库脚本
-│   └── xuetu_db.sql
-├── logs/                    # 日志目录
-└── pom.xml                  # 父级POM
+┌──────────────────────────────────────────────────────────────────┐
+│                        用户浏览器                                  │
+└────────────────────────┬─────────────────────────────────────────┘
+                         │ HTTP :80
+                         ↓
+┌────────────────────────────────────────────────────────────────────┐
+│                  服务器1 (8.141.106.92)                             │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │  Nginx 容器 (xuetu-web)                                       │ │
+│  │  - 前端静态文件托管 (/usr/share/nginx/html)                   │ │
+│  │  - 媒体文件托管 (/usr/share/nginx/media)                      │ │
+│  │  - API反向代理 → 服务器2:8080                                 │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │  MySQL 容器 (xuetu-mysql) :3306                               │ │
+│  │  Redis 容器 (xuetu-redis) :6379                               │ │
+│  │  Nacos 容器 (xuetu-nacos) :8848                               │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────┘
+                         │
+                         │ API请求转发
+                         ↓
+┌────────────────────────────────────────────────────────────────────┐
+│                  服务器2 (112.126.85.23)                            │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │  Gateway 容器 (xuetu-gateway) :8080                           │ │
+│  │  - 统一API网关入口                                            │ │
+│  │  - 从Nacos获取服务列表                                        │ │
+│  │  - 路由转发到各个微服务                                       │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │  User Service (xuetu-user-service) :8088                      │ │
+│  │  - 用户管理、认证、头像上传                                   │ │
+│  │  - 文件挂载: /www/wwwroot/media                               │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │  Course Service (xuetu-course-service) :8077                  │ │
+│  │  Learning Service (xuetu-learning-service) :8044              │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────┘
+                         │
+                         │ 服务调用
+                         ↓
+┌────────────────────────────────────────────────────────────────────┐
+│                  服务器3 (8.140.224.117)                            │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │  Order Service (xuetu-order-service) :8033                    │ │
+│  │  AI Service (xuetu-ai-service) :8066                          │ │
+│  │  Admin Service (xuetu-admin-service) :8055                    │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────┘
+
+         所有微服务通过Nacos进行服务注册与发现
+              ↑ 注册 / 心跳 / 配置拉取 ↓
 ```
 
 ---
 
-## 🔌 服务端口汇总
+## 🔗 核心组件关系详解
 
-### 外部访问端口
+### 1. 用户请求流程
 
-| 服务 | 服务器 | 端口 | 访问地址 | 说明 |
-|------|--------|------|----------|------|
-| Web前端 | Server 1 | 80 | http://8.141.106.92 | 用户访问入口 |
-| API网关 | Server 2 | 8080 | http://112.126.85.23:8080 | 后端API入口 |
-| Nacos控制台 | Server 1 | 8848 | http://8.141.106.92:8848/nacos | 服务注册中心 |
-| MySQL | Server 1 | 3306 | 8.141.106.92:3306 | 数据库 |
-| Redis | Server 1 | 6379 | 8.141.106.92:6379 | 缓存 |
+#### 静态资源请求（前端页面、CSS、JS、图片）
+```
+浏览器 
+  → http://8.141.106.92/ 
+  → Nginx容器 (服务器1) 
+  → /usr/share/nginx/html/index.html
+  → 返回前端页面
+```
 
-### 内部服务端口
+#### 媒体文件请求（课程封面、视频、用户头像）
+```
+浏览器 
+  → http://8.141.106.92/media/covers/course1.jpg 
+  → Nginx容器 (服务器1) 
+  → /usr/share/nginx/media/covers/course1.jpg
+  → 返回图片文件
+```
 
-| 服务名称 | 服务器 | 端口 | 用途 |
-|---------|--------|------|------|
-| user-service | Server 2 | 8066 | 用户服务 |
-| course-service | Server 2 | 8055 | 课程服务 |
-| learning-service | Server 2 | 8033 | 学习服务 |
-| ai-service | Server 3 | 8066 | AI服务 |
-| admin-service | Server 3 | 8055 | 管理服务 |
-| order-service | Server 3 | 8033 | 订单服务 |
-| gateway | Server 2 | 8080 | API网关 |
+#### API请求（登录、获取数据等）
+```
+浏览器 
+  → http://8.141.106.92/api/auth/login 
+  → Nginx容器 (服务器1) 
+  → 反向代理到 http://112.126.85.23:8080/auth/login 
+  → Gateway容器 (服务器2) 
+  → 查询Nacos获取 user-service 的地址
+  → 转发到 user-service:8088/auth/login
+  → 返回响应
+```
 
 ---
 
-## 🚀 快速开始
+### 2. Nginx配置详解
 
-### 前置要求
+**Nginx容器位置**：服务器1 (8.141.106.92)  
+**配置文件路径**：`/etc/nginx/conf.d/default.conf`
 
-- JDK 17+
-- Maven 3.8+
-- Node.js 16+
-- Docker & Docker Compose
-- MySQL 8.0
-- Redis 7.x
+```nginx
+server {
+    listen 80;
+    server_name localhost;
+    client_max_body_size 50m;
+    charset utf-8;
 
-### 本地开发
+    # 【1】前端静态文件托管
+    root /usr/share/nginx/html;
+    index index.html;
+    location / {
+        try_files $uri $uri/ /index.html;  # Vue Router 的 History 模式支持
+    }
 
-#### 1. 克隆项目
+    # 【2】媒体文件托管（课程封面、视频、用户头像）
+    location ^~ /media/ {
+        alias /usr/share/nginx/media/;  # 映射到容器内的media目录
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header Access-Control-Allow-Origin *;
+    }
 
-```bash
-git clone <repository-url>
-cd xuetu
+    # 【3】API反向代理到服务器2的Gateway
+    location /api/ {
+        proxy_pass http://112.126.85.23:8080/;  # 转发到Gateway
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_connect_timeout 120s;
+        proxy_read_timeout 120s;
+    }
+
+    # 【4】直接访问微服务（用于调试）
+    location ~ ^/(user-service|course-service|learning-service|order-service|ai-service|admin-service)/ {
+        proxy_pass http://112.126.85.23:8080;
+    }
+}
 ```
 
-#### 2. 启动基础设施
+---
 
-```bash
-# 启动MySQL
-docker run -d --name mysql \
-  -p 3306:3306 \
-  -e MYSQL_ROOT_PASSWORD=your_password \
-  mysql:8.0
+### 3. Docker容器与文件挂载关系
 
-# 启动Redis
-docker run -d --name redis \
-  -p 6379:6379 \
-  redis:7-alpine
+#### 服务器1 - 基础设施层
 
-# 启动Nacos
-docker run -d --name nacos \
-  -p 8848:8848 \
-  -p 9848:9848 \
-  -e MODE=standalone \
-  nacos/nacos-server:v2.2.0
-```
-
-#### 3. 导入数据库
-
-```bash
-mysql -u root -p < sql/xuetu_db.sql
-```
-
-#### 4. 配置AI服务
-
-在 `ai-service/src/main/resources/application.yml` 中配置通义千问API密钥：
-
+**xuetu-web (Nginx容器)**
 ```yaml
-qwen:
-  api:
-    key: your_api_key_here
+volumes:
+  # 前端打包文件
+  - /www/wwwroot/xuetu-web/dist:/usr/share/nginx/html
+  # Nginx配置文件
+  - /www/wwwroot/xuetu-web/nginx.conf:/etc/nginx/conf.d/default.conf
+  # 媒体文件目录（重要！）
+  - /www/wwwroot/media:/usr/share/nginx/media
 ```
 
-#### 5. 启动后端服务
+**xuetu-mysql (MySQL容器)**
+```yaml
+volumes:
+  - mysql_data:/var/lib/mysql  # 数据持久化
+ports:
+  - "3306:3306"  # 暴露给其他服务器访问
+```
+
+**xuetu-redis (Redis容器)**
+```yaml
+ports:
+  - "6379:6379"  # 暴露给其他服务器访问
+```
+
+**xuetu-nacos (Nacos容器)**
+```yaml
+ports:
+  - "8848:8848"  # HTTP端口（Web控制台 + 服务注册）
+  - "9848:9848"  # gRPC端口（服务间通信）
+```
+
+---
+
+#### 服务器2 - 核心业务层
+
+**xuetu-gateway (网关容器)**
+```yaml
+environment:
+  NACOS_SERVER: "8.141.106.92:8848"  # 连接到服务器1的Nacos
+  MYSQL_HOST: "8.141.106.92"         # 连接到服务器1的MySQL
+  REDIS_HOST: "8.141.106.92"         # 连接到服务器1的Redis
+volumes:
+  - ./jars/gateway.jar:/app/gateway.jar
+  - ./logs:/var/log/xuetu
+ports:
+  - "8080:8080"  # 网关端口（Nginx会代理到这里）
+```
+
+**xuetu-user-service (用户服务容器)**
+```yaml
+environment:
+  NACOS_SERVER: "8.141.106.92:8848"
+  MYSQL_HOST: "8.141.106.92"
+  REDIS_HOST: "8.141.106.92"
+volumes:
+  - ./jars/user-service.jar:/app/user-service.jar
+  - ./logs:/var/log/xuetu
+  # ⚠️ 关键：文件上传目录（与服务器1的Nginx共享同一路径）
+  - /www/wwwroot/media:/www/wwwroot/media
+ports:
+  - "8088:8088"
+```
+
+**xuetu-course-service (课程服务容器)**
+```yaml
+environment:
+  NACOS_SERVER: "8.141.106.92:8848"
+  MYSQL_HOST: "8.141.106.92"
+  REDIS_HOST: "8.141.106.92"
+volumes:
+  - ./jars/course-service.jar:/app/course-service.jar
+  - ./logs:/var/log/xuetu
+ports:
+  - "8077:8077"
+```
+
+**xuetu-learning-service (学习服务容器)**
+```yaml
+environment:
+  NACOS_SERVER: "8.141.106.92:8848"
+  MYSQL_HOST: "8.141.106.92"
+  REDIS_HOST: "8.141.106.92"
+volumes:
+  - ./jars/learning-service.jar:/app/learning-service.jar
+  - ./logs:/var/log/xuetu
+ports:
+  - "8044:8044"
+```
+
+---
+
+#### 服务器3 - 扩展业务层
+
+**xuetu-order-service (订单服务容器)**
+```yaml
+environment:
+  NACOS_SERVER: "8.141.106.92:8848"
+  MYSQL_HOST: "8.141.106.92"
+  REDIS_HOST: "8.141.106.92"
+volumes:
+  - ./jars/order-service.jar:/app/order-service.jar
+  - ./logs:/var/log/xuetu
+ports:
+  - "8033:8033"
+```
+
+**xuetu-ai-service (AI服务容器)**
+```yaml
+environment:
+  NACOS_SERVER: "8.141.106.92:8848"
+  MYSQL_HOST: "8.141.106.92"
+  REDIS_HOST: "8.141.106.92"
+volumes:
+  - ./jars/ai-service.jar:/app/ai-service.jar
+  - ./logs:/var/log/xuetu
+ports:
+  - "8066:8066"
+```
+
+**xuetu-admin-service (管理服务容器)**
+```yaml
+environment:
+  NACOS_SERVER: "8.141.106.92:8848"
+  MYSQL_HOST: "8.141.106.92"
+  REDIS_HOST: "8.141.106.92"
+volumes:
+  - ./jars/admin-service.jar:/app/admin-service.jar
+  - ./logs:/var/log/xuetu
+ports:
+  - "8055:8055"
+```
+
+---
+
+## 📁 文件存储机制详解
+
+### ⚠️ 重要：跨服务器文件存储问题
+
+在分布式架构中，文件存储是一个关键问题。我们的项目存在以下情况：
+
+#### 问题场景：用户头像上传
+
+```
+用户上传头像 
+  → 前端发送到 /api/user/avatar/upload
+  → Nginx (服务器1) 代理到 Gateway (服务器2)
+  → Gateway 路由到 user-service (服务器2)
+  → user-service 保存文件到 /www/wwwroot/media/UserAvatar/ (服务器2的磁盘)
+  → 返回URL: http://8.141.106.92/media/UserAvatar/2025/10/31/xxx.png
+
+用户访问头像
+  → 浏览器请求 /media/UserAvatar/2025/10/31/xxx.png
+  → Nginx (服务器1) 从 /usr/share/nginx/media/UserAvatar/ 读取
+  → ❌ 文件不存在！因为文件在服务器2上
+```
+
+#### 解决方案
+
+**方案1：手动文件同步（当前使用）**
+
+当发现头像404时，手动从服务器2同步到服务器1：
 
 ```bash
-# 编译整个项目
+# 在服务器2打包
+cd /www/wwwroot/media
+tar -czvf /tmp/UserAvatar.tar.gz UserAvatar/
+
+# 传输到服务器1
+scp /tmp/UserAvatar.tar.gz root@8.141.106.92:/tmp/
+
+# 在服务器1解压
+cd /www/wwwroot/media
+tar -xzvf /tmp/UserAvatar.tar.gz
+```
+
+**方案2：定期自动同步（推荐）**
+
+在服务器2上创建定时任务：
+
+```bash
+# 编辑crontab
+crontab -e
+
+# 每小时同步一次
+0 * * * * rsync -avz --delete /www/wwwroot/media/UserAvatar/ root@8.141.106.92:/www/wwwroot/media/UserAvatar/
+```
+
+**方案3：统一对象存储（生产推荐）**
+
+使用阿里云OSS或MinIO统一存储：
+- 所有服务上传到OSS
+- 用户直接从OSS访问
+- 无需跨服务器同步
+
+---
+
+### 媒体文件目录结构
+
+```
+/www/wwwroot/media/          # 媒体根目录
+├── covers/                  # 课程封面
+│   ├── course1.jpg
+│   └── course2.png
+├── videos/                  # 课程视频
+│   ├── lesson1.mp4
+│   └── lesson2.mp4
+└── UserAvatar/              # 用户头像
+    └── 2025/
+        └── 10/
+            └── 31/
+                └── d56b7c7069a64c90b13eaee8be2a2952.png
+```
+
+**关键点：**
+- `covers/` 和 `videos/` 通常由管理员上传，只在服务器1上
+- `UserAvatar/` 由用户动态上传，在服务器2生成，需要同步到服务器1
+
+---
+
+## 🌐 网络通信详解
+
+### 端口映射表
+
+| 服务器 | 容器名称 | 容器内端口 | 宿主机端口 | 外部访问 |
+|--------|---------|-----------|-----------|---------|
+| 服务器1 | xuetu-web | 80 | 80 | ✅ 所有用户 |
+| 服务器1 | xuetu-mysql | 3306 | 3306 | ⚠️ 仅内部服务 |
+| 服务器1 | xuetu-redis | 6379 | 6379 | ⚠️ 仅内部服务 |
+| 服务器1 | xuetu-nacos | 8848 | 8848 | ✅ Web控制台 |
+| 服务器1 | xuetu-nacos | 9848 | 9848 | ⚠️ gRPC通信 |
+| 服务器2 | xuetu-gateway | 8080 | 8080 | ⚠️ 仅Nginx代理 |
+| 服务器2 | xuetu-user-service | 8088 | 8088 | ❌ 不对外 |
+| 服务器2 | xuetu-course-service | 8077 | 8077 | ❌ 不对外 |
+| 服务器2 | xuetu-learning-service | 8044 | 8044 | ❌ 不对外 |
+| 服务器3 | xuetu-order-service | 8033 | 8033 | ❌ 不对外 |
+| 服务器3 | xuetu-ai-service | 8066 | 8066 | ❌ 不对外 |
+| 服务器3 | xuetu-admin-service | 8055 | 8055 | ❌ 不对外 |
+
+### 服务间通信机制
+
+**1. Nacos服务注册与发现**
+
+```
+启动流程：
+1. 各微服务启动时连接 8.141.106.92:8848
+2. 向Nacos注册自己的服务名和IP:端口
+3. 定期发送心跳保持在线状态
+
+示例：
+- user-service 注册为 "user-service" @ 112.126.85.23:8088
+- course-service 注册为 "course-service" @ 112.126.85.23:8077
+- ai-service 注册为 "ai-service" @ 8.140.224.117:8066
+```
+
+**2. Gateway路由转发**
+
+```
+Gateway从Nacos获取服务列表，动态生成路由：
+
+路由规则：
+- /user/** → user-service
+- /course/** → course-service
+- /learning/** → learning-service
+- /api/orders/** → order-service
+- /chat/** → ai-service
+- /role/** → admin-service
+```
+
+**3. 微服务互相调用**
+
+```java
+// 使用OpenFeign进行服务调用（通过Nacos服务发现）
+
+@FeignClient(name = "user-service")  // 服务名称，不是IP
+public interface UserServiceClient {
+    @GetMapping("/user/{id}")
+    User getUserById(@PathVariable Long id);
+}
+
+// Feign会自动从Nacos查询 user-service 的实际地址
+```
+
+---
+
+## 🚀 部署流程
+
+### 前置条件
+
+1. **三台服务器**已安装 Docker 和 Docker Compose
+2. **服务器间网络**互通（阿里云安全组已配置）
+3. **本地开发环境**已安装 JDK 17 和 Maven
+4. **前端环境**已安装 Node.js 18+
+
+### 步骤1：打包后端服务
+
+```bash
+# 在项目根目录执行
 mvn clean package -DskipTests
 
-# 启动各个服务（按顺序）
-cd gateway && mvn spring-boot:run &
-cd user-service && mvn spring-boot:run &
-cd course-service && mvn spring-boot:run &
-cd learning-service && mvn spring-boot:run &
-cd order-service && mvn spring-boot:run &
-cd ai-service && mvn spring-boot:run &
-cd admin-service && mvn spring-boot:run &
+# 打包结果在各服务的 target 目录：
+# - gateway/target/gateway.jar
+# - user-service/target/user-service.jar
+# - course-service/target/course-service.jar
+# - learning-service/target/learning-service.jar
+# - order-service/target/order-service.jar
+# - ai-service/target/ai-service.jar
+# - admin-service/target/admin-service.jar
 ```
 
-#### 6. 启动前端
+### 步骤2：打包前端项目
 
 ```bash
 cd xuetu-web
 npm install
-npm run dev
+npm run build
+
+# 打包结果在 dist 目录
 ```
 
-访问 http://localhost:5173
+### 步骤3：上传文件到服务器
+
+**服务器1 (8.141.106.92)**
+```bash
+# 上传前端
+scp -r xuetu-web/dist root@8.141.106.92:/www/wwwroot/xuetu-web/
+scp xuetu-web/nginx.conf root@8.141.106.92:/www/wwwroot/xuetu-web/
+
+# 上传docker-compose文件
+scp deployment/docker-compose-server1.yml root@8.141.106.92:/root/xuetu/docker-compose.yml
+```
+
+**服务器2 (112.126.85.23)**
+```bash
+# 创建目录
+ssh root@112.126.85.23 "mkdir -p /root/xuetu/jars"
+
+# 上传JAR文件
+scp gateway/target/gateway.jar root@112.126.85.23:/root/xuetu/jars/
+scp user-service/target/user-service.jar root@112.126.85.23:/root/xuetu/jars/
+scp course-service/target/course-service.jar root@112.126.85.23:/root/xuetu/jars/
+scp learning-service/target/learning-service.jar root@112.126.85.23:/root/xuetu/jars/
+
+# 上传docker-compose文件
+scp deployment/docker-compose-server2.yml root@112.126.85.23:/root/xuetu/docker-compose.yml
+```
+
+**服务器3 (8.140.224.117)**
+```bash
+# 创建目录
+ssh root@8.140.224.117 "mkdir -p /root/xuetu/jars"
+
+# 上传JAR文件
+scp order-service/target/order-service.jar root@8.140.224.117:/root/xuetu/jars/
+scp ai-service/target/ai-service.jar root@8.140.224.117:/root/xuetu/jars/
+scp admin-service/target/admin-service.jar root@8.140.224.117:/root/xuetu/jars/
+
+# 上传docker-compose文件
+scp deployment/docker-compose-server3.yml root@8.140.224.117:/root/xuetu/docker-compose.yml
+```
+
+### 步骤4：启动服务
+
+**按顺序启动（重要！）**
+
+```bash
+# 1. 先启动服务器1的基础设施
+ssh root@8.141.106.92
+cd /root/xuetu
+docker-compose up -d
+
+# 等待30秒，确保MySQL、Redis、Nacos完全启动
+sleep 30
+
+# 2. 启动服务器2的Gateway和业务服务
+ssh root@112.126.85.23
+cd /root/xuetu
+docker-compose up -d
+
+# 3. 启动服务器3的业务服务
+ssh root@8.140.224.117
+cd /root/xuetu
+docker-compose up -d
+```
+
+### 步骤5：验证部署
+
+```bash
+# 检查Nacos服务注册
+浏览器访问：http://8.141.106.92:8848/nacos
+账号：nacos / nacos
+查看"服务管理" → "服务列表"，确保7个服务都已注册
+
+# 检查容器状态
+docker ps -a  # 所有容器STATUS应该是 Up
+
+# 测试前端访问
+浏览器访问：http://8.141.106.92/
+
+# 测试API
+curl http://8.141.106.92/api/chat/health
+```
 
 ---
 
-## 🌟 核心功能特性
+## 🔧 运维管理
 
-### 1. AI智能助手 🤖
+### 查看日志
 
-- **智能问答**: 基于通义千问AI，24小时在线答疑
-- **学习路径规划**: 根据学习目标生成个性化学习路线
-- **智能推荐**: 基于学习数据推荐适合的课程
-- **学习分析**: AI分析学习数据，生成可视化报告
-- **前端缓存优化**: 
-  - 学习路径缓存24小时
-  - 课程推荐缓存5分钟
-  - 学习报告缓存10分钟
+```bash
+# 查看容器日志
+docker logs -f xuetu-gateway
+docker logs --tail 100 xuetu-user-service
 
-### 2. 课程管理 📚
+# 查看应用日志（如果挂载了日志目录）
+tail -f /root/xuetu/logs/gateway/app.log
+```
 
-- 课程分类与检索
-- 视频课时播放
-- 课程详情展示
-- 学习进度跟踪
-- 课程评论与评分
+### 重启服务
 
-### 3. 学习功能 📖
+```bash
+# 重启单个容器
+docker restart xuetu-gateway
 
-- 学习记录追踪
-- 学习进度统计
-- 学习笔记管理
-- 学习数据分析
-- 学习成就系统（开发中）
+# 重启整个服务器的所有服务
+cd /root/xuetu
+docker-compose restart
 
-### 4. 订单系统 🛒
+# 完全重建（删除旧容器，重新创建）
+docker-compose down
+docker-compose up -d
+```
 
-- 课程购买
-- 订单管理
-- 支付集成（预留）
-- 购物车功能
+### 更新服务
 
-### 5. 用户系统 👤
+```bash
+# 1. 上传新的JAR文件到 /root/xuetu/jars/
+# 2. 重启对应的服务
+docker-compose restart xuetu-user-service
+```
 
-- 用户注册/登录
-- 个人信息管理
-- 角色权限管理
-- 学习中心
+### 定期维护
 
----
+   可以设置每周重启脚本防止OOM：
 
-## 📊 数据库设计
+```bash
+# 创建重启脚本
+cat > /root/restart_xuetu.sh << 'EOF'
+#!/bin/bash
+cd /root/xuetu
+docker-compose restart
+echo "$(date): 学途服务已重启" >> /var/log/xuetu-restart.log
+EOF
 
-主要数据表：
+chmod +x /root/restart_xuetu.sh
 
-- **用户相关**: `user`, `user_role`, `role`, `permission`
-- **课程相关**: `course`, `category`, `lesson`, `course_comment`
-- **学习相关**: `learning_record`, `learning_note`, `learning_progress`
-- **订单相关**: `order`, `order_item`
-- **AI相关**: `ai_chat_history`, `ai_recommendation`
-
----
-
-## 🔧 开发说明
-
-### 后端开发规范
-
-1. **包结构**
-   ```
-   com.star.{service-name}/
-   ├── controller/    # 控制器层
-   ├── service/       # 服务层
-   ├── mapper/        # 数据访问层
-   ├── entity/        # 实体类
-   ├── dto/           # 数据传输对象
-   ├── vo/            # 视图对象
-   └── config/        # 配置类
-   ```
-
-2. **统一返回格式**
-   ```java
-   R.ok(data)      // 成功
-   R.error(msg)    // 失败
-   ```
-
-3. **异常处理**: 全局异常处理器统一处理
-
-### 前端开发规范
-
-1. **组件规范**: 使用 Vue 3 Composition API
-2. **状态管理**: Pinia stores
-3. **API调用**: 封装在 `/src/api` 目录
-4. **类型定义**: TypeScript接口定义在 `/src/types`
+# 设置定时任务（每周日凌晨3点）
+crontab -e
+# 添加：0 3 * * 0 /root/restart_xuetu.sh
+```
 
 ---
 
-## 🎨 前端缓存优化
+## 🐛 常见问题排查
 
-为提升用户体验，前端实现了智能缓存机制：
+### 1. 服务无法访问 / 502 Bad Gateway
 
-| 功能 | 缓存时间 | 说明 |
-|------|---------|------|
-| 学习路径生成 | 24小时 | 相同目标直接使用缓存 |
-| 课程推荐 | 5分钟 | 快速响应，减少AI调用 |
-| 学习报告 | 10分钟 | 数据分析结果缓存 |
+**排查步骤：**
 
-**特点：**
-- 自动过期管理
-- 用户可选择使用缓存或重新生成
-- 明确提示数据来源（缓存/实时）
+```bash
+# 检查容器状态
+docker ps -a
+
+# 检查Nacos服务注册
+curl http://8.141.106.92:8848/nacos/v1/ns/instance/list?serviceName=gateway
+
+# 检查网关连通性
+curl http://112.126.85.23:8080/actuator/health
+
+# 查看容器日志
+docker logs xuetu-gateway
+```
+
+### 2. 用户头像/媒体文件404
+
+**原因**：文件在服务器2，但Nginx在服务器1
+
+**解决**：
+```bash
+# 从服务器2同步到服务器1
+ssh root@112.126.85.23 "cd /www/wwwroot/media && tar -czf /tmp/media.tar.gz UserAvatar/"
+scp root@112.126.85.23:/tmp/media.tar.gz /tmp/
+cd /www/wwwroot/media
+tar -xzf /tmp/media.tar.gz
+```
+
+**永久方案**：配置自动同步或使用OSS
+
+### 3. 内存不足 / 容器频繁重启
+
+**检查内存使用：**
+```bash
+free -h
+docker stats --no-stream
+```
+
+**优化JVM内存：**
+```yaml
+# docker-compose.yml 中调整
+command: java -Xms64m -Xmx128m -jar /app/gateway.jar
+```
+
+### 4. 数据库连接失败
+
+**检查：**
+```bash
+# 测试MySQL连接
+docker exec xuetu-mysql mysql -uroot -p密码 -e "SELECT 1"
+
+# 检查防火墙
+telnet 8.141.106.92 3306
+```
+
+### 5. Nacos服务注册失败
+
+**检查：**
+```bash
+# 查看Nacos日志
+docker logs xuetu-nacos
+
+# 检查服务配置
+docker exec xuetu-user-service env | grep NACOS
+
+# 手动测试注册
+curl -X POST 'http://8.141.106.92:8848/nacos/v1/ns/instance?serviceName=test&ip=127.0.0.1&port=8080'
+```
 
 ---
 
-## 🌐 部署架构
+## 📊 监控与性能
 
-### 生产环境部署
+### 资源使用建议
 
-当前项目已部署在3台阿里云服务器上，采用Docker容器化部署：
+| 服务器 | 推荐配置 | 当前使用 |
+|--------|---------|---------|
+| 服务器1 | 2核4G | 1.7G / 1.8G |
+| 服务器2 | 2核4G | - |
+| 服务器3 | 2核2G | - |
 
-**优势：**
-- ✅ 服务隔离，互不影响
-- ✅ 资源分配合理
-- ✅ 易于扩展和维护
-- ✅ 支持独立重启
+### 性能优化建议
 
-**部署流程：**
-1. 打包各服务JAR文件
-2. 上传到对应服务器的 `/root/xuetu/jars/` 目录
-3. 使用 docker-compose 启动服务
-4. 通过Nacos查看服务注册状态
+1. **启用Redis缓存**：热点数据缓存，减少数据库压力
+2. **Nginx静态资源缓存**：CSS/JS设置长期缓存
+3. **数据库连接池**：HikariCP优化
+4. **JVM参数调优**：根据实际内存调整Xms/Xmx
+5. **使用CDN**：静态资源和媒体文件使用CDN加速
 
-详见：`deployment/DEPLOYMENT-GUIDE.md`
+---
+
+## 🔐 安全说明
+
+- **JWT令牌认证**：Gateway前置鉴权
+- **CORS跨域配置**：Nginx统一配置
+- **SQL注入防护**：MyBatis Plus参数化查询
+- **XSS攻击防护**：前端Element Plus过滤
+- **敏感信息加密**：密码使用bcrypt加密存储
+- **端口安全**：仅开放必要端口（80, 8848），其他端口仅内网访问
+- **定期备份**：MySQL数据、用户上传文件
 
 ---
 
@@ -445,47 +769,33 @@ npm run dev
 
 ### 主要API端点
 
-#### 用户服务
-- `POST /user/register` - 用户注册
-- `POST /user/login` - 用户登录
-- `GET /user/info` - 获取用户信息
+**用户服务**
+- `POST /api/auth/login` - 用户登录
+- `POST /api/auth/register` - 用户注册
+- `GET /api/user/info` - 获取用户信息
+- `POST /api/user/avatar/upload` - 上传头像
 
-#### 课程服务
-- `GET /course/list` - 课程列表
-- `GET /course/{id}` - 课程详情
-- `GET /course/category` - 课程分类
+**课程服务**
+- `GET /api/course/list` - 课程列表
+- `GET /api/course/{id}` - 课程详情
+- `GET /api/category/tree` - 课程分类树
 
-#### AI服务
-- `POST /ai/chat/ask` - AI问答
-- `POST /ai/recommend/path` - 学习路径生成
-- `GET /ai/recommend/courses` - 课程推荐
-- `GET /ai/analysis/report` - 学习分析报告
+**学习服务**
+- `GET /api/learning/progress/{courseId}` - 学习进度
+- `POST /api/learning/record` - 记录学习
 
-所有API通过 Gateway (8080端口) 统一访问。
-
----
-
-## 🔐 安全说明
-
-- JWT令牌认证
-- CORS跨域配置
-- SQL注入防护
-- XSS攻击防护
-- 敏感信息加密存储
+**AI服务**
+- `POST /api/chat/ask` - AI问答
+- `POST /api/recommend/path` - 学习路径生成
+- `GET /api/analysis/report` - 学习分析报告
 
 ---
 
 ## 📞 联系方式
 
-- **项目性质**: 个人学习项目
-- **用途**: 技术学习与演示
-- **状态**: 开发中
-
----
-
-## 📜 许可证
-
-本项目仅供学习和研究使用。
+- **项目性质**：个人学习项目
+- **用途**：技术学习与演示
+- **状态**：生产环境运行中
 
 ---
 
@@ -496,6 +806,7 @@ npm run dev
 - Element Plus UI
 - 阿里云通义千问
 - ECharts 可视化
+- 阿里云 ECS
 
 ---
 
@@ -503,8 +814,9 @@ npm run dev
 
 - **v1.0** (2025-10) - 初始版本，实现核心功能
 - **v1.1** (2025-10) - 新增AI服务和前端缓存优化
+- **v1.2** (2025-11) - 优化生产部署配置，修复媒体路径
+- **v1.3** (2026-01) - 修正架构文档，完善跨服务器文件存储说明
 
 ---
 
-**最后更新**: 2025年10月28日
-
+**最后更新**：2026年1月14日

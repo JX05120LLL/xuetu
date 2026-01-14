@@ -26,7 +26,7 @@ public class User extends BaseEntity {
     @Schema(description = "邮箱", example = "zhangsan@example.com")
     private String email;
 
-    @Schema(description = "手机号", example = "13888888888")
+    @Schema(description = "手机号", example = "1388889999")
     private String phone;
 
     @Schema(description = "昵称", example = "张三")
