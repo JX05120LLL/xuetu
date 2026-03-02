@@ -505,6 +505,8 @@ public class RedisUtil {
         }
     }
 
+
+    // 目前分布式锁缺少超时处理(看门狗机制)
     /**
      * 分布式锁
      * @param key 锁key
