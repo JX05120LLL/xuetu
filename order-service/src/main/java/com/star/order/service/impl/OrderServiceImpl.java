@@ -17,6 +17,7 @@ import com.star.order.entity.OrderItem;
 import com.star.order.exception.OrderException;
 import com.star.order.feign.CourseServiceClient;
 import com.star.order.mapper.OrderMapper;
+import com.star.order.mq.OrderMessageProducer;
 import com.star.order.service.OrderItemService;
 import com.star.order.service.OrderService;
 import com.star.order.service.PaymentService;
@@ -55,6 +56,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final CourseServiceClient courseServiceClient;
     private final RedisUtil redisUtil;
     private final RedissonClient redissonClient;
+    private final OrderMessageProducer orderMessageProducer;
 
     // 订单号生成器
     private static final AtomicLong ORDER_SEQUENCE = new AtomicLong(1);
@@ -311,14 +313,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         redisUtil.del(cacheKey);
         log.info("订单支付成功，已删除缓存，订单ID: {}", order.getId());
 
-        // 开通用户课程
-        boolean coursesActivated = userCourseService.activateUserCoursesFromOrder(order.getId());
-        if (!coursesActivated) {
-            log.error("开通用户课程失败，订单ID: {}", order.getId());
-            return false;
-        }
+        // 获取订单项，异步通知 learning-service 开通课程
+        List<OrderItem> orderItems = orderItemService.getOrderItemsByOrderId(order.getId());
+        orderMessageProducer.sendOrderPaidMessage(order, orderItems);
 
-        log.info("支付成功处理完成，订单号: {}", orderNo);
+        log.info("支付成功处理完成，订单号: {}，已发送 MQ 消息通知开通课程", orderNo);
         return true;
     }
 

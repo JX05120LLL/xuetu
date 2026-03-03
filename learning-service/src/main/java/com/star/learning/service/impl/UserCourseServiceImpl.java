@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.star.common.dto.PageParam;
 import com.star.common.dto.PageResult;
+import com.star.common.mq.OrderPaidMessage;
 import com.star.common.result.R;
 import com.star.common.utils.PageUtil;
 import com.star.learning.dto.UserCourseDTO;
@@ -215,5 +216,39 @@ public class UserCourseServiceImpl extends ServiceImpl<UserCourseMapper, UserCou
         } catch (NumberFormatException e) {
             return 0;
         }
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
+    public void activateCoursesFromMessage(OrderPaidMessage message) {
+        log.info("开始处理订单支付消息，订单号: {}, 用户ID: {}, 课程数: {}",
+                message.getOrderNo(), message.getUserId(), message.getCourseItems().size());
+
+        for (OrderPaidMessage.CourseItem item : message.getCourseItems()) {
+            // 幂等检查：已开通过的课程直接跳过，防止消息重复消费
+            if (checkUserHasCourse(message.getUserId(), item.getCourseId())) {
+                log.info("课程已开通，跳过重复激活，用户ID: {}, 课程ID: {}", message.getUserId(), item.getCourseId());
+                continue;
+            }
+
+            UserCourse userCourse = new UserCourse();
+            userCourse.setUserId(message.getUserId());
+            userCourse.setCourseId(item.getCourseId());
+            userCourse.setOrderId(message.getOrderId());
+            userCourse.setPurchasePrice(item.getPurchasePrice());
+            userCourse.setPurchaseTime(java.time.LocalDateTime.now());
+            userCourse.setStatus(UserCourse.Status.ACTIVE.getValue());
+            userCourse.setProgress(0);
+
+            boolean success = save(userCourse);
+            if (success) {
+                log.info("课程开通成功，用户ID: {}, 课程ID: {}", message.getUserId(), item.getCourseId());
+            } else {
+                log.error("课程开通失败，用户ID: {}, 课程ID: {}", message.getUserId(), item.getCourseId());
+                throw new RuntimeException("课程开通失败，触发事务回滚，orderId=" + message.getOrderId());
+            }
+        }
+
+        log.info("订单所有课程开通完成，订单号: {}, 用户ID: {}", message.getOrderNo(), message.getUserId());
     }
 }

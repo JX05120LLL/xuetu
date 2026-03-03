@@ -54,6 +54,12 @@ spring:
         import-check:
           enabled: false  # 禁用强制导入检查
 
+# RocketMQ 配置
+rocketmq:
+  name-server: localhost:9876
+  consumer:
+    group: learning-consumer-group  # 消费者组名
+
 # MyBatis Plus配置
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml

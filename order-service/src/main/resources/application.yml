@@ -110,6 +110,14 @@ feign:
   circuitbreaker:
     enabled: false  # 暂时禁用熔断器
 
+# RocketMQ 配置
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: order-producer-group   # 生产者组名，同一个服务用同一个组名
+    send-message-timeout: 3000    # 发送超时时间（毫秒）
+    retry-times-when-send-failed: 2  # 发送失败重试次数
+
 # 订单服务特有配置
 order:
   # 订单超时配置

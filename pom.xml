@@ -43,6 +43,12 @@
         <!-- 插件版本 -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <spring-boot-maven-plugin.version>${spring-boot.version}</spring-boot-maven-plugin.version>
+
+        <!-- RocketMQ -->
+        <rocketmq.version>2.2.3</rocketmq.version>
+
+        <!-- Redisson（3.23.x 是支持 Spring Boot 2.7.x 的最后一个系列，3.24+ 需要 Spring Boot 3.x） -->
+        <redisson.version>3.23.5</redisson.version>
     </properties>
 
     <dependencyManagement>
@@ -122,6 +128,20 @@
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
                 <optional>true</optional>
+            </dependency>
+
+            <!-- RocketMQ Spring Boot Starter -->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq.version}</version>
+            </dependency>
+
+            <!-- Redisson：分布式锁核心库（不用 starter，避免自动注入 RedisConnectionFactory 与 Lettuce 冲突） -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -3,6 +3,7 @@ package com.star.learning.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.star.common.dto.PageParam;
 import com.star.common.dto.PageResult;
+import com.star.common.mq.OrderPaidMessage;
 import com.star.learning.dto.UserCourseDTO;
 import com.star.learning.entity.UserCourse;
 
@@ -57,4 +58,12 @@ public interface UserCourseService extends IService<UserCourse> {
      * @return 课程数量
      */
     Integer getUserCourseCount(Long userId);
+
+    /**
+     * 根据 MQ 消息开通课程（由 OrderPaidMessageListener 调用）
+     * 消费 order-service 发来的支付成功消息，为用户开通订单中的所有课程
+     *
+     * @param message 订单支付成功消息
+     */
+    void activateCoursesFromMessage(OrderPaidMessage message);
 }
