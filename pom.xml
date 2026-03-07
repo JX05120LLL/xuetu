@@ -24,36 +24,43 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        
-        <!-- 框架版本 -->
-        <spring-boot.version>2.7.17</spring-boot.version>
-        <spring-cloud.version>2021.0.8</spring-cloud.version>
-        <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
-        
-        <!-- 数据库相关 -->
-        <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
+
+        <!-- ── 核心框架版本 ── -->
+        <!-- Spring Boot 3.x 要求 Java 17+，底层切换到 Jakarta EE 10 -->
+        <spring-boot.version>3.3.6</spring-boot.version>
+        <!-- Spring Cloud 2023.0.x 对应 Spring Boot 3.2/3.3 -->
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <!-- Spring Cloud Alibaba 2023.0.x 对应 Spring Boot 3.3 -->
+        <spring-cloud-alibaba.version>2023.0.3.2</spring-cloud-alibaba.version>
+        <!-- Spring AI 1.1.2（当前最新稳定版，兼容 Spring Boot 3.3.x） -->
+        <spring-ai.version>1.1.2</spring-ai.version>
+
+        <!-- ── 数据库相关 ── -->
+        <!-- MyBatis Plus 3.5.7+ 提供 spring-boot3-starter，支持 Jakarta EE -->
+        <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <mysql.version>8.0.33</mysql.version>
-        
-        <!-- 工具库版本 -->
-        <knife4j.version>4.1.0</knife4j.version>
+
+        <!-- ── 工具库版本 ── -->
+        <!-- Knife4j 4.4.0 提供 knife4j-openapi3-jakarta-spring-boot-starter -->
+        <knife4j.version>4.4.0</knife4j.version>
         <hutool.version>5.8.23</hutool.version>
         <auth0-jwt.version>4.4.0</auth0-jwt.version>
         <lombok.version>1.18.30</lombok.version>
-        
-        <!-- 插件版本 -->
+
+        <!-- ── 消息/锁 ── -->
+        <!-- RocketMQ Spring 2.3.0 起支持 Spring Boot 3.x -->
+        <rocketmq.version>2.3.0</rocketmq.version>
+        <!-- Redisson 3.24+ 要求 Spring Boot 3.x（3.23.x 最后支持 Boot 2.7） -->
+        <redisson.version>3.27.2</redisson.version>
+
+        <!-- ── 插件版本 ── -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <spring-boot-maven-plugin.version>${spring-boot.version}</spring-boot-maven-plugin.version>
-
-        <!-- RocketMQ -->
-        <rocketmq.version>2.2.3</rocketmq.version>
-
-        <!-- Redisson（3.23.x 是支持 Spring Boot 2.7.x 的最后一个系列，3.24+ 需要 Spring Boot 3.x） -->
-        <redisson.version>3.23.5</redisson.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Boot -->
+            <!-- Spring Boot BOM -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -61,8 +68,8 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
-            <!-- Spring Cloud -->
+
+            <!-- Spring Cloud BOM -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
@@ -70,8 +77,8 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
-            <!-- Spring Cloud Alibaba -->
+
+            <!-- Spring Cloud Alibaba BOM -->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
@@ -79,49 +86,58 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
-            <!-- MyBatis Plus -->
+
+            <!-- Spring AI BOM（1.0.0 GA，需要 Spring Boot 3.2+） -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- MyBatis Plus（Spring Boot 3 专用 starter，支持 Jakarta EE） -->
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
-            
+
             <!-- MySQL -->
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
             </dependency>
-            
-            <!-- Knife4j API文档 -->
+
+            <!-- Knife4j（Jakarta 版，适配 Spring Boot 3.x / Jakarta EE 10） -->
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
                 <version>${knife4j.version}</version>
             </dependency>
-            
-            <!-- Knife4j 网关聚合 -->
+
+            <!-- Knife4j 网关聚合（Gateway / WebFlux） -->
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
                 <version>${knife4j.version}</version>
             </dependency>
-            
+
             <!-- Auth0 JWT -->
             <dependency>
                 <groupId>com.auth0</groupId>
                 <artifactId>java-jwt</artifactId>
                 <version>${auth0-jwt.version}</version>
             </dependency>
-            
-            <!-- Hutool工具包 -->
+
+            <!-- Hutool -->
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
             </dependency>
-            
+
             <!-- Lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -130,14 +146,14 @@
                 <optional>true</optional>
             </dependency>
 
-            <!-- RocketMQ Spring Boot Starter -->
+            <!-- RocketMQ Spring Boot Starter（2.3.0 起支持 Spring Boot 3.x） -->
             <dependency>
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
                 <version>${rocketmq.version}</version>
             </dependency>
 
-            <!-- Redisson：分布式锁核心库（不用 starter，避免自动注入 RedisConnectionFactory 与 Lettuce 冲突） -->
+            <!-- Redisson（3.24+ 要求 Spring Boot 3.x） -->
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
@@ -149,7 +165,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- Maven编译插件 -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -160,8 +175,7 @@
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
-                
-                <!-- Spring Boot Maven插件 -->
+
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
@@ -184,9 +198,8 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        
+
         <plugins>
-            <!-- 所有子模块都需要的编译插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

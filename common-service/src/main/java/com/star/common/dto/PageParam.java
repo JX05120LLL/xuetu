@@ -3,8 +3,8 @@ package com.star.common.dto;
 import com.star.common.constant.CommonConstant;
 import lombok.Data;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 /**
  * 分页参数

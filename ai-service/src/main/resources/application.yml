@@ -56,21 +56,43 @@ mybatis-plus:
     db-config:
       id-type: auto
 
-# 阿里通义千问配置
+# 阿里通义千问配置（保留，QwenAIClient 继续使用此配置）
 aliyun:
   ai:
-    # 需要在阿里云申请：https://dashscope.console.aliyun.com/
-    api-key: ${ALIYUN_AI_KEY:sk-a409f5a051484d0fbc984a6ab2b78691}  # 从环境变量或配置获取
-    # API地址
+    api-key: ${ALIYUN_AI_KEY:请替换为你的真实Key}
     api-url: https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation
-    # 模型名称
-    model: qwen-turbo  # 可选: qwen-turbo(快速), qwen-plus(均衡), qwen-max(最强)
-    # 超时时间(秒)
+    model: qwen-turbo
     timeout: 90
-    # 最大tokens（增加到4000以支持更详细的学习路径）
     max-tokens: 4000
-    # 温度(创造性): 0-2, 越高越随机
     temperature: 0.85
+    embedding:
+      api-url: https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding
+      model: text-embedding-v3
+      dimension: 1024
+
+# Spring AI 配置
+# DashScope 提供 OpenAI 兼容接口，spring-ai-openai-spring-boot-starter 可直接对接
+spring:
+  ai:
+    openai:
+      api-key: ${ALIYUN_AI_KEY:请替换为你的真实Key}
+      # DashScope OpenAI 兼容模式入口（与 OpenAI 接口协议完全一致）
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      chat:
+        options:
+          model: qwen-turbo
+      embedding:
+        options:
+          # text-embedding-v3 默认输出 1024 维，与 Qdrant collection 维度保持一致
+          model: text-embedding-v3
+    vectorstore:
+      qdrant:
+        host: localhost
+        # Qdrant gRPC 端口（Spring AI Qdrant 使用 gRPC 通信）
+        port: 6334
+        collection-name: xuetu_knowledge
+        # 首次启动时自动创建 collection（维度 1024，余弦相似度）
+        initialize-schema: true
 
 # 日志配置
 logging:

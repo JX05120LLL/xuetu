@@ -83,10 +83,11 @@ public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
         log.error("HTTP状态异常: {}", ex.getMessage());
         
         ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(ex.getStatus());
+        // Spring 6.x: getStatus() 已移除，改为 getStatusCode()
+        response.setStatusCode(ex.getStatusCode());
         
         String errorMessage = "请求处理失败: " + ex.getReason();
-        return buildErrorResponse(exchange, ex.getStatus().value(), errorMessage);
+        return buildErrorResponse(exchange, ex.getStatusCode().value(), errorMessage);
     }
 
     /**
