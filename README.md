@@ -1,7 +1,7 @@
 # 学途 (XueTu) - 智能在线学习平台
 
 > 基于 Spring Cloud 微服务架构的智能在线学习平台  
-> 集成 AI 助手、课程推荐、学习路径规划、RAG 知识库问答（规划中）等现代化功能
+> 集成 AI 助手、课程推荐、学习路径规划、RAG 知识库问答等现代化功能
 
 > ⚠️ **项目说明**：本项目仅供个人参考与学习使用，非商业用途。
 
@@ -9,12 +9,13 @@
 
 ## 📋 项目简介
 
-学途是一个功能完善的在线学习平台，采用前后端分离与微服务架构，涵盖用户认证、课程管理、学习跟踪、订单支付、AI 智能问答、权限管理等完整业务闭环。项目使用 Spring Boot 3.x、Spring Cloud 2023、Spring Cloud Alibaba 等主流技术栈，并引入 Redis 缓存、RocketMQ 消息队列、Redisson 分布式锁等中间件，保障高并发与数据一致性。后续计划基于 Spring AI 实现 RAG 知识库问答，将课程、章节、笔记等知识向量化，提供「带引用」的智能回答。
+学途是一个功能完善的在线学习平台，采用前后端分离与微服务架构，涵盖用户认证、课程管理、学习跟踪、订单支付、AI 智能问答、权限管理等完整业务闭环。
+
+项目使用 Spring Boot 3.x、Spring Cloud 2023、Spring Cloud Alibaba 等主流技术栈，引入 Redis 缓存、RocketMQ 消息队列、Redisson 分布式锁等中间件保障高并发与数据一致性。AI 模块基于 **Spring AI + Qdrant** 实现 RAG 知识库问答，将平台课程与 FAQ 向量化存储，用户提问时优先检索知识库，结合检索结果调用通义千问生成带来源标注的回答。
 
 **核心功能：**
-- 🎓 **课程学习**：分类、章节、课时管理，视频播放，评论系统
-- 🤖 **AI 智能助手**：学习问答、学习路径规划、学习数据分析
-- 📚 **RAG 知识库问答**（规划中）：课程/章节/课时/笔记/FAQ → 向量检索 → LLM 生成带引用回答
+- 🎓 **课程学习**：分类、章节、课时管理，评论系统
+- 🤖 **AI 智能助手**：RAG 知识库问答（优先知识库，未命中自动降级普通 AI）、学习路径规划、学习数据分析
 - 📊 **学习跟踪**：学习进度、笔记、学习记录
 - 🛒 **订单支付**：课程购买、支付回调、异步开课
 - 👤 **用户与权限**：注册登录、角色权限、头像上传
@@ -32,9 +33,9 @@
 | **数据库** | MySQL 8.0 |
 | **缓存** | Redis 7.x |
 | **消息队列** | RocketMQ 4.9.7 |
-| **向量数据库** | Qdrant 1.7.4（RAG 知识库） |
+| **向量数据库** | Qdrant 1.13.0（RAG 知识库） |
 | **分布式锁** | Redisson 3.27.2 |
-| **AI** | 通义千问 (Qwen) / Spring AI 1.1.2 |
+| **AI** | Spring AI 1.1.2 / 通义千问 (qwen-turbo) / text-embedding-v3 |
 | **开发语言** | Java 17 |
 | **构建工具** | Maven 3.8+ |
 
@@ -44,21 +45,19 @@
 
 ```
 xuetu/
-├── gateway/                 # API 网关
+├── gateway/                 # API 网关（路由、JWT 鉴权、分布式限流）
 ├── user-service/            # 用户服务（认证、用户信息、头像）
 ├── course-service/          # 课程服务（课程、分类、章节、课时、评论、标签）
 ├── learning-service/        # 学习服务（学习记录、笔记、用户课程）
 ├── order-service/           # 订单服务（订单、支付、购买记录）
-├── ai-service/              # AI 服务（智能问答、推荐、分析、RAG 规划中）
+├── ai-service/              # AI 服务（RAG 知识库问答、推荐、分析）
 ├── admin-service/           # 管理服务（角色、权限）
 ├── common-service/          # 公共模块（DTO、工具类、MQ 消息体）
 ├── xuetu-web/               # 前端项目（Vue 3 + TypeScript + Element Plus）
 ├── deployment/              # Docker 编排与部署配置
 │   ├── docker-compose-local.yml    # 本地开发：一键启动全量中间件
 │   ├── init-db.sh                  # MySQL 初始化脚本
-│   ├── docker-compose-server1.yml  # 生产：基础设施层
-│   ├── docker-compose-server2.yml  # 生产：核心业务层
-│   └── docker-compose-server3.yml  # 生产：扩展业务层
+│   └── ...
 ├── sql/                     # 数据库脚本
 └── 文档/
 ```
@@ -70,7 +69,7 @@ xuetu/
 | **course-service** | 课程 CRUD、分类树、章节课时、评论、布隆过滤器 + Redis 缓存 + 分布式锁 |
 | **learning-service** | 学习进度、笔记、用户课程、消费支付成功 MQ 消息开通课程 |
 | **order-service** | 订单创建、支付、发送支付成功 MQ 消息、分布式锁防重复下单 |
-| **ai-service** | 通义千问对话、学习路径推荐、学习分析报告；规划中：RAG 知识库问答 |
+| **ai-service** | RAG 知识库问答（自动优先检索向量库）、学习路径推荐、学习分析报告 |
 | **admin-service** | 角色、权限、角色分配 |
 | **common-service** | 通用 DTO、分页、Redis 工具、MQ 消息体（OrderPaidMessage） |
 
@@ -178,7 +177,7 @@ mvn clean package -DskipTests
 3. **按依赖顺序启动微服务**（先确保 Nacos、MySQL、Redis、RocketMQ 已就绪）：
 
 ```bash
-# 方式一：使用 IDE 依次启动各服务主类
+# 方式一：使用 IDE 依次启动各服务主类（推荐本地开发）
 # 方式二：使用 java -jar 启动
 java -jar gateway/target/gateway-*.jar
 java -jar user-service/target/user-service-*.jar
@@ -201,10 +200,25 @@ npm run dev
 
 ### 四、AI 服务配置
 
-AI 相关功能（智能问答、学习路径、RAG）需配置 **阿里云 DashScope API Key**：
+AI 相关功能（智能问答、RAG 知识库）需配置 **阿里云 DashScope API Key**：
 
-- 在 `ai-service/src/main/resources/application.yml` 中配置 `aliyun.ai.api-key` 或环境变量 `ALIYUN_AI_KEY`
-- 可前往 [阿里云百炼](https://bailian.console.aliyun.com/) 申请通义千问 API Key
+1. 前往 [阿里云百炼](https://bailian.console.aliyun.com/) 申请通义千问 API Key
+2. 在 IDEA 的 Run/Debug Configurations → Environment variables 中添加：
+   ```
+   ALIYUN_AI_KEY=你的key
+   ```
+
+### 五、初始化 RAG 知识库
+
+ai-service 启动成功后，调用以下接口将课程和 FAQ 数据写入向量库（**只需执行一次**）：
+
+```bash
+POST http://localhost:8066/knowledge/ingest/all
+```
+
+或在 Knife4j（`http://localhost:8066/doc.html`）的「知识库管理」分组中执行「全量入库」。
+
+入库完成后，`/chat/ask` 接口会自动优先检索知识库回答，知识库未命中时降级为普通 AI 对话。
 
 ---
 
@@ -260,39 +274,26 @@ learning-service 监听 ORDER_PAID
         → 释放锁
 ```
 
-### 5. 订单创建与防重复流程
+### 5. RAG 知识库问答流程
 
 ```
-用户发起购买
-    → 加 Redisson 锁（key: lock:create:order:{userId}）
-    → 拿不到锁：返回「请勿重复提交」
-    → 拿到锁：创建订单、发起支付
-    → 支付成功回调：发送 ORDER_PAID 消息
+用户发起 POST /chat/ask
+    → 将问题向量化（DashScope text-embedding-v3，1024 维）
+    → 在 Qdrant 中检索最相关的 Top-5 文档片段（余弦相似度）
+    → 有结果：将文档片段注入 Prompt，调用 qwen-turbo 生成带来源标注的回答
+    → 无结果：降级为普通 AI 对话（QwenAIClient，带多轮上下文）
+    → 响应中 sources 字段返回引用的知识来源
 ```
 
----
+**知识库管理接口（`/knowledge/**`）：**
 
-## 📚 RAG 知识库问答（规划中）
-
-基于 **Spring AI** 与 **Qdrant** 向量数据库，计划实现 RAG（Retrieval-Augmented Generation）知识库问答功能。
-
-### 设计思路
-
-1. **知识源**：课程简介、章节标题与内容、课时内容、用户笔记、FAQ、项目文档等
-2. **流程**：
-   - 将知识切分、向量化（DashScope `text-embedding-v3`，1024 维）
-   - 存入 Qdrant 向量库（collection：`xuetu_knowledge`）
-   - 用户提问时：先做向量检索 Top-K，再结合检索结果 + 问题，调用 LLM 生成「带引用」的回答
-3. **后续规划**：
-   - RAG 评测与观测（recall@k、延迟、token 成本）
-   - 增量更新索引、缓存、限流
-   - 权限隔离（用户笔记仅本人可检索）
-
-### 当前准备情况
-
-- `ai-service` 已引入 Spring AI、Qdrant 相关依赖
-- `application.yml` 已配置 DashScope、Qdrant 连接
-- `docker-compose-local.yml` 已包含 Qdrant 容器，启动即可使用
+| 接口 | 说明 |
+|------|------|
+| `POST /knowledge/ingest/all` | 全量入库：课程 + FAQ |
+| `POST /knowledge/ingest/courses` | 仅入库课程 |
+| `POST /knowledge/ingest/faqs` | 仅入库 FAQ |
+| `POST /knowledge/ingest/course/{courseId}` | 增量更新单门课程 |
+| `DELETE /knowledge/clear/{type}` | 按类型清空向量数据 |
 
 ---
 
@@ -304,9 +305,11 @@ learning-service 监听 ORDER_PAID
 | 课程列表/详情 | `/course/**`, `/category/**` | course-service |
 | 学习进度/笔记 | `/learning/**` | learning-service |
 | 创建订单/支付 | `/api/orders/**`, `/api/payments/**` | order-service |
-| AI 问答/推荐/分析 | `/chat/**`, `/recommend/**`, `/analysis/**` | ai-service |
+| AI 问答（RAG） | `/chat/ask` | ai-service |
+| AI 推荐/分析 | `/recommend/**`, `/analysis/**` | ai-service |
+| 知识库管理 | `/knowledge/**` | ai-service |
 | 角色权限 | `/role/**`, `/permission/**` | admin-service |
-| API 文档 | `/doc.html`（经 Gateway 聚合） | 各服务 Knife4j |
+| API 文档 | `http://localhost:8080/doc.html` | 各服务 Knife4j |
 
 ---
 
@@ -317,7 +320,7 @@ learning-service 监听 ORDER_PAID
 | **Nacos** | `http://localhost:8848/nacos`（默认 nacos/nacos） |
 | **RocketMQ Dashboard** | `http://localhost:8180` |
 | **Qdrant Dashboard** | `http://localhost:6333/dashboard` |
-| **AI 通义千问** | 在 `ai-service` 中配置 DashScope API Key 或环境变量 `ALIYUN_AI_KEY` |
+| **AI 通义千问** | 环境变量 `ALIYUN_AI_KEY`，在 IDEA Run Configuration 中配置 |
 | **JWT** | Gateway 中配置 `jwt.secret`、`jwt.expiration` |
 | **MySQL** | 默认 root/root123456，数据库 xuetu_db（与 docker-compose 一致） |
 
@@ -328,18 +331,18 @@ learning-service 监听 ORDER_PAID
 启动 Gateway 及各微服务后，访问：
 
 - **Knife4j 聚合文档**：`http://localhost:8080/doc.html`
-
-可在此查看并调试各服务的接口。
+- **AI 服务独立文档**：`http://localhost:8066/doc.html`
 
 ---
 
 ## 📌 版本历史
 
-- **v1.0** - 核心功能上线
-- **v1.1** - 新增 AI 服务与缓存优化
+- **v1.0** - 核心功能上线（用户、课程、学习、订单）
+- **v1.1** - 新增 AI 服务（通义千问对话、推荐、分析）
 - **v1.2** - Redis 缓存防护（布隆过滤器、分布式锁、定时预热）
 - **v1.3** - RocketMQ 支付成功异步开课
-- **v2.0** - 升级 Spring Boot 3.x、Spring AI，数据库索引优化，接入 Qdrant 为 RAG 做准备
+- **v2.0** - 升级 Spring Boot 3.x、Spring AI，数据库索引优化，接入 Qdrant
+- **v2.1** - RAG 知识库问答上线（Spring AI + Qdrant，自动优先知识库，降级兜底）
 
 ---
 
