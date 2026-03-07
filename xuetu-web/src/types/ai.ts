@@ -13,7 +13,10 @@ export interface ChatRequest {
 export interface ChatResponse {
   answer: string
   conversationId: string
-  timestamp: string
+  question: string
+  answerTime: string
+  sources?: string[]   // 知识库来源（有值说明该回答来自知识库）
+  tokens?: number
 }
 
 // 聊天历史

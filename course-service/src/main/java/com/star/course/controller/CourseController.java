@@ -113,7 +113,7 @@ public class CourseController {
     @GetMapping("/hot")
     @Operation(summary = "查询热门课程", description = "根据学习人数查询热门课程")
     public R<List<CourseDTO>> getHotCourses(
-            @Parameter(description = "数量限制，默认10") @RequestParam(defaultValue = "10") Integer limit) {
+            @Parameter(description = "数量限制，默认10") @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
         List<CourseDTO> result = courseService.getHotCourses(limit);
         return R.ok(result);
     }

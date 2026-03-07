@@ -19,7 +19,7 @@ public class Knife4jConfig {
     public GroupedOpenApi aiApi() {
         return GroupedOpenApi.builder()
                 .group("AI服务")
-                .pathsToMatch("/chat/**", "/analysis/**", "/recommend/**")
+                .pathsToMatch("/chat/**", "/analysis/**", "/recommend/**", "/knowledge/**")
                 .build();
     }
 

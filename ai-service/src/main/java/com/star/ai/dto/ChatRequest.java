@@ -29,4 +29,7 @@ public class ChatRequest implements Serializable {
 
     @Schema(description = "关联课时ID(可选)", example = "1")
     private Long lessonId;
+
+    @Schema(description = "是否启用知识库增强（RAG），默认 false；true 时会先检索向量库再生成回答", example = "false")
+    private Boolean useRag = false;
 }

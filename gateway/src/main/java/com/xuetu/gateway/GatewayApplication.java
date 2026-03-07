@@ -2,6 +2,7 @@ package com.xuetu.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.Arrays;
@@ -20,7 +21,7 @@ import java.util.Arrays;
  * 
  * @author star
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 // @EnableDiscoveryClient  // 本地开发模式禁用，生产环境启用
 public class GatewayApplication {
 

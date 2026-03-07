@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * AI聊天响应
@@ -35,4 +36,7 @@ public class ChatResponse implements Serializable {
 
     @Schema(description = "消耗的tokens(可选)")
     private Integer tokens;
+
+    @Schema(description = "知识来源列表（RAG 模式下返回，标注回答引用了哪些知识片段）")
+    private List<String> sources;
 }

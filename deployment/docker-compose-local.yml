@@ -130,7 +130,7 @@ services:
 
   # ─── Qdrant（向量数据库，RAG 知识库问答用）────────────────────────────────────
   qdrant:
-    image: qdrant/qdrant:v1.7.4
+    image: qdrant/qdrant:v1.13.0
     container_name: xuetu-qdrant
     restart: unless-stopped
     ports:
