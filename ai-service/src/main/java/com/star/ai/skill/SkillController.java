@@ -60,7 +60,7 @@ public class SkillController {
             );
         } catch (Exception e) {
             log.error("[Skill-RAG] 向量检索失败: {}", e.getMessage());
-            return R.fail("知识库检索失败：" + e.getMessage());
+            return R.error("知识库检索失败：" + e.getMessage());
         }
 
         if (docs.isEmpty()) {
@@ -122,7 +122,7 @@ public class SkillController {
 
         } catch (Exception e) {
             log.error("[Skill-Course] 调用 course-service 失败: {}", e.getMessage());
-            return R.fail("课程服务暂时不可用：" + e.getMessage());
+            return R.error("课程服务暂时不可用：" + e.getMessage());
         }
     }
 
