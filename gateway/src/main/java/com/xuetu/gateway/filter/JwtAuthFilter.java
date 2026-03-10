@@ -181,7 +181,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
      * 
      * @param response 响应对象
      * @param message 错误消息
-     * @return Mono<Void>
+     * @return Mono<Void>>
      */
     private Mono<Void> unauthorizedResponse(ServerHttpResponse response, String message) {
         response.setStatusCode(HttpStatus.UNAUTHORIZED);

@@ -118,6 +118,20 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+
+        <!-- MCP Server: 将 ai-service 的 RAG 能力暴露为标准 MCP 工具 -->
+        <!-- 外部 AI 客户端（Claude Desktop、Cursor、其他 Agent）可直接调用本服务的技能 -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-server</artifactId>
+        </dependency>
+
+        <!-- WebFlux: MCP Server 的 SSE 传输层依赖响应式支持 -->
+        <!-- 与 Spring MVC 共存，需在 application.yml 中保持 web-application-type=servlet -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
