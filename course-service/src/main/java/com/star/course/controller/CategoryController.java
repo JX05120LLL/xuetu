@@ -107,8 +107,8 @@ public class CategoryController {
     @GetMapping("/check-name")
     @Operation(summary = "检查分类名称", description = "检查分类名称是否已被使用")
     public R<Boolean> checkCategoryName(
-            @Parameter(description = "分类名称") @RequestParam String name,
-            @Parameter(description = "排除的分类ID（用于更新时检查）") @RequestParam(required = false) Long excludeId) {
+            @Parameter(description = "分类名称") @RequestParam(name = "name") String name,
+            @Parameter(description = "排除的分类ID（用于更新时检查）") @RequestParam(name = "excludeId", required = false) Long excludeId) {
         Boolean exists = categoryService.existsByName(name, excludeId);
         return R.ok(!exists);
     }

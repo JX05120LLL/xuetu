@@ -57,9 +57,9 @@ public class OrderController {
 
     @GetMapping("/my")
     @Operation(summary = "查询我的订单", description = "分页查询当前用户的订单列表，支持按状态筛选")
-    public R<PageResult<OrderDTO>> getMyOrders(@Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer current,
-                                               @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Integer size,
-                                               @Parameter(description = "订单状态（可选）") @RequestParam(required = false) Integer status,
+    public R<PageResult<OrderDTO>> getMyOrders(@Parameter(description = "页码") @RequestParam(name = "current", defaultValue = "1") Integer current,
+                                               @Parameter(description = "每页大小") @RequestParam(name = "size", defaultValue = "10") Integer size,
+                                               @Parameter(description = "订单状态（可选）") @RequestParam(name = "status", required = false) Integer status,
                                                HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         PageParam pageParam = new PageParam(current, size);
@@ -78,8 +78,8 @@ public class OrderController {
     @GetMapping("/my/status/{status}")
     @Operation(summary = "按状态查询我的订单", description = "分页查询当前用户指定状态的订单列表")
     public R<PageResult<OrderDTO>> getMyOrdersByStatus(@Parameter(description = "订单状态") @PathVariable Integer status,
-                                                       @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer current,
-                                                       @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Integer size,
+                                                       @Parameter(description = "页码") @RequestParam(name = "current", defaultValue = "1") Integer current,
+                                                       @Parameter(description = "每页大小") @RequestParam(name = "size", defaultValue = "10") Integer size,
                                                        HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         PageParam pageParam = new PageParam(current, size);

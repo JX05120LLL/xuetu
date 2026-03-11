@@ -31,8 +31,8 @@ public class UserCourseController {
     @GetMapping("/my")
     @Operation(summary = "获取我的课程", description = "分页获取当前用户的课程列表")
     public R<PageResult<UserCourseDTO>> getMyCourses(
-            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer current,
-            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Integer size,
+            @Parameter(description = "页码") @RequestParam(name = "current", defaultValue = "1") Integer current,
+            @Parameter(description = "每页大小") @RequestParam(name = "size", defaultValue = "10") Integer size,
             HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         PageParam pageParam = new PageParam(current, size);
@@ -68,7 +68,7 @@ public class UserCourseController {
     @Operation(summary = "更新课程进度", description = "更新用户课程学习进度")
     public R<Boolean> updateCourseProgress(
             @Parameter(description = "课程ID") @PathVariable Long courseId,
-            @Parameter(description = "进度(0-100)") @RequestParam Integer progress,
+            @Parameter(description = "进度(0-100)") @RequestParam(name = "progress") Integer progress,
             HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         boolean result = userCourseService.updateCourseProgress(userId, courseId, progress);

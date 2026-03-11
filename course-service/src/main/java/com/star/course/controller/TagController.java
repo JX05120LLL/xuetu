@@ -40,7 +40,7 @@ public class TagController {
     @Operation(summary = "查询热门标签", description = "根据使用次数获取热门标签列表")
     public R<List<TagDTO>> getPopularTags(
             @Parameter(description = "数量限制，默认10个") 
-            @RequestParam(defaultValue = "10") Integer limit) {
+            @RequestParam(name = "limit", defaultValue = "10") Integer limit) {
         List<TagDTO> tags = tagService.getPopularTags(limit);
         return R.ok(tags);
     }

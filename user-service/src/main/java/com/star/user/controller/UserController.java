@@ -51,6 +51,19 @@ public class UserController {
     }
 
     /**
+     * 根据用户名查询用户（供 OpenClaw/Agent 等根据 username 解析 userId 使用）
+     */
+    @GetMapping("/by-username")
+    @Operation(summary = "根据用户名查询用户", description = "根据用户名获取用户信息，用于解析 userId")
+    public R<User> getByUsername(@Parameter(description = "用户名", required = true) @RequestParam("username") String username) {
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            return R.error("用户不存在: " + username);
+        }
+        return R.ok(user);
+    }
+
+    /**
      * 禁用用户账号（管理员操作）
      */
     @PostMapping("/{userId}/disable")
@@ -77,7 +90,7 @@ public class UserController {
     @Operation(summary = "更新用户状态", description = "管理员更新用户账号状态")
     public R<Boolean> updateUserStatus(
             @Parameter(description = "用户ID") @PathVariable Long userId,
-            @Parameter(description = "状态(0:禁用,1:启用)") @RequestParam Integer status) {
+            @Parameter(description = "状态(0:禁用,1:启用)") @RequestParam("status") Integer status) {
         Boolean result = userService.updateUserStatus(userId, status);
         String statusText = status == 1 ? "启用" : "禁用";
         return R.ok(result, "用户状态已更新为" + statusText);

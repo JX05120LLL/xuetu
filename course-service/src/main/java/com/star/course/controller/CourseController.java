@@ -36,10 +36,10 @@ public class CourseController {
     @Operation(summary = "分页查询课程列表", description = "支持按标题、分类、状态、难度级别筛选")
     public R<IPage<CourseDTO>> getCoursePage(
             @Valid PageParam pageParam,
-            @Parameter(description = "课程标题（模糊查询）") @RequestParam(required = false) String title,
-            @Parameter(description = "分类ID") @RequestParam(required = false) Long categoryId,
-            @Parameter(description = "状态(0:未发布,1:已发布,2:已下架)") @RequestParam(required = false) Integer status,
-            @Parameter(description = "难度级别(0:初级,1:中级,2:高级)") @RequestParam(required = false) Integer level) {
+            @Parameter(description = "课程标题（模糊查询）") @RequestParam(name = "title", required = false) String title,
+            @Parameter(description = "分类ID") @RequestParam(name = "categoryId", required = false) Long categoryId,
+            @Parameter(description = "状态(0:未发布,1:已发布,2:已下架)") @RequestParam(name = "status", required = false) Integer status,
+            @Parameter(description = "难度级别(0:初级,1:中级,2:高级)") @RequestParam(name = "level", required = false) Integer level) {
         
         IPage<CourseDTO> result = courseService.getCoursePage(pageParam, title, categoryId, status, level);
         return R.ok(result);
@@ -125,7 +125,7 @@ public class CourseController {
     @Operation(summary = "搜索课程", description = "根据关键词搜索课程")
     public R<IPage<CourseDTO>> searchCourses(
             @Valid PageParam pageParam,
-            @Parameter(description = "搜索关键词") @RequestParam String keyword) {
+            @Parameter(description = "搜索关键词") @RequestParam(name = "keyword") String keyword) {
         IPage<CourseDTO> result = courseService.searchCourses(pageParam, keyword);
         return R.ok(result);
     }
@@ -137,7 +137,7 @@ public class CourseController {
     @Operation(summary = "增加学习人数", description = "用户购买课程后调用此接口")
     public R<Boolean> increaseStudentCount(
             @Parameter(description = "课程ID") @PathVariable Long id,
-            @Parameter(description = "增量，默认1") @RequestParam(defaultValue = "1") Integer increment) {
+            @Parameter(description = "增量，默认1") @RequestParam(name = "increment", defaultValue = "1") Integer increment) {
         Boolean result = courseService.increaseStudentCount(id, increment);
         return R.ok(result);
     }
@@ -148,8 +148,8 @@ public class CourseController {
     @PostMapping("/batch-status")
     @Operation(summary = "批量更新课程状态", description = "批量发布或下架课程")
     public R<Boolean> batchUpdateStatus(
-            @Parameter(description = "课程ID列表") @RequestParam List<Long> ids,
-            @Parameter(description = "新状态") @RequestParam Integer status) {
+            @Parameter(description = "课程ID列表") @RequestParam(name = "ids") List<Long> ids,
+            @Parameter(description = "新状态") @RequestParam(name = "status") Integer status) {
         Boolean result = courseService.batchUpdateStatus(ids, status);
         return R.ok(result);
     }

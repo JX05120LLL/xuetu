@@ -5,6 +5,7 @@ import com.star.common.result.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
  * 
  * @author star
  */
-@FeignClient(name = "course-service", path = "/course")
+@FeignClient(name = "course-service", contextId = "courseServiceClient", path = "/course")
 public interface CourseServiceClient {
 
     /**
@@ -36,4 +37,10 @@ public interface CourseServiceClient {
      */
     @GetMapping("/search")
     R<List<CourseDTO>> getCoursesByTitle(@RequestParam("title") String title);
+
+    /**
+     * 根据课程ID获取课程详情
+     */
+    @GetMapping("/{id}")
+    R<CourseDTO> getCourseDetail(@PathVariable("id") Long id);
 }

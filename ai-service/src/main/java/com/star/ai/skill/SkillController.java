@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 /**
  * 技能接口层 —— 将学途已有能力封装为标准 HTTP 技能接口
  *
- * 这些接口即 Nacos skill-registry.json 中 invokeType=java_http 技能的实际 invokeUrl 对应实现。
- * 编排层（或外部调用方）通过 POST 这两个接口即可使用学途本地能力，无需了解内部实现细节。
+ * 供 OpenClaw 编排层或外部调用方 POST 使用；后续可配合 openclaw-spring-boot-starter 的 @Skill 注解
+ * 将此处能力注册为 course_rag_qa_skill、course_query_skill 等。
  */
 @Slf4j
 @RestController
@@ -124,16 +124,5 @@ public class SkillController {
             log.error("[Skill-Course] 调用 course-service 失败: {}", e.getMessage());
             return R.error("课程服务暂时不可用：" + e.getMessage());
         }
-    }
-
-    // ── 技能注册表查询（可选，便于调试） ─────────────────────────────────
-
-    /**
-     * 查看当前 Nacos 技能注册表中已加载的技能列表（调试用）
-     */
-    @GetMapping("/registry")
-    @Operation(summary = "技能注册表", description = "查看从 Nacos 加载的全部技能定义（调试用）")
-    public R<List<SkillDefinition>> registry(SkillRegistryService skillRegistryService) {
-        return R.ok(skillRegistryService.listAll(), "技能列表获取成功");
     }
 }

@@ -1,12 +1,11 @@
 package com.star.ai.feign;
 
 import com.star.ai.dto.LearningStatsDTO;
-import com.star.ai.dto.UserCourseProgressDTO;
 import com.star.common.result.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -25,8 +24,14 @@ public interface LearningServiceClient {
     R<LearningStatsDTO> getLearningStats(@RequestHeader("X-User-Id") Long userId);
 
     /**
-     * 获取用户课程进度列表（需要在learning-service中实现）
+     * 获取指定课程的学习进度百分比
      */
-    @GetMapping("/record/progress/list")
-    R<List<UserCourseProgressDTO>> getUserCourseProgress(@RequestHeader("X-User-Id") Long userId);
+    @GetMapping("/record/progress/{courseId}")
+    R<Double> getCourseProgress(@RequestHeader("X-User-Id") Long userId, @PathVariable("courseId") Long courseId);
+
+    /**
+     * 获取指定课程的学习记录列表
+     */
+    @GetMapping("/record/course/{courseId}")
+    R<List<Object>> getCourseRecords(@RequestHeader("X-User-Id") Long userId, @PathVariable("courseId") Long courseId);
 }

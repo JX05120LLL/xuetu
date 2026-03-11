@@ -73,7 +73,7 @@ public class PaymentController {
     @PostMapping("/{paymentNo}/refund")
     @Operation(summary = "申请退款", description = "为成功支付的订单申请退款")
     public R<Boolean> requestRefund(@Parameter(description = "支付单号", required = true) @PathVariable String paymentNo,
-                                    @Parameter(description = "退款原因") @RequestParam(required = false) String reason) {
+                                    @Parameter(description = "退款原因") @RequestParam(name = "reason", required = false) String reason) {
         Boolean result = paymentService.requestRefund(paymentNo, reason);
         return R.ok(result, "退款申请成功");
     }

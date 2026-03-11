@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -43,6 +44,18 @@ public class AIServiceExceptionHandler {
     public R<Void> handleConstraintViolationException(ConstraintViolationException e) {
         log.error("参数校验失败", e);
         return R.error(400, "参数错误: " + e.getMessage());
+    }
+
+    /**
+     * 静态资源不存在（如 favicon.ico），不记录为系统异常
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public R<Void> handleNoResourceFound(NoResourceFoundException e) {
+        if (e.getResourcePath() != null && e.getResourcePath().equals("favicon.ico")) {
+            return R.error(404, null);
+        }
+        log.warn("资源未找到: {}", e.getResourcePath());
+        return R.error(404, "资源未找到");
     }
 
     /**

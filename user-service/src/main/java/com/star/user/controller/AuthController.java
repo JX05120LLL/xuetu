@@ -34,9 +34,9 @@ public class AuthController {
     @Operation(summary = "用户注册", description = "新用户注册账号")
     public R<Long> register(@Valid @RequestBody UserRegisterRequest request) {
         log.info("用户注册请求: {}", request.getUsername());
-        
+
         Long userId = userService.register(request);
-        
+
         return R.ok(userId);
     }
 
@@ -47,9 +47,9 @@ public class AuthController {
     @Operation(summary = "用户登录", description = "用户登录获取访问Token")
     public R<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request) {
         log.info("用户登录请求: {}", request.getUsername());
-        
+
         UserLoginResponse response = userService.login(request);
-        
+
         return R.ok(response);
     }
 
@@ -58,7 +58,7 @@ public class AuthController {
      */
     @GetMapping("/check-username")
     @Operation(summary = "检查用户名", description = "检查用户名是否已被注册")
-    public R<Boolean> checkUsername(@RequestParam String username) {
+    public R<Boolean> checkUsername(@RequestParam("username") String username) {
         boolean exists = userService.existsByUsername(username);
         return R.ok(!exists);
     }
@@ -68,7 +68,7 @@ public class AuthController {
      */
     @GetMapping("/check-email")
     @Operation(summary = "检查邮箱", description = "检查邮箱是否已被注册")
-    public R<Boolean> checkEmail(@RequestParam String email) {
+    public R<Boolean> checkEmail(@RequestParam("email") String email) {
         boolean exists = userService.existsByEmail(email);
         return R.ok(!exists);
     }

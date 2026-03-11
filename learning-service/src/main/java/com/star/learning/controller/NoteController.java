@@ -90,7 +90,7 @@ public class NoteController {
     @Operation(summary = "分页查询笔记", description = "分页查询用户的所有笔记")
     public R<IPage<NoteDTO>> getNotesPage(
             @Valid PageParam pageParam,
-            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword,
+            @Parameter(description = "搜索关键词") @RequestParam(name = "keyword", required = false) String keyword,
             HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         IPage<NoteDTO> result = noteService.getUserNotesPage(userId, pageParam, keyword);
@@ -105,8 +105,8 @@ public class NoteController {
     @Operation(summary = "获取我的笔记", description = "分页查询用户的所有笔记")
     public R<IPage<NoteDTO>> getMyNotes(
             @Valid PageParam pageParam,
-            @Parameter(description = "课程ID") @RequestParam(required = false) Long courseId,
-            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword,
+            @Parameter(description = "课程ID") @RequestParam(name = "courseId", required = false) Long courseId,
+            @Parameter(description = "搜索关键词") @RequestParam(name = "keyword", required = false) String keyword,
             HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         IPage<NoteDTO> result = noteService.getUserNotesPage(userId, pageParam, keyword);
@@ -145,8 +145,8 @@ public class NoteController {
     @GetMapping("/search")
     @Operation(summary = "搜索笔记", description = "根据关键词搜索用户笔记")
     public R<List<NoteDTO>> searchNotes(
-            @Parameter(description = "搜索关键词", required = true) @RequestParam String keyword,
-            @Parameter(description = "限制条数", example = "20") @RequestParam(defaultValue = "20") Integer limit,
+            @Parameter(description = "搜索关键词", required = true) @RequestParam(name = "keyword") String keyword,
+            @Parameter(description = "限制条数", example = "20") @RequestParam(name = "limit", defaultValue = "20") Integer limit,
             HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         List<NoteDTO> notes = noteService.searchNotes(userId, keyword, limit);
@@ -159,7 +159,7 @@ public class NoteController {
     @GetMapping("/recent")
     @Operation(summary = "获取最近笔记", description = "查询用户最近创建的笔记")
     public R<List<NoteDTO>> getRecentNotes(
-            @Parameter(description = "限制条数", example = "10") @RequestParam(defaultValue = "10") Integer limit,
+            @Parameter(description = "限制条数", example = "10") @RequestParam(name = "limit", defaultValue = "10") Integer limit,
             HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         List<NoteDTO> notes = noteService.getRecentNotes(userId, limit);

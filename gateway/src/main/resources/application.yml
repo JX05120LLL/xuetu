@@ -112,6 +112,18 @@ spring:
           uri: lb://ai-service
           predicates:
             - Path=/recommend/**
+
+        # OpenClaw 技能路由（自主学习智能体 + 智能运维 Agent）
+        - id: ai-openclaw-skill
+          uri: lb://ai-service
+          predicates:
+            - Path=/openclaw/**
+
+        # Agent 智能体路由（学习智能体 + 运维智能体入口）
+        - id: ai-agent
+          uri: lb://ai-service
+          predicates:
+            - Path=/agent/**
             
         # ========== 管理服务路由 ==========
         - id: role-service

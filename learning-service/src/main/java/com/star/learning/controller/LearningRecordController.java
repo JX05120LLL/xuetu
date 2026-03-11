@@ -86,7 +86,7 @@ public class LearningRecordController {
     @GetMapping("/recent")
     @Operation(summary = "获取最近学习记录", description = "查询用户最近的学习记录")
     public R<List<LearningRecordDTO>> getRecentRecords(
-            @Parameter(description = "限制条数", example = "10") @RequestParam(defaultValue = "10") Integer limit,
+            @Parameter(description = "限制条数", example = "10") @RequestParam(name = "limit", defaultValue = "10") Integer limit,
             HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         List<LearningRecordDTO> records = learningRecordService.getRecentLearningRecords(userId, limit);
@@ -112,8 +112,8 @@ public class LearningRecordController {
     @PostMapping("/complete")
     @Operation(summary = "标记课时完成", description = "标记某个课时为已完成状态")
     public R<Boolean> markLessonCompleted(
-            @Parameter(description = "课程ID", required = true) @RequestParam Long courseId,
-            @Parameter(description = "课时ID", required = true) @RequestParam Long lessonId,
+            @Parameter(description = "课程ID", required = true) @RequestParam(name = "courseId") Long courseId,
+            @Parameter(description = "课时ID", required = true) @RequestParam(name = "lessonId") Long lessonId,
             HttpServletRequest httpRequest) {
         Long userId = getUserIdFromRequest(httpRequest);
         Boolean result = learningRecordService.markLessonCompleted(userId, courseId, lessonId);
