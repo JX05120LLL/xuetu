@@ -166,7 +166,7 @@ C:\Users\你的用户名\.openclaw\openclaw.json
 ```json
 {
   "auth": {
-    "token": "706edbf328264433d5ef22f73b2d744183fbd3633a63154f"
+    "token": "706edbf32xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"    
   }
 }
 ```
