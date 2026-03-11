@@ -129,6 +129,96 @@ docker-compose -f docker-compose-local.yml logs -f mysql
 
 ---
 
+## 🤖 OpenClaw 本地 AI 网关配置
+
+OpenClaw 是一个本地运行的 AI Gateway，项目通过它将平台技能（@Tool 方法）通过 MCP 协议对外暴露，也可作为智能体入口。
+
+### 安装 OpenClaw
+
+参考官方文档安装：[OpenClaw 官方文档](https://openclaw.ai/docs)
+
+> 安装完成后，OpenClaw 默认运行在 `http://localhost:18789`。
+
+### 启动 OpenClaw
+
+```bash
+# Windows / Mac 安装后，直接运行 OpenClaw 客户端即可
+# 或命令行启动（参考官方文档对应平台命令）
+openclaw start
+```
+
+启动后浏览器访问 `http://localhost:18789` 验证是否正常运行。
+
+### 获取 OpenClaw Token
+
+OpenClaw 启动后会生成一个本地鉴权 Token，用于 ai-service 调用 OpenClaw Gateway API 时的身份验证。
+
+**查看 Token：**
+
+打开本地配置文件（Windows 路径示例）：
+
+```
+C:\Users\你的用户名\.openclaw\openclaw.json
+```
+
+在文件中找到类似以下内容：
+
+```json
+{
+  "auth": {
+    "token": "706edbf328264433d5ef22f73b2d744183fbd3633a63154f"
+  }
+}
+```
+
+**配置到 ai-service：**
+
+在 IDEA 的 Run/Debug Configurations → Environment variables 中添加：
+
+```
+OPENCLAW_TOKEN=你的token值
+```
+
+或直接在 `ai-service/src/main/resources/application.yml` 中修改默认值：
+
+```yaml
+openclaw:
+  gateway:
+    token: ${OPENCLAW_TOKEN:你的token值}
+```
+
+### 启用 OpenResponses 接口（可选）
+
+如需使用 OpenClaw 的 `/v1/responses` Agent 接口，需在 `openclaw.json` 中开启：
+
+```json
+{
+  "gateway": {
+    "http": {
+      "endpoints": {
+        "responses": {
+          "enabled": true
+        }
+      }
+    }
+  }
+}
+```
+
+修改后重启 OpenClaw 生效。
+
+### 验证 MCP 连接
+
+ai-service 启动后，Spring AI MCP Server 会在服务端口上暴露工具列表。可在 OpenClaw 管理界面中添加 MCP 服务器地址：
+
+```
+http://localhost:8066/sse
+```
+
+添加成功后，OpenClaw 即可发现并调用学途平台的 10 个业务技能（课程查询、进度跟踪、计划生成等）。
+
+---
+
 ## 🚀 快速运行项目
 
 ### 环境要求
